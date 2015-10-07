@@ -20,7 +20,7 @@ namespace PaymentTest
             mpos.Initialized += (sender, e) => mpos.ProcessPayment(250);
 
             mpos.PaymentProcessed += (sender, e) => {
-                e
+                
             };
 
             mpos.Initialize();

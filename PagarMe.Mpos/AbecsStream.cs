@@ -33,14 +33,10 @@ namespace PagarMe.Mpos
 
         public unsafe Error Open(Native *stream)
         {
-            byte[] buffer = new byte[4096];
-
             if (_open)
                 return Error.OkError;
 
-            _baseStream.ReadAsync(buffer, 0, buffer.Length).ContinueWith(t => {
-                _nativeStream->DataReceived(stream, buffer, t.Result);
-            }, _cancellationToken.Token);
+            BeginRead();
 
             return Error.Ok;
         }
@@ -80,6 +76,18 @@ namespace PagarMe.Mpos
                 Native.Free(_nativeStream);
                 _nativeStream = null;
             }
+        }
+
+        private void BeginRead()
+        {
+            byte[] buffer = new byte[4096];
+
+            _baseStream.ReadAsync(buffer, 0, buffer.Length).ContinueWith(t =>
+                {
+                    _nativeStream->DataReceived(_nativeStream, buffer, t.Result);
+
+                    BeginRead();
+                }, _cancellationToken.Token);
         }
 
         public enum Error
