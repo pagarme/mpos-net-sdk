@@ -1,65 +1,160 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 
 namespace PagarMe.Mpos
 {
-	public class Mpos
+    public unsafe class Mpos : IDisposable
 	{
-		private bool _initialized;
-		private readonly Stream _stream;
+        private AbecsStream _stream;
+        private Native *_nativeMpos;
 		private readonly string _encryptionKey;
 
 		public event EventHandler Initialized;
 		public event EventHandler<PaymentResult> PaymentProcessed;
+        public event UnhandledExceptionEventHandler Errored;
 
-		public Stream Stream { get { return _stream; } }
+		public Stream BaseStream { get { return _stream.BaseStream; } }
 		public string EncryptionKey { get { return _encryptionKey; } }
-		public bool IsInitialized { get { return _initialized; } }
 
-		public Mpos(Stream stream, string encryptionKey)
+        public Mpos(Stream stream, string encryptionKey)
+            : this(new AbecsStream(stream), encryptionKey)
+        {
+        }
+
+		private Mpos(AbecsStream stream, string encryptionKey)
 		{
 			_stream = stream;
 			_encryptionKey = encryptionKey;
-			_initialized = false;
+            _nativeMpos = Native.Create(stream.NativeStream);
+            _nativeMpos->PaymentCallback = HandlePaymentCallback;
 		}
 
-		public async Task Initialize()
+        ~Mpos()
+        {
+            Dispose(false);
+        }
+
+        public void Initialize()
 		{
-			OnInitialized();
+            Error error = Native.Initialize(_nativeMpos, IntPtr.Zero);
+
+            if (error != Error.Ok)
+                throw new MposException(error);
 		}
 
-		public async Task<PaymentResult> ProcessPayment(int amount, PaymentFlags flags)
+        public void ProcessPayment(int amount, PaymentFlags flags = PaymentFlags.Default)
 		{
-			PaymentResult result;
+            Error error = Native.ProcessPayment(_nativeMpos, amount, flags);
 
-			if (!_initialized)
-				throw new InvalidOperationException("Device is not ready.");
-
-
-			OnPaymentProcessed(result);
-
-			return result;
+            if (error != Error.Ok)
+                throw new MposException(error);
 		}
 
 		public void Close()
 		{
+            Error error = Native.Close(_nativeMpos);
 
+            if (error != Error.Ok)
+                throw new MposException(error);
 		}
+            
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
-		protected void OnPaymentProcessed(PaymentResult result)
-		{
-			if (PaymentProcessed != null)
-				PaymentProcessed(this, result);
-		}
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (_stream != null)
+                {
+                    _stream.Dispose();
+                    _stream = null;
+                }
+            }
 
-		protected void OnInitialized()
-		{
-			_initialized = true;
+            if (_nativeMpos != null)
+            {
+                Native.Free(_nativeMpos);
+            }
+        }
 
-			if (Initialized != null)
-				Initialized(this, new EventArgs());
-		}
+        protected virtual void OnInitialized()
+        {
+            if (Initialized != null)
+                Initialized(this, new EventArgs());
+        }
+
+        protected virtual void OnError(MposException exception)
+        {
+            if (Errored != null)
+                Errored(this, new UnhandledExceptionEventArgs(exception, false));
+        }
+
+        protected virtual void OnPaymentProcessed(PaymentResult result)
+        {
+            if (PaymentProcessed != null)
+                PaymentProcessed(this, result);
+        }
+
+        private unsafe Error HandlePaymentCallback(Native *mpos, Error error, IntPtr data, int dataLength)
+        {
+            if (error == Error.Ok)
+            {
+                byte[] buffer = new byte[dataLength];
+
+                Marshal.Copy(data, buffer, 0, buffer.Length);
+
+                OnPaymentProcessed(PaymentResult.FromEmvData(buffer, _encryptionKey));
+            }
+            else
+            {
+                OnError(new MposException(error));
+            }
+
+            return Error.Ok;
+        }
+
+        internal enum Error
+        {
+            Ok,
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct Native
+        {
+            [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+            public delegate Error MposPaymentCallbackDelegate(Native *mpos, Error error, IntPtr data, int dataLength);
+
+            [DllImport("mpos", EntryPoint = "mpos_create")]
+            public static extern Native *Create(AbecsStream.Native *stream);
+
+            [DllImport("mpos", EntryPoint = "mpos_initialize")]
+            public static extern Error Initialize(Native *mpos, IntPtr data);
+
+            [DllImport("mpos", EntryPoint = "mpos_process_payment")]
+            public static extern Error ProcessPayment(Native *mpos, int amount, PaymentFlags flags);
+
+            [DllImport("mpos", EntryPoint = "mpos_close")]
+            public static extern Error Close(Native *mpos);
+
+            [DllImport("mpos", EntryPoint = "mpos_free")]
+            public static extern Error Free(Native *mpos);
+
+            public IntPtr Abecs;
+            public IntPtr UserInfo;
+            public IntPtr PaymentCallbackPointer;
+       
+            public MposPaymentCallbackDelegate PaymentCallback
+            {
+                get { return Marshal.GetDelegateForFunctionPointer<MposPaymentCallbackDelegate>(PaymentCallbackPointer); }
+                set { PaymentCallbackPointer = Marshal.GetFunctionPointerForDelegate(value); }
+            }
+        }
 	}
 }
 

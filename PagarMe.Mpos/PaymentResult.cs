@@ -15,6 +15,11 @@ namespace PagarMe.Mpos
             _status = status;
             _cardHash = cardHash;
         }
+
+        internal static PaymentResult FromEmvData(byte[] data, string encryptionKey)
+        {
+            return null;
+        }
     }
 }
 
