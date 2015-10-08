@@ -4,8 +4,8 @@ namespace PagarMe.Mpos
 {
     public enum PaymentStatus
     {
-        Pending,
         Success,
-        Refused
+        Error,
+        Canceled
     }
 }

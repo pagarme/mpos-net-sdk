@@ -80,7 +80,7 @@ namespace PagarMe.Mpos
 
         private void BeginRead()
         {
-            byte[] buffer = new byte[4096];
+            byte[] buffer = new byte[512];
 
             _baseStream.ReadAsync(buffer, 0, buffer.Length).ContinueWith(t =>
                 {
@@ -104,7 +104,6 @@ namespace PagarMe.Mpos
             NoCommand = 15,
             FileError = 20,
             InternalError = 21
-
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -124,11 +123,13 @@ namespace PagarMe.Mpos
 
             public static int Size { get { return Marshal.SizeOf<Native>(); } }
 
+            public IntPtr StreamData;
+            public IntPtr UserData;
+
             public IntPtr OpenPointer;
             public IntPtr WritePointer;
-            public IntPtr ClosePointer;
             public IntPtr DataReceivedPointer;
-            public IntPtr UserData;
+            public IntPtr ClosePointer;
 
             public StreamOpenDelegate Open
             {
@@ -150,8 +151,8 @@ namespace PagarMe.Mpos
 
             public StreamDataReceivedDelegate DataReceived
             {
-                get { return Marshal.GetDelegateForFunctionPointer<StreamDataReceivedDelegate>(OpenPointer); }
-                set { OpenPointer = Marshal.GetFunctionPointerForDelegate(value); }
+                get { return Marshal.GetDelegateForFunctionPointer<StreamDataReceivedDelegate>(DataReceivedPointer); }
+                set { DataReceivedPointer = Marshal.GetFunctionPointerForDelegate(value); }
             }
            
             public static unsafe Native *Allocate()

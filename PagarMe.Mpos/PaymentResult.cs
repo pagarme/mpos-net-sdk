@@ -4,21 +4,17 @@ namespace PagarMe.Mpos
 {
     public class PaymentResult
     {
-        private readonly PaymentStatus _status;
-        private readonly string _cardHash;
+        public string CardHash { get; private set; }
+        public PaymentStatus Status { get; internal set; }
 
-        public PaymentStatus Status { get { return _status; } }
-        public string CardHash { get { return _cardHash; } }
+        internal string Pan { get; set; }
+        internal string Track2 { get; set; }
+        internal string EmvData { get; set; }
+        internal string ExpirationDate { get; set; }
 
-        public PaymentResult(PaymentStatus status, string cardHash)
+        internal void CalculateCardHash(string encryptionKey)
         {
-            _status = status;
-            _cardHash = cardHash;
-        }
-
-        internal static PaymentResult FromEmvData(byte[] data, string encryptionKey)
-        {
-            return null;
+            
         }
     }
 }
