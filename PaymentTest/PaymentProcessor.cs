@@ -14,7 +14,7 @@ namespace PaymentTest
 
         public PaymentProcessor()
         {
-            _port = new SerialPort("/dev/tty.usbmodem1411", 19200);
+            _port = new SerialPort("/dev/tty.usbmodem89", 19200);
             _port.Open();
 
             _mpos = new Mpos(_port.BaseStream, "ek_live_IiZGjjXdxDug8t8xRtEFas0dke6I7H");

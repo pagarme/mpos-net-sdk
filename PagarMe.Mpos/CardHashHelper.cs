@@ -24,45 +24,46 @@ namespace PagarMe.Mpos
 
         static async Task<Tuple<string, string>> GetCardHashKey(string encryptionKey)
         {
-            WebRequest request = WebRequest.Create(ApiEndpoint + "/transactions/card_hash_key");
+            var request = WebRequest.Create(ApiEndpoint + "/transactions/card_hash_key");
 
             request.Method = "GET";
             request.PreAuthenticate = true;
             request.Credentials = new NetworkCredential(encryptionKey, "x");
 
-            HttpWebResponse response = (HttpWebResponse)(await request.GetResponseAsync());
+            var response = (HttpWebResponse)(await request.GetResponseAsync());
 
-            string json = new StreamReader(response.GetResponseStream(), Encoding.UTF8).ReadToEnd();
-            dynamic result = JsonConvert.DeserializeObject<dynamic>(json);
+            var json = new StreamReader(response.GetResponseStream(), Encoding.UTF8).ReadToEnd();
+            var result = JsonConvert.DeserializeObject<dynamic>(json);
 
             return new Tuple<string, string>(result.id.ToString(), result.public_key.ToString());
         }
 
-        static byte[] Combine( params byte[][] arrays )
+        static byte[] Combine(byte[][] arrays)
         {
-            byte[] rv = new byte[ arrays.Sum( a => a.Length ) ];
             int offset = 0;
-            foreach ( byte[] array in arrays ) {
-                System.Buffer.BlockCopy( array, 0, rv, offset, array.Length );
+            byte[] result = new byte[arrays.Sum(a => a.Length)];
+
+            foreach (byte[] array in arrays) {
+                Buffer.BlockCopy(array, 0, result, offset, array.Length);
                 offset += array.Length;
             }
-            return rv;
+
+            return result;
         }
 
         static byte[] Encrypt(byte[] data, AsymmetricKeyParameter key)
         {
-            IAsymmetricBlockCipher e = new Pkcs1Encoding(new RsaEngine());
-
             List<byte[]> output = new List<byte[]>();
+            Pkcs1Encoding engine = new Pkcs1Encoding(new RsaEngine());
 
-            e.Init(true, key);
+            engine.Init(true, key);
 
-            int blockSize = e.GetInputBlockSize();
+            int blockSize = engine.GetInputBlockSize();
 
             for (int chunkPosition = 0; chunkPosition < data.Length; chunkPosition += blockSize)
             {
                 int chunkSize = Math.Min(blockSize, data.Length - chunkPosition);
-                output.Add(e.ProcessBlock(data, chunkPosition, chunkSize));
+                output.Add(engine.ProcessBlock(data, chunkPosition, chunkSize));
             }
 
             return Combine(output.ToArray());

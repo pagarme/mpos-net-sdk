@@ -22,6 +22,7 @@ namespace PagarMe.Mpos
             List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
 
             parameters.Add(new Tuple<string, string>("capture_method", "emv"));
+            parameters.Add(new Tuple<string, string>("payment_method", method == PaymentMethod.Credit ? "credit_card" : "debit_card"));
             parameters.Add(new Tuple<string, string>("card_number", pan));
             parameters.Add(new Tuple<string, string>("card_holder_name", holderName));
             parameters.Add(new Tuple<string, string>("card_expiration_date", expirationDate));
@@ -36,7 +37,7 @@ namespace PagarMe.Mpos
             }
 
             string urlEncoded = parameters.Select(x => new Tuple<string, string>(x.Item1, Uri.EscapeDataString(x.Item2))).Select(x => x.Item1 + "=" + x.Item2).Aggregate((a, b) => a + "&" + b);
-            
+
             Status = status;
             PaymentMethod = method;
             CardHolderName = holderName;

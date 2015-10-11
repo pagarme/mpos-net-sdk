@@ -4,8 +4,8 @@ namespace PagarMe.Mpos
 {
     public enum PaymentMethod
     {
-        Debit,
-        Credit
+        Credit = 1,
+        Debit
     }
 }
 
