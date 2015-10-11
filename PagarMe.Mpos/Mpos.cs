@@ -1,16 +1,30 @@
 ﻿using System;
 using System.IO;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
+using System.Linq;
 
 namespace PagarMe.Mpos
 {
-    public unsafe class Mpos : IDisposable
-	{
+    public class Mpos : IDisposable
+    {
+        private static string GetString(byte[] data, IntPtr len)
+        {
+            return GetString(data, len.ToInt32());
+        }
+
+        private static string GetString(byte[] data, int len = -1)
+        {
+            if (len == -1)
+                len = data.Length;
+
+            return Encoding.ASCII.GetString(data, 0, len);
+        }
+
         private AbecsStream _stream;
-        private Native *_nativeMpos;
-        private IntPtr _handlePaymentPointer;
+        private IntPtr _nativeMpos;
 		private readonly string _encryptionKey;
 
 		public event EventHandler Initialized;
@@ -26,12 +40,11 @@ namespace PagarMe.Mpos
         {
         }
 
-		private Mpos(AbecsStream stream, string encryptionKey)
+		private unsafe Mpos(AbecsStream stream, string encryptionKey)
 		{
 			_stream = stream;
 			_encryptionKey = encryptionKey;
-            _nativeMpos = Native.Create(stream.NativeStream, HandleNotificationCallback, HandleOperationCompletedCallback);
-            _handlePaymentPointer = Marshal.GetFunctionPointerForDelegate(new Native.MposPaymentCallbackDelegate(HandlePaymentCallback));
+            _nativeMpos = Native.Create((IntPtr)stream.NativeStream, HandleNotificationCallback, HandleOperationCompletedCallback);
 		}
 
         ~Mpos()
@@ -39,39 +52,67 @@ namespace PagarMe.Mpos
             Dispose(false);
         }
 
-        public void Initialize()
-		{
-            Error error = Native.Initialize(_nativeMpos, IntPtr.Zero, (mpos) => {
-                OnInitialized();
+        public Task Initialize()
+        {
+            var source = new TaskCompletionSource<bool>();
 
-                return Error.Ok;
+            Native.Error error = Native.Initialize(_nativeMpos, IntPtr.Zero, mpos => {
+                try {
+                    OnInitialized();
+
+                    source.TrySetResult(true);
+                } catch(Exception ex) {
+                    source.TrySetException(ex);
+                }
+
+                return Native.Error.Ok;
             });
 
-            if (error != Error.Ok)
+            if (error != Native.Error.Ok)
                 throw new MposException(error);
+
+            return source.Task;
 		}
 
-        public void ProcessPayment(int amount, PaymentFlags flags = PaymentFlags.Default)
+        public Task<PaymentResult> ProcessPayment(int amount, PaymentFlags flags = PaymentFlags.Default)
 		{
-            Error error = Native.ProcessPayment(_nativeMpos, amount, flags, _handlePaymentPointer);
+            var source = new TaskCompletionSource<PaymentResult>();
 
-            if (error != Error.Ok)
+            Native.Error error = Native.ProcessPayment(_nativeMpos, amount, flags, (mpos, err, infoPointer) => {
+                var info = Marshal.PtrToStructure<Native.PaymentInfo>(infoPointer);
+
+                HandlePaymentCallback(err, info).ContinueWith(t => {
+                    if (t.Status == TaskStatus.Faulted) {
+                        source.SetException(t.Exception);
+                    } else {
+                        source.SetResult(t.Result);
+                    }
+
+                    OnPaymentProcessed(t.Result);
+                });
+
+                return Native.Error.Ok;
+            });
+
+            if (error != Native.Error.Ok)
                 throw new MposException(error);
+
+            return source.Task;
 		}
 
         public void Display(string text)
         {
-            Error error = Native.Display(_nativeMpos, text);
+            Native.Error error = Native.Display(_nativeMpos, text);
 
-            if (error != Error.Ok)
+            if (error != Native.Error.Ok)
                 throw new MposException(error);
         }
 
 		public void Close()
 		{
-            Error error = Native.Close(_nativeMpos);
+            Native.Error error = Native.Close(_nativeMpos);
 
-            if (error != Error.Ok)
+            if (error != Native.Error.Ok)
                 throw new MposException(error);
 		}
             
@@ -92,7 +133,7 @@ namespace PagarMe.Mpos
                 }
             }
 
-            if (_nativeMpos != null)
+            if (_nativeMpos != IntPtr.Zero)
             {
                 Native.Free(_nativeMpos);
             }
@@ -110,102 +151,141 @@ namespace PagarMe.Mpos
                 PaymentProcessed(this, result);
         }
 
-        private unsafe Error HandlePaymentCallback(Native *mpos, Error error, ref Native.PaymentInfo info)
+        private async Task<PaymentResult> HandlePaymentCallback(Native.Error error, Native.PaymentInfo info)
         {
             PaymentResult result = new PaymentResult();
 
-            if (error == Error.Ok)
+            if (error == Native.Error.Ok)
             {
-                result.Status = PaymentStatus.Success;
-                result.EmvData = Encoding.ASCII.GetString(info.EmvData, 0, info.EmvDataLength.ToInt32());
-                result.Track2 = Encoding.ASCII.GetString(info.Track2, 0, info.Track2Length.ToInt32());
-                result.Pan = Encoding.ASCII.GetString(info.Pan, 0, info.PanLength.ToInt32());
-                result.ExpirationDate = Encoding.ASCII.GetString(info.ExpirationDate, 0, info.ExpirationDate.Length);
+                PaymentStatus status = info.Decision == Native.Decision.Refused ? PaymentStatus.Rejected : PaymentStatus.Accepted;
+                string emv = GetString(info.EmvData, info.EmvDataLength);
+                string track2 = GetString(info.Track2, info.Track2Length);
+                string pan = GetString(info.Pan, info.PanLength);
+                string expirationDate = GetString(info.ExpirationDate);
+                string holderName = GetString(info.HolderName);
+                string pin = null, pinKek = null;
+                bool isOnlinePin = info.IsOnlinePin;
 
-                result.CalculateCardHash(_encryptionKey);
+                expirationDate = expirationDate.Substring(2, 2) + expirationDate.Substring(0, 2);
+                holderName = holderName.Trim().Split('/').Reverse().Aggregate((a, b) => a + ' ' + b);
+
+                if (isOnlinePin)
+                {
+                    pin = GetString(info.Pin);
+                    pinKek = GetString(info.PinKek);
+                }
+
+                await result.BuildAccepted(this.EncryptionKey, status, PaymentMethod.Credit, pan, holderName, expirationDate, track2, emv, isOnlinePin, pin, pinKek);
             }
             else
             {
-                result.Status = PaymentStatus.Error;
+                result.BuildErrored();
             }
 
-            OnPaymentProcessed(result);
-
-
-            return Error.Ok;
+            return result;
         }
 
-        private unsafe void HandleNotificationCallback(Native *mpos, string notification)
+        private unsafe void HandleNotificationCallback(IntPtr mpos, string notification)
         {
             if (NotificationReceived != null)
                 NotificationReceived(this, notification);
         }
 
-        private unsafe void HandleOperationCompletedCallback(Native *mpos)
+        private unsafe void HandleOperationCompletedCallback(IntPtr mpos)
         {
             if (OperationCompleted != null)
                 OperationCompleted(this, new EventArgs());
         }
 
-        internal enum Error
-        {
-            Ok,
-            Error
-        }
-
         [StructLayout(LayoutKind.Sequential)]
         internal struct Native
         {
-            [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
-            public struct PaymentInfo
+            internal enum Error
             {
+                Ok,
+                Error
+            }
+
+            public enum Decision
+            {
+                Approved = 0,
+                Refused,
+                GoOnline
+            }
+
+            [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
+            public unsafe struct PaymentInfo
+            {
+                public Decision Decision;
+
                 public int Amount;
 
                 [MarshalAs(UnmanagedType.ByValArray, SizeConst = 6)]
                 public byte[] ExpirationDate;
 
+                [MarshalAs(UnmanagedType.ByValArray, SizeConst = 26)]
+                public byte[] HolderName;
+
                 [MarshalAs(UnmanagedType.ByValArray, SizeConst = 19)]
                 public byte[] Pan;
                 public IntPtr PanLength;
+
+                [MarshalAs(UnmanagedType.ByValArray, SizeConst = 76)]
+                public byte[] Track1;
+                public IntPtr Track1Length;
 
                 [MarshalAs(UnmanagedType.ByValArray, SizeConst = 40)]
                 public byte[] Track2;
                 public IntPtr Track2Length;
 
+                [MarshalAs(UnmanagedType.ByValArray, SizeConst = 104)]
+                public byte[] Track3;
+                public IntPtr Track3Length;
+
                 [MarshalAs(UnmanagedType.ByValArray, SizeConst = 512)]
                 public byte[] EmvData;
                 public IntPtr EmvDataLength;
+
+                [MarshalAs(UnmanagedType.Bool)]
+                public bool IsOnlinePin;
+
+                [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
+                public byte[] Pin;
+
+                [MarshalAs(UnmanagedType.ByValArray, SizeConst = 20)]
+                public byte[] PinKek;
             }
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate void MposNotificationCallbackDelegate(Native *mpos, string notification);
+            public delegate void MposNotificationCallbackDelegate(IntPtr mpos, string notification);
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate void MposOperationCompletedCallbackDelegate(Native *mpos);
+            public delegate void MposOperationCompletedCallbackDelegate(IntPtr mpos);
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate Error MposInitializedCallbackDelegate(Native *mpos);
+            public delegate Error MposInitializedCallbackDelegate(IntPtr mpos);
+
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate Error MposPaymentCallbackDelegate(Native *mpos, Error error, ref PaymentInfo info);
+            public delegate Error MposPaymentCallbackDelegate(IntPtr mpos, Error error, IntPtr info);
 
             [DllImport("mpos", EntryPoint = "mpos_new", CharSet = CharSet.Ansi)]
-            public static extern Native *Create(AbecsStream.Native*stream, MposNotificationCallbackDelegate notificationCallback, MposOperationCompletedCallbackDelegate operationCompletedCallback);
+            public static extern IntPtr Create(IntPtr stream, MposNotificationCallbackDelegate notificationCallback, MposOperationCompletedCallbackDelegate operationCompletedCallback);
 
             [DllImport("mpos", EntryPoint = "mpos_initialize", CharSet = CharSet.Ansi)]
-            public static extern Error Initialize(Native *mpos, IntPtr streamData, MposInitializedCallbackDelegate initializedCallback);
+            public static extern Error Initialize(IntPtr mpos, IntPtr streamData, MposInitializedCallbackDelegate initializedCallback);
 
             [DllImport("mpos", EntryPoint = "mpos_process_payment", CharSet = CharSet.Ansi)]
-            public static extern Error ProcessPayment(Native *mpos, int amount, PaymentFlags flags, IntPtr paymentCallback);
+            public static extern Error ProcessPayment(IntPtr mpos, int amount, PaymentFlags flags, MposPaymentCallbackDelegate paymentCallback);
 
             [DllImport("mpos", EntryPoint = "mpos_display", CharSet = CharSet.Ansi)]
-            public static extern Error Display(Native *mpos, string texxt);
+            public static extern Error Display(IntPtr mpos, string texxt);
 
             [DllImport("mpos", EntryPoint = "mpos_close", CharSet = CharSet.Ansi)]
-            public static extern Error Close(Native *mpos);
+            public static extern Error Close(IntPtr mpos);
 
             [DllImport("mpos", EntryPoint = "mpos_free", CharSet = CharSet.Ansi)]
-            public static extern Error Free(Native *mpos);
+            public static extern Error Free(IntPtr mpos);
         }
 	}
 }

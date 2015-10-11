@@ -1,20 +1,46 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using System.Linq;
 
 namespace PagarMe.Mpos
 {
     public class PaymentResult
     {
         public string CardHash { get; private set; }
-        public PaymentStatus Status { get; internal set; }
+        public PaymentStatus Status { get; private set; }
+        public PaymentMethod PaymentMethod { get; private set; }
+        public string CardHolderName { get; private set; }
 
-        internal string Pan { get; set; }
-        internal string Track2 { get; set; }
-        internal string EmvData { get; set; }
-        internal string ExpirationDate { get; set; }
-
-        internal void CalculateCardHash(string encryptionKey)
+        internal void BuildErrored()
         {
+            Status = PaymentStatus.Errored;
+        }
+
+        internal async Task BuildAccepted(string encryptionKey, PaymentStatus status, PaymentMethod method, string pan, string holderName, string expirationDate, string track2, string emv, bool isOnlinePin, string pin, string pinKek)
+        {
+            List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
+
+            parameters.Add(new Tuple<string, string>("capture_method", "emv"));
+            parameters.Add(new Tuple<string, string>("card_number", pan));
+            parameters.Add(new Tuple<string, string>("card_holder_name", holderName));
+            parameters.Add(new Tuple<string, string>("card_expiration_date", expirationDate));
+            parameters.Add(new Tuple<string, string>("card_track_2", track2));
+            parameters.Add(new Tuple<string, string>("card_emv_data", emv));
+            parameters.Add(new Tuple<string, string>("card_pin_mode", isOnlinePin ? "online" : "offline"));
+
+            if (isOnlinePin)
+            {
+                parameters.Add(new Tuple<string, string>("card_pin", pin));
+                parameters.Add(new Tuple<string, string>("card_pin_kek", pinKek));
+            }
+
+            string urlEncoded = parameters.Select(x => new Tuple<string, string>(x.Item1, Uri.EscapeDataString(x.Item2))).Select(x => x.Item1 + "=" + x.Item2).Aggregate((a, b) => a + "&" + b);
             
+            Status = status;
+            PaymentMethod = method;
+            CardHolderName = holderName;
+            CardHash = await CardHashHelper.CreateCardHash(encryptionKey, urlEncoded);
         }
     }
 }
