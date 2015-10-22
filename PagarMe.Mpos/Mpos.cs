@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,6 +22,15 @@ namespace PagarMe.Mpos
                 len = data.Length;
 
             return Encoding.ASCII.GetString(data, 0, len);
+        }
+
+        private static IntPtr GetMarshalBytes<T>(T str) {
+            int size = Marshal.SizeOf<T>();
+
+            IntPtr ptr = Marshal.AllocHGlobal(size);
+            Marshal.StructureToPtr(str, ptr, true);
+
+            return ptr;
         }
 
         private AbecsStream _stream;
@@ -74,6 +84,41 @@ namespace PagarMe.Mpos
             return source.Task;
 		}
 
+        public async Task SynchronizeTables()
+        {
+            var source = new TaskCompletionSource<bool>();
+
+            CapkEntry[] capks = await ApiHelper.GetTerminalTable<CapkEntry>("capks");
+            AidEntry[] aids = await ApiHelper.GetTerminalTable<AidEntry>("aids");
+
+            Native.Capk[] nativeCapk = capks.Select(x => new Native.Capk(x)).ToArray();
+            Native.Aid[] nativeAid = aids.Select(x => new Native.Aid(x)).ToArray();
+
+            List<IntPtr> tables = new List<IntPtr>();
+
+            foreach (var aid in nativeAid)
+                tables.Add(GetMarshalBytes(aid));
+
+            //foreach (var capk in nativeCapk)
+            //    tables.Add(GetMarshalBytes(capk));
+
+            Native.Error error = Native.UpdateTables(_nativeMpos, tables.ToArray(), tables.Count, (mpos, err) =>
+                {
+                    foreach (IntPtr ptr in tables)
+                        Marshal.FreeHGlobal(ptr);
+
+                    source.SetResult(true);
+
+                    return Native.Error.Ok;
+                });
+
+            if (error != Native.Error.Ok)
+                throw new MposException(error);
+
+            await source.Task;
+        }
+
+
         public Task<PaymentResult> ProcessPayment(int amount, PaymentFlags flags = PaymentFlags.Default)
 		{
             var source = new TaskCompletionSource<PaymentResult>();
@@ -99,6 +144,33 @@ namespace PagarMe.Mpos
 
             return source.Task;
 		}
+
+        public Task FinishTransaction(int responseCode, string emvData)
+        {
+            var source = new TaskCompletionSource<bool>();
+            Native.TransactionStatus status;
+
+            if (responseCode < 1000)
+            {
+                status = responseCode == 0 ? Native.TransactionStatus.Ok : Native.TransactionStatus.NonZero;
+            }
+            else
+            {
+                status = Native.TransactionStatus.Error;
+            }
+
+            Native.Error error = Native.FinishTransaction(_nativeMpos, status, responseCode, emvData.Length, emvData, (mpos, err) => {
+                source.SetResult(true);
+
+                return Native.Error.Ok;
+            });
+
+            if (error != Native.Error.Ok)
+                throw new MposException(error);
+
+            return source.Task;
+        }
+
 
         public void Display(string text)
         {
@@ -213,6 +285,13 @@ namespace PagarMe.Mpos
                 GoOnline
             }
 
+            public enum TransactionStatus
+            {
+                Ok = 0,
+                Error = 1,
+                NonZero = 9
+            }
+
             [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
             public unsafe struct PaymentInfo
             {
@@ -246,7 +325,7 @@ namespace PagarMe.Mpos
                 public byte[] EmvData;
                 public IntPtr EmvDataLength;
 
-                [MarshalAs(UnmanagedType.Bool)]
+                [MarshalAs(UnmanagedType.I1)]
                 public bool IsOnlinePin;
 
                 [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
@@ -254,6 +333,181 @@ namespace PagarMe.Mpos
 
                 [MarshalAs(UnmanagedType.ByValArray, SizeConst = 20)]
                 public byte[] PinKek;
+            }
+
+            [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
+            public unsafe struct Capk
+            {
+                [MarshalAs(UnmanagedType.I1)]
+                public bool IsAid;
+                public int AcquirerNumber;
+                public int RecordIndex;
+
+                [MarshalAs(UnmanagedType.ByValArray, SizeConst = 10)]
+                public byte[] Rid;
+                public int CapkIndex;
+                public int ExponentLength;
+                [MarshalAs(UnmanagedType.ByValArray, SizeConst = 6)]
+                public byte[] Exponent;
+                public int ModulusLength;
+                [MarshalAs(UnmanagedType.ByValArray, SizeConst = 496)]
+                public byte[] Modulus;
+
+                [MarshalAs(UnmanagedType.I1)]
+                public bool HasChecksum;
+                [MarshalAs(UnmanagedType.ByValArray, SizeConst = 40)]
+                public byte[] Checksum;
+
+                public Capk(CapkEntry e)
+                {
+                    IsAid = false;
+                    AcquirerNumber = e.AcquirerNumber;
+                    RecordIndex = e.RecordIndex;
+
+                    Rid = GetBytes(e.Rid, 10);
+                    CapkIndex = e.PublicKeyId;
+                    Exponent = GetHexBytes(Convert.FromBase64String(e.Exponent), 6, out ExponentLength, false);
+                    Modulus = GetHexBytes(Convert.FromBase64String(e.Modulus), 496, out ModulusLength, false);
+                    HasChecksum = e.Checksum != null;
+
+                    if (HasChecksum)
+                        Checksum = GetHexBytes(Convert.FromBase64String(e.Exponent), 40, false);
+                    else
+                        Checksum = GetHexBytes("", 40);
+                }
+            }
+
+            [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
+            public unsafe struct Aid
+            {
+                [MarshalAs(UnmanagedType.I1)]
+                public bool IsAid;
+                public int AcquirerNumber;
+                public int RecordIndex;
+
+                public int AidLength;
+                [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
+                public byte[] AidNumber;
+                public int ApplicationType;
+                public int ApplicationNameLength;
+                [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
+                public byte[] ApplicationName;
+                public int CountryCode;
+                public int Currency;
+                public int CurrencyExponent;
+                [MarshalAs(UnmanagedType.ByValArray, SizeConst = 15)]
+                public byte[] MerchantId;
+                public int Mcc;
+                [MarshalAs(UnmanagedType.ByValArray, SizeConst = 6)]
+                public byte[] TerminalCapabilities;
+                [MarshalAs(UnmanagedType.ByValArray, SizeConst = 10)]
+                public byte[] AdditionalTerminalCapabilities;
+                public int TerminalType;
+                [MarshalAs(UnmanagedType.ByValArray, SizeConst = 10)]
+                public byte[] DefaultTac;
+                [MarshalAs(UnmanagedType.ByValArray, SizeConst = 10)]
+                public byte[] DenialTac;
+                [MarshalAs(UnmanagedType.ByValArray, SizeConst = 10)]
+                public byte[] OnlineTac;
+                public int FloorLimit;
+                [MarshalAs(UnmanagedType.I1)]
+                public byte Tcc;
+
+                [MarshalAs(UnmanagedType.I1)]
+                public bool CtlsZeroAm;
+                public int CtlsMode;
+                public int CtlsTransactionLimit;
+                public int CtlsFloorLimit;
+                public int CtlsCvmLimit;
+                [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
+                public byte[] CtlsApplicationVersion;
+
+                public int TdolLength;
+                [MarshalAs(UnmanagedType.ByValArray, SizeConst = 40)]
+                public byte[] Tdol;
+                public int DdolLength;
+                [MarshalAs(UnmanagedType.ByValArray, SizeConst = 40)]
+                public byte[] Ddol;
+
+                public Aid(AidEntry e)
+                {
+                    IsAid = true;
+                    AcquirerNumber = e.AcquirerNumber;
+                    RecordIndex = e.RecordIndex;
+
+                    AidNumber = GetHexBytes(e.Aid, 32, out AidLength);
+                    ApplicationType = e.ApplicationType;
+                    ApplicationName = GetBytes(e.ApplicationName, 16, out ApplicationNameLength);
+                    CountryCode = e.CountryCode;
+                    Currency = e.Currency;
+                    CurrencyExponent = e.CurrencyExponent;
+                    MerchantId = GetHexBytes("", 15);
+                    Mcc = 4816;
+
+                    TerminalCapabilities = GetHexBytes(e.TerminalCapabilities, 6);
+                    AdditionalTerminalCapabilities = GetHexBytes(e.AdditionalTerminalCapabilities, 10);
+                    TerminalType = e.TerminalType;
+                    DefaultTac = GetHexBytes(e.DefaultTac, 10);
+                    DenialTac = GetHexBytes(e.DenialTac, 10);
+                    OnlineTac = GetHexBytes(e.OnlineTac, 10);
+                    FloorLimit = e.FloorLimit;
+                    Tcc = (byte)'T';
+
+                    CtlsZeroAm = e.ContactlessZeroOnlineOnly;
+                    CtlsMode = e.ContactlessMode;
+                    CtlsTransactionLimit = e.ContactlessTransactionLimit;
+                    CtlsFloorLimit = e.ContactlessFloorLimit;
+                    CtlsCvmLimit = e.ContactlessCvmLimit;
+                    CtlsApplicationVersion = GetHexBytes(e.ContactlessApplicationVersion.ToString("X4"), 4);
+
+                    Tdol = GetBytes((e.Tdol.Length / 2).ToString("X2") + e.Tdol, 40, out TdolLength);
+                    Ddol = GetBytes((e.Ddol.Length / 2).ToString("X2") + e.Ddol, 40, out DdolLength);
+                }
+            }
+
+            public static byte[] GetBytes(string data, int length, out int newSize, char? fill = null, bool padLeft = true)
+            {
+                if (fill.HasValue && data.Length < length)
+                    data = padLeft ? data.PadLeft(length, fill.Value) : data.PadRight(length, fill.Value);
+                
+                byte[] result = Encoding.UTF8.GetBytes(data);
+
+                newSize = result.Length;
+
+                return result;
+            }
+                
+            public static byte[] GetBytes(string data, int length, char? fill = null, bool padLeft = true)
+            {
+                int newSize;
+
+                return GetBytes(data, length, out newSize, fill, padLeft);
+            }
+
+            public static byte[] GetHexBytes(string data, int length, out int byteLength, bool padLeft = true)
+            {
+                byte[] result = GetBytes(data, length, out byteLength, '0', padLeft);
+
+                byteLength /= 2;
+
+                return result;
+            }
+
+            public static byte[] GetHexBytes(string data, int length, bool padLeft = true)
+            {
+                int newSize;
+
+                return GetHexBytes(data, length, out newSize, padLeft);
+            }
+
+            public static byte[] GetHexBytes(byte[] data, int length, out int byteLength, bool padLeft = true)
+            {
+                return GetHexBytes(data.Select(x => x.ToString("X2")).Aggregate((a, b) => a + b), length, out byteLength, padLeft);
+            }
+
+            public static byte[] GetHexBytes(byte[] data, int length, bool padLeft = true)
+            {
+                return GetHexBytes(data.Select(x => x.ToString("X2")).Aggregate((a, b) => a + b), length, padLeft);
             }
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -265,9 +519,14 @@ namespace PagarMe.Mpos
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate Error MposInitializedCallbackDelegate(IntPtr mpos);
 
-
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate Error MposPaymentCallbackDelegate(IntPtr mpos, Error error, IntPtr info);
+
+            [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+            public delegate Error MposTablesLoadedCallbackDelegate(IntPtr mpos, Error error);
+
+            [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+            public delegate Error MposFinishTransacitonCallbackDelegate(IntPtr mpos, Error error);
 
             [DllImport("mpos", EntryPoint = "mpos_new", CharSet = CharSet.Ansi)]
             public static extern IntPtr Create(IntPtr stream, MposNotificationCallbackDelegate notificationCallback, MposOperationCompletedCallbackDelegate operationCompletedCallback);
@@ -278,14 +537,21 @@ namespace PagarMe.Mpos
             [DllImport("mpos", EntryPoint = "mpos_process_payment", CharSet = CharSet.Ansi)]
             public static extern Error ProcessPayment(IntPtr mpos, int amount, PaymentFlags flags, MposPaymentCallbackDelegate paymentCallback);
 
+            [DllImport("mpos", EntryPoint = "mpos_update_tables", CharSet = CharSet.Ansi)]
+            public static extern Error UpdateTables(IntPtr mpos, IntPtr[] data, int count, MposFinishTransacitonCallbackDelegate callback);
+
+            [DllImport("mpos", EntryPoint = "mpos_finish_transaction", CharSet = CharSet.Ansi)]
+            public static extern Error FinishTransaction(IntPtr mpos, TransactionStatus status, int arc, int emvLen, string emv, MposFinishTransacitonCallbackDelegate callback);
+
             [DllImport("mpos", EntryPoint = "mpos_display", CharSet = CharSet.Ansi)]
-            public static extern Error Display(IntPtr mpos, string texxt);
+            public static extern Error Display(IntPtr mpos, string text);
 
             [DllImport("mpos", EntryPoint = "mpos_close", CharSet = CharSet.Ansi)]
             public static extern Error Close(IntPtr mpos);
 
             [DllImport("mpos", EntryPoint = "mpos_free", CharSet = CharSet.Ansi)]
             public static extern Error Free(IntPtr mpos);
+
         }
 	}
 }

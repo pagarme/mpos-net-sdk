@@ -48,7 +48,10 @@
     <Compile Include="AbecsStream.cs" />
     <Compile Include="MposException.cs" />
     <Compile Include="PaymentMethod.cs" />
-    <Compile Include="CardHashHelper.cs" />
+    <Compile Include="ApiHelper.cs" />
+    <Compile Include="AidEntry.cs" />
+    <Compile Include="CapkEntry.cs" />
+    <Compile Include="ByteArrayConverter.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

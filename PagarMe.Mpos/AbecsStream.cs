@@ -123,8 +123,7 @@ namespace PagarMe.Mpos
 
             public static int Size { get { return Marshal.SizeOf<Native>(); } }
 
-            public IntPtr StreamData;
-            public IntPtr UserData;
+            public IntPtr Abecs;
 
             public IntPtr OpenPointer;
             public IntPtr WritePointer;

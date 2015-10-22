@@ -41,7 +41,7 @@ namespace PagarMe.Mpos
             Status = status;
             PaymentMethod = method;
             CardHolderName = holderName;
-            CardHash = await CardHashHelper.CreateCardHash(encryptionKey, urlEncoded);
+            CardHash = await ApiHelper.CreateCardHash(encryptionKey, urlEncoded);
         }
     }
 }

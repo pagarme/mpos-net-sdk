@@ -13,24 +13,33 @@ using Newtonsoft.Json;
 
 namespace PagarMe.Mpos
 {
-    public static class CardHashHelper
+    public static class ApiHelper
     {
         public static string ApiEndpoint { get; set; }
 
-        static CardHashHelper()
+        static ApiHelper()
         {
-            ApiEndpoint = "http://localhost:3000";
+            ApiEndpoint = "https://api.pagar.me/1";
+        }
+
+        static HttpWebRequest CreateRequest(string method, string path, string auth)
+        {
+            var request = WebRequest.Create(ApiEndpoint + path);
+
+            request.Method = "GET";
+
+            if (auth != null)
+            {
+                request.PreAuthenticate = true;
+                request.Credentials = new NetworkCredential(auth, "x");
+            }
+
+            return (HttpWebRequest)request;
         }
 
         static async Task<Tuple<string, string>> GetCardHashKey(string encryptionKey)
         {
-            var request = WebRequest.Create(ApiEndpoint + "/transactions/card_hash_key");
-
-            request.Method = "GET";
-            request.PreAuthenticate = true;
-            request.Credentials = new NetworkCredential(encryptionKey, "x");
-
-            var response = (HttpWebResponse)(await request.GetResponseAsync());
+            var response = (HttpWebResponse)(await CreateRequest("GET", "/transactions/card_hash_key", encryptionKey).GetResponseAsync());
 
             var json = new StreamReader(response.GetResponseStream(), Encoding.UTF8).ReadToEnd();
             var result = JsonConvert.DeserializeObject<dynamic>(json);
@@ -87,6 +96,14 @@ namespace PagarMe.Mpos
             Tuple<string, string> hashParameters = await GetCardHashKey(encryptionKey);
 
             return EncryptWith(hashParameters.Item1, hashParameters.Item2, data);
+        }
+
+        public static async Task<T[]> GetTerminalTable<T>(string type)
+        {
+            var response = (HttpWebResponse)(await CreateRequest("GET", "/terminal/" + type, null).GetResponseAsync());
+            var json = new StreamReader(response.GetResponseStream(), Encoding.UTF8).ReadToEnd();
+
+            return JsonConvert.DeserializeObject<T[]>(json);
         }
     }
 }
