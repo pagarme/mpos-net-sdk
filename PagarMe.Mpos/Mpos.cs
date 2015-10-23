@@ -28,7 +28,7 @@ namespace PagarMe.Mpos
             int size = Marshal.SizeOf(typeof(T));
 
             IntPtr ptr = Marshal.AllocHGlobal(size);
-            Marshal.StructureToPtr(str, ptr, true);
+            Marshal.StructureToPtr(str, ptr, false);
 
             return ptr;
         }
@@ -99,8 +99,8 @@ namespace PagarMe.Mpos
             foreach (var aid in nativeAid)
                 tables.Add(GetMarshalBytes(aid));
 
-            //foreach (var capk in nativeCapk)
-             //   tables.Add(GetMarshalBytes(capk));
+            foreach (var capk in nativeCapk)
+                tables.Add(GetMarshalBytes(capk));
 
             Native.Error error = Native.UpdateTables(_nativeMpos, tables.ToArray(), tables.Count, (mpos, err) =>
                 {
@@ -295,6 +295,7 @@ namespace PagarMe.Mpos
             [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
             public unsafe struct PaymentInfo
             {
+                [MarshalAs(UnmanagedType.I4)]
                 public Decision Decision;
 
                 public int Amount;
@@ -472,7 +473,12 @@ namespace PagarMe.Mpos
                 if (fill.HasValue && data.Length < length)
                     data = padLeft ? data.PadLeft(length, fill.Value) : data.PadRight(length, fill.Value);
                 
-                return Encoding.UTF8.GetBytes(data);
+                byte[] result = Encoding.UTF8.GetBytes(data);
+                byte[] full = new byte[length];
+
+                Buffer.BlockCopy(result, 0, full, 0, result.Length);
+
+                return full;
             }
                 
             public static byte[] GetBytes(string data, int length, char? fill = null, bool padLeft = true)
@@ -532,22 +538,22 @@ namespace PagarMe.Mpos
             [DllImport("mpos", EntryPoint = "mpos_initialize", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
             public static extern Error Initialize(IntPtr mpos, IntPtr streamData, MposInitializedCallbackDelegate initializedCallback);
 
-            [DllImport("mpos", EntryPoint = "mpos_process_payment", CharSet = CharSet.Ansi)]
+            [DllImport("mpos", EntryPoint = "mpos_process_payment", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
             public static extern Error ProcessPayment(IntPtr mpos, int amount, PaymentFlags flags, MposPaymentCallbackDelegate paymentCallback);
 
-            [DllImport("mpos", EntryPoint = "mpos_update_tables", CharSet = CharSet.Ansi)]
+            [DllImport("mpos", EntryPoint = "mpos_update_tables", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
             public static extern Error UpdateTables(IntPtr mpos, IntPtr[] data, int count, MposFinishTransacitonCallbackDelegate callback);
 
-            [DllImport("mpos", EntryPoint = "mpos_finish_transaction", CharSet = CharSet.Ansi)]
+            [DllImport("mpos", EntryPoint = "mpos_finish_transaction", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
             public static extern Error FinishTransaction(IntPtr mpos, TransactionStatus status, int arc, int emvLen, string emv, MposFinishTransacitonCallbackDelegate callback);
 
-            [DllImport("mpos", EntryPoint = "mpos_display", CharSet = CharSet.Ansi)]
+            [DllImport("mpos", EntryPoint = "mpos_display", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
             public static extern Error Display(IntPtr mpos, string text);
 
-            [DllImport("mpos", EntryPoint = "mpos_close", CharSet = CharSet.Ansi)]
+            [DllImport("mpos", EntryPoint = "mpos_close", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
             public static extern Error Close(IntPtr mpos);
 
-            [DllImport("mpos", EntryPoint = "mpos_free", CharSet = CharSet.Ansi)]
+            [DllImport("mpos", EntryPoint = "mpos_free", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
             public static extern Error Free(IntPtr mpos);
 
         }
