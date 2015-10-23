@@ -15,7 +15,7 @@ namespace PaymentTest
 
         public static async Task Process()
         {
-            var processor = new PaymentProcessor("/dev/tty.usbmodem1421");
+            var processor = new PaymentProcessor("COM6");
 
             Console.WriteLine("Welcome to Pagador 9000");
             Console.WriteLine("Initializing...");
@@ -23,9 +23,9 @@ namespace PaymentTest
             await processor.Initialize();
 
             Console.Write("Amount: ");
-            var transaction = await processor.Pay(Int32.Parse(Console.ReadLine()));
+            await processor.Pay(Int32.Parse(Console.ReadLine()));
 
-            Console.WriteLine("Created transaction {0}.", transaction.Id);
+           // Console.WriteLine("Created transaction {0}.", transaction.Id);
         }
     }
 }

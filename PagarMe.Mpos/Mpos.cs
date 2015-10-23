@@ -25,7 +25,7 @@ namespace PagarMe.Mpos
         }
 
         private static IntPtr GetMarshalBytes<T>(T str) {
-            int size = Marshal.SizeOf<T>();
+            int size = Marshal.SizeOf(typeof(T));
 
             IntPtr ptr = Marshal.AllocHGlobal(size);
             Marshal.StructureToPtr(str, ptr, true);
@@ -124,7 +124,7 @@ namespace PagarMe.Mpos
             var source = new TaskCompletionSource<PaymentResult>();
 
             Native.Error error = Native.ProcessPayment(_nativeMpos, amount, flags, (mpos, err, infoPointer) => {
-                var info = Marshal.PtrToStructure<Native.PaymentInfo>(infoPointer);
+                var info = (Native.PaymentInfo)Marshal.PtrToStructure(infoPointer, typeof(Native.PaymentInfo));
 
                 HandlePaymentCallback(err, info).ContinueWith(t => {
                     if (t.Status == TaskStatus.Faulted) {
@@ -528,10 +528,10 @@ namespace PagarMe.Mpos
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate Error MposFinishTransacitonCallbackDelegate(IntPtr mpos, Error error);
 
-            [DllImport("mpos", EntryPoint = "mpos_new", CharSet = CharSet.Ansi)]
+            [DllImport("mpos", EntryPoint = "mpos_new", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
             public static extern IntPtr Create(IntPtr stream, MposNotificationCallbackDelegate notificationCallback, MposOperationCompletedCallbackDelegate operationCompletedCallback);
 
-            [DllImport("mpos", EntryPoint = "mpos_initialize", CharSet = CharSet.Ansi)]
+            [DllImport("mpos", EntryPoint = "mpos_initialize", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
             public static extern Error Initialize(IntPtr mpos, IntPtr streamData, MposInitializedCallbackDelegate initializedCallback);
 
             [DllImport("mpos", EntryPoint = "mpos_process_payment", CharSet = CharSet.Ansi)]

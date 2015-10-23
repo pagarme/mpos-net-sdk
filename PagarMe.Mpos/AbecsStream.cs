@@ -121,7 +121,7 @@ namespace PagarMe.Mpos
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate Error StreamDataReceivedDelegate(Native *stream, byte[] buffer, int size);
 
-            public static int Size { get { return Marshal.SizeOf<Native>(); } }
+            public static int Size { get { return Marshal.SizeOf(typeof(Native)); } }
 
             public IntPtr Abecs;
 
@@ -132,25 +132,25 @@ namespace PagarMe.Mpos
 
             public StreamOpenDelegate Open
             {
-                get { return Marshal.GetDelegateForFunctionPointer<StreamOpenDelegate>(OpenPointer); }
+                get { return (StreamOpenDelegate)Marshal.GetDelegateForFunctionPointer(OpenPointer, typeof(StreamOpenDelegate)); }
                 set { OpenPointer = Marshal.GetFunctionPointerForDelegate(value); }
             }
 
             public StreamWriteDelegate Write
             {
-                get { return Marshal.GetDelegateForFunctionPointer<StreamWriteDelegate>(WritePointer); }
+                get { return (StreamWriteDelegate)Marshal.GetDelegateForFunctionPointer(WritePointer, typeof(StreamWriteDelegate)); }
                 set { WritePointer = Marshal.GetFunctionPointerForDelegate(value); }
             }
                 
             public StreamCloseDelegate Close
             {
-                get { return Marshal.GetDelegateForFunctionPointer<StreamCloseDelegate>(ClosePointer); }
+                get { return (StreamCloseDelegate)Marshal.GetDelegateForFunctionPointer(ClosePointer, typeof(StreamCloseDelegate)); }
                 set { ClosePointer = Marshal.GetFunctionPointerForDelegate(value); }
             }
 
             public StreamDataReceivedDelegate DataReceived
             {
-                get { return Marshal.GetDelegateForFunctionPointer<StreamDataReceivedDelegate>(DataReceivedPointer); }
+                get { return (StreamDataReceivedDelegate)Marshal.GetDelegateForFunctionPointer(DataReceivedPointer, typeof(StreamDataReceivedDelegate)); }
                 set { DataReceivedPointer = Marshal.GetFunctionPointerForDelegate(value); }
             }
            
