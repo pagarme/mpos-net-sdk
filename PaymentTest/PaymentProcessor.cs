@@ -15,7 +15,8 @@ namespace PaymentTest
 
         public PaymentProcessor(string device)
         {
-            _port = new SerialPort(device, 19200);
+            _port = new SerialPort(device, 19200, Parity.None, 8, StopBits.One);
+            _port.ErrorReceived += (object sender, SerialErrorReceivedEventArgs e) => Console.WriteLine(e.EventType.ToString());
             _port.Open();
 
             _mpos = new Mpos(_port.BaseStream, "ek_live_IiZGjjXdxDug8t8xRtEFas0dke6I7H");
@@ -35,7 +36,7 @@ namespace PaymentTest
 
         public async Task<Transaction> Pay(int amount)
         {
-            var result = await _mpos.ProcessPayment(amount, PaymentFlags.Visa | PaymentFlags.CreditCard);
+            var result = await _mpos.ProcessPayment(amount);
 
             var transaction = new Transaction
                 {
