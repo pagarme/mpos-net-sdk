@@ -35,7 +35,7 @@ namespace PaymentTest
 
         public async Task Pay(int amount)
         {
-            var result = await _mpos.ProcessPayment(amount, PaymentFlags.Visa | PaymentFlags.CreditCard);
+            var result = await _mpos.ProcessPayment(amount);
 
             /*var transaction = new Transaction
                 {

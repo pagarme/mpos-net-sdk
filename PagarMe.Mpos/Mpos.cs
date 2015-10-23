@@ -100,7 +100,7 @@ namespace PagarMe.Mpos
                 tables.Add(GetMarshalBytes(aid));
 
             //foreach (var capk in nativeCapk)
-            //    tables.Add(GetMarshalBytes(capk));
+             //   tables.Add(GetMarshalBytes(capk));
 
             Native.Error error = Native.UpdateTables(_nativeMpos, tables.ToArray(), tables.Count, (mpos, err) =>
                 {
@@ -435,7 +435,7 @@ namespace PagarMe.Mpos
                     AcquirerNumber = e.AcquirerNumber;
                     RecordIndex = e.RecordIndex;
 
-                    AidNumber = GetHexBytes(e.Aid, 32, out AidLength);
+                    AidNumber = GetHexBytes(e.Aid, 32, out AidLength, false);
                     ApplicationType = e.ApplicationType;
                     ApplicationName = GetBytes(e.ApplicationName, 16, out ApplicationNameLength);
                     CountryCode = e.CountryCode;
@@ -467,14 +467,12 @@ namespace PagarMe.Mpos
 
             public static byte[] GetBytes(string data, int length, out int newSize, char? fill = null, bool padLeft = true)
             {
+                newSize = Encoding.UTF8.GetByteCount(data);
+
                 if (fill.HasValue && data.Length < length)
                     data = padLeft ? data.PadLeft(length, fill.Value) : data.PadRight(length, fill.Value);
                 
-                byte[] result = Encoding.UTF8.GetBytes(data);
-
-                newSize = result.Length;
-
-                return result;
+                return Encoding.UTF8.GetBytes(data);
             }
                 
             public static byte[] GetBytes(string data, int length, char? fill = null, bool padLeft = true)
