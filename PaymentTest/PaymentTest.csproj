@@ -37,7 +37,7 @@
       <HintPath>..\packages\BouncyCastle.1.7.0\lib\Net40-Client\BouncyCastle.Crypto.dll</HintPath>
     </Reference>
     <Reference Include="PagarMe">
-      <HintPath>..\..\pagarme-net\PagarMe\bin\Debug\PagarMe.dll</HintPath>
+      <HintPath>..\packages\Pagar.me.2.2.3\lib\net45\PagarMe.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

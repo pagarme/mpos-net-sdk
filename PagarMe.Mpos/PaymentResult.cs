@@ -19,7 +19,7 @@ namespace PagarMe.Mpos
 
         internal async Task BuildAccepted(string encryptionKey, PaymentStatus status, PaymentMethod method, string pan, string holderName, string expirationDate, string track2, string emv, bool isOnlinePin, string pin, string pinKek)
         {
-            List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
+			List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
 
             parameters.Add(new Tuple<string, string>("capture_method", "emv"));
             parameters.Add(new Tuple<string, string>("payment_method", method == PaymentMethod.Credit ? "credit_card" : "debit_card"));

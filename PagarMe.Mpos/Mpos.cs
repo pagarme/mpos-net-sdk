@@ -124,11 +124,11 @@ namespace PagarMe.Mpos
             var source = new TaskCompletionSource<PaymentResult>();
 
             Native.Error error = Native.ProcessPayment(_nativeMpos, amount, flags, (mpos, err, infoPointer) => {
-                var info = (Native.PaymentInfo)Marshal.PtrToStructure(infoPointer, typeof(Native.PaymentInfo));
+				var info = (Native.PaymentInfo)Marshal.PtrToStructure(infoPointer, typeof(Native.PaymentInfo));
 
                 HandlePaymentCallback(err, info).ContinueWith(t => {
-                    if (t.Status == TaskStatus.Faulted) {
-                        source.SetException(t.Exception);
+					if (t.Status == TaskStatus.Faulted) {
+						source.SetException(t.Exception);
                     } else {
                         source.SetResult(t.Result);
                     }
@@ -141,8 +141,7 @@ namespace PagarMe.Mpos
 
             if (error != Native.Error.Ok)
                 throw new MposException(error);
-
-            return source.Task;
+			return source.Task;
 		}
 
         public Task FinishTransaction(int responseCode, string emvData)
@@ -229,8 +228,8 @@ namespace PagarMe.Mpos
 
             if (error == Native.Error.Ok)
             {
-                PaymentStatus status = info.Decision == Native.Decision.Refused ? PaymentStatus.Rejected : PaymentStatus.Accepted;
-                string emv = GetString(info.EmvData, info.EmvDataLength);
+				PaymentStatus status = info.Decision == Native.Decision.Refused ? PaymentStatus.Rejected : PaymentStatus.Accepted;
+				string emv = GetString(info.EmvData, info.EmvDataLength);
                 string track2 = GetString(info.Track2, info.Track2Length);
                 string pan = GetString(info.Pan, info.PanLength);
                 string expirationDate = GetString(info.ExpirationDate);
@@ -247,7 +246,7 @@ namespace PagarMe.Mpos
                     pinKek = GetString(info.PinKek);
                 }
 
-                await result.BuildAccepted(this.EncryptionKey, status, PaymentMethod.Credit, pan, holderName, expirationDate, track2, emv, isOnlinePin, pin, pinKek);
+				await result.BuildAccepted(this.EncryptionKey, status, PaymentMethod.Credit, pan, holderName, expirationDate, track2, emv, isOnlinePin, pin, pinKek);
             }
             else
             {
@@ -299,6 +298,10 @@ namespace PagarMe.Mpos
                 public Decision Decision;
 
                 public int Amount;
+
+				public int acquirer_index;
+				public int record_number;
+				public int application_type;
 
                 [MarshalAs(UnmanagedType.ByValArray, SizeConst = 6)]
                 public byte[] ExpirationDate;

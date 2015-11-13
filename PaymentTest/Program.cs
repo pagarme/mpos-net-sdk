@@ -15,15 +15,20 @@ namespace PaymentTest
 
         public static async Task Process()
         {
-            var processor = new PaymentProcessor("COM6");
+			var processor = new PaymentProcessor("/dev/tty.PAX-50346373-BluetoothS");
 
             Console.WriteLine("Welcome to Pagador 9000");
             Console.WriteLine("Initializing...");
 
+
             await processor.Initialize();
 
-            Console.Write("Amount: ");
-            await processor.Pay(Int32.Parse(Console.ReadLine()));
+			System.Threading.Thread.Sleep (3000);
+			Console.Write("Amount: ");
+			//String x = Console.ReadLine ();
+			//Console.WriteLine ("read line " + x);
+			//Int32 integer = Int32.Parse (x);
+            await processor.Pay(314);
 
            // Console.WriteLine("Created transaction {0}.", transaction.Id);
         }

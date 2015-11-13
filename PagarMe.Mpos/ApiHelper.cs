@@ -39,7 +39,7 @@ namespace PagarMe.Mpos
 
         static async Task<Tuple<string, string>> GetCardHashKey(string encryptionKey)
         {
-            var response = (HttpWebResponse)(await CreateRequest("GET", "/transactions/card_hash_key", encryptionKey).GetResponseAsync());
+		var response = (HttpWebResponse)(await CreateRequest("GET", "/transactions/card_hash_key", encryptionKey).GetResponseAsync());
 
             var json = new StreamReader(response.GetResponseStream(), Encoding.UTF8).ReadToEnd();
             var result = JsonConvert.DeserializeObject<dynamic>(json);
