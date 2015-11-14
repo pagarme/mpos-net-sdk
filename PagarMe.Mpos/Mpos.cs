@@ -28,6 +28,7 @@ namespace PagarMe.Mpos
             int size = Marshal.SizeOf(typeof(T));
 
             IntPtr ptr = Marshal.AllocHGlobal(size);
+
             Marshal.StructureToPtr(str, ptr, false);
 
             return ptr;
@@ -35,27 +36,27 @@ namespace PagarMe.Mpos
 
         private AbecsStream _stream;
         private IntPtr _nativeMpos;
-		private readonly string _encryptionKey;
+        private readonly string _encryptionKey;
 
-		public event EventHandler Initialized;
+        public event EventHandler Initialized;
         public event EventHandler<PaymentResult> PaymentProcessed;
         public event EventHandler<string> NotificationReceived;
         public event EventHandler OperationCompleted;
 
-		public Stream BaseStream { get { return _stream.BaseStream; } }
-		public string EncryptionKey { get { return _encryptionKey; } }
+        public Stream BaseStream { get { return _stream.BaseStream; } }
+        public string EncryptionKey { get { return _encryptionKey; } }
 
         public Mpos(Stream stream, string encryptionKey)
             : this(new AbecsStream(stream), encryptionKey)
         {
         }
 
-		private unsafe Mpos(AbecsStream stream, string encryptionKey)
-		{
-			_stream = stream;
-			_encryptionKey = encryptionKey;
+        private unsafe Mpos(AbecsStream stream, string encryptionKey)
+        {
+            _stream = stream;
+            _encryptionKey = encryptionKey;
             _nativeMpos = Native.Create((IntPtr)stream.NativeStream, HandleNotificationCallback, HandleOperationCompletedCallback);
-		}
+        }
 
         ~Mpos()
         {
@@ -82,7 +83,7 @@ namespace PagarMe.Mpos
                 throw new MposException(error);
 
             return source.Task;
-		}
+        }
 
         public async Task SynchronizeTables()
         {
@@ -120,15 +121,15 @@ namespace PagarMe.Mpos
 
 
         public Task<PaymentResult> ProcessPayment(int amount, PaymentFlags flags = PaymentFlags.Default)
-		{
+        {
             var source = new TaskCompletionSource<PaymentResult>();
 
             Native.Error error = Native.ProcessPayment(_nativeMpos, amount, flags, (mpos, err, infoPointer) => {
-				var info = (Native.PaymentInfo)Marshal.PtrToStructure(infoPointer, typeof(Native.PaymentInfo));
+                var info = (Native.PaymentInfo)Marshal.PtrToStructure(infoPointer, typeof(Native.PaymentInfo));
 
                 HandlePaymentCallback(err, info).ContinueWith(t => {
-					if (t.Status == TaskStatus.Faulted) {
-						source.SetException(t.Exception);
+                    if (t.Status == TaskStatus.Faulted) {
+                        source.SetException(t.Exception);
                     } else {
                         source.SetResult(t.Result);
                     }
@@ -141,8 +142,8 @@ namespace PagarMe.Mpos
 
             if (error != Native.Error.Ok)
                 throw new MposException(error);
-			return source.Task;
-		}
+            return source.Task;
+        }
 
         public Task FinishTransaction(int responseCode, string emvData)
         {
@@ -179,14 +180,14 @@ namespace PagarMe.Mpos
                 throw new MposException(error);
         }
 
-		public void Close()
-		{
+        public void Close()
+        {
             Native.Error error = Native.Close(_nativeMpos);
 
             if (error != Native.Error.Ok)
                 throw new MposException(error);
-		}
-            
+        }
+
         public void Dispose()
         {
             Dispose(true);
@@ -228,8 +229,8 @@ namespace PagarMe.Mpos
 
             if (error == Native.Error.Ok)
             {
-				PaymentStatus status = info.Decision == Native.Decision.Refused ? PaymentStatus.Rejected : PaymentStatus.Accepted;
-				string emv = GetString(info.EmvData, info.EmvDataLength);
+                PaymentStatus status = info.Decision == Native.Decision.Refused ? PaymentStatus.Rejected : PaymentStatus.Accepted;
+                string emv = GetString(info.EmvData, info.EmvDataLength);
                 string track2 = GetString(info.Track2, info.Track2Length);
                 string pan = GetString(info.Pan, info.PanLength);
                 string expirationDate = GetString(info.ExpirationDate);
@@ -246,7 +247,7 @@ namespace PagarMe.Mpos
                     pinKek = GetString(info.PinKek);
                 }
 
-				await result.BuildAccepted(this.EncryptionKey, status, PaymentMethod.Credit, pan, holderName, expirationDate, track2, emv, isOnlinePin, pin, pinKek);
+                await result.BuildAccepted(this.EncryptionKey, status, PaymentMethod.Credit, pan, holderName, expirationDate, track2, emv, isOnlinePin, pin, pinKek);
             }
             else
             {
@@ -299,9 +300,9 @@ namespace PagarMe.Mpos
 
                 public int Amount;
 
-				public int acquirer_index;
-				public int record_number;
-				public int application_type;
+                public int acquirer_index;
+                public int record_number;
+                public int application_type;
 
                 [MarshalAs(UnmanagedType.ByValArray, SizeConst = 6)]
                 public byte[] ExpirationDate;
@@ -475,7 +476,7 @@ namespace PagarMe.Mpos
 
                 if (fill.HasValue && data.Length < length)
                     data = padLeft ? data.PadLeft(length, fill.Value) : data.PadRight(length, fill.Value);
-                
+
                 byte[] result = Encoding.UTF8.GetBytes(data);
                 byte[] full = new byte[length];
 
@@ -483,7 +484,7 @@ namespace PagarMe.Mpos
 
                 return full;
             }
-                
+
             public static byte[] GetBytes(string data, int length, char? fill = null, bool padLeft = true)
             {
                 int newSize;
@@ -560,6 +561,6 @@ namespace PagarMe.Mpos
             public static extern Error Free(IntPtr mpos);
 
         }
-	}
+    }
 }
 
