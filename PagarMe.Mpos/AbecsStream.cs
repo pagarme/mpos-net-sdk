@@ -13,17 +13,25 @@ namespace PagarMe.Mpos
         private readonly CancellationTokenSource _cancellationToken;
         private readonly Stream _baseStream;
 
+        private readonly Native.StreamOpenDelegate OpenPin;
+        private readonly Native.StreamWriteDelegate WritePin;
+        private readonly Native.StreamCloseDelegate ClosePin;
+
         public Stream BaseStream { get { return _baseStream; } }
         public Native *NativeStream { get { return _nativeStream; } }
 
         public AbecsStream(Stream baseStream)
         {
+            OpenPin = Open;
+            WritePin = Write;
+            ClosePin = Close;
+
             _baseStream = baseStream;
             _cancellationToken = new CancellationTokenSource();
             _nativeStream = Native.Allocate();
-            _nativeStream->Open = Open;
-            _nativeStream->Write = Write;
-            _nativeStream->Close = Close;
+            _nativeStream->Open = OpenPin;
+            _nativeStream->Write = WritePin;
+            _nativeStream->Close = ClosePin;
         }
 
         ~AbecsStream()

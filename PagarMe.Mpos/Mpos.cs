@@ -38,6 +38,9 @@ namespace PagarMe.Mpos
         private IntPtr _nativeMpos;
         private readonly string _encryptionKey;
 
+        private Native.MposNotificationCallbackDelegate NotificationPin;
+        private Native.MposOperationCompletedCallbackDelegate OperationPin;
+
         public event EventHandler Initialized;
         public event EventHandler<PaymentResult> PaymentProcessed;
         public event EventHandler<string> NotificationReceived;
@@ -53,9 +56,12 @@ namespace PagarMe.Mpos
 
         private unsafe Mpos(AbecsStream stream, string encryptionKey)
         {
+            NotificationPin = HandleNotificationCallback;
+            OperationPin = HandleOperationCompletedCallback;
+
             _stream = stream;
             _encryptionKey = encryptionKey;
-            _nativeMpos = Native.Create((IntPtr)stream.NativeStream, HandleNotificationCallback, HandleOperationCompletedCallback);
+            _nativeMpos = Native.Create((IntPtr)stream.NativeStream, NotificationPin, OperationPin);
         }
 
         ~Mpos()
@@ -65,19 +71,30 @@ namespace PagarMe.Mpos
 
         public Task Initialize()
         {
+            GCHandle pin = default(GCHandle);
             var source = new TaskCompletionSource<bool>();
 
-            Native.Error error = Native.Initialize(_nativeMpos, IntPtr.Zero, mpos => {
-                try {
-                    OnInitialized();
+            Native.MposInitializedCallbackDelegate callback = mpos =>
+                {
+                    pin.Free();
 
-                    source.TrySetResult(true);
-                } catch(Exception ex) {
-                    source.TrySetException(ex);
-                }
+                    try
+                    {
+                        OnInitialized();
 
-                return Native.Error.Ok;
-            });
+                        source.TrySetResult(true);
+                    }
+                    catch (Exception ex)
+                    {
+                        source.TrySetException(ex);
+                    }
+
+                    return Native.Error.Ok;
+                };
+
+            pin = GCHandle.Alloc(pin);
+
+            Native.Error error = Native.Initialize(_nativeMpos, IntPtr.Zero, callback);
 
             if (error != Native.Error.Ok)
                 throw new MposException(error);
@@ -87,6 +104,7 @@ namespace PagarMe.Mpos
 
         public async Task SynchronizeTables()
         {
+            GCHandle pin = default(GCHandle);
             var source = new TaskCompletionSource<bool>();
 
             CapkEntry[] capks = await ApiHelper.GetTerminalTable<CapkEntry>("capks");
@@ -103,15 +121,21 @@ namespace PagarMe.Mpos
             foreach (var capk in nativeCapk)
                 tables.Add(GetMarshalBytes(capk));
 
-            Native.Error error = Native.UpdateTables(_nativeMpos, tables.ToArray(), tables.Count, (mpos, err) =>
+            Native.MposFinishTransacitonCallbackDelegate callback = (mpos, err) =>
                 {
+                    pin.Free();
+
                     foreach (IntPtr ptr in tables)
                         Marshal.FreeHGlobal(ptr);
 
                     source.SetResult(true);
 
                     return Native.Error.Ok;
-                });
+                };
+
+            pin = GCHandle.Alloc(callback);
+
+            Native.Error error = Native.UpdateTables(_nativeMpos, tables.ToArray(), tables.Count, callback);
 
             if (error != Native.Error.Ok)
                 throw new MposException(error);
@@ -122,23 +146,35 @@ namespace PagarMe.Mpos
 
         public Task<PaymentResult> ProcessPayment(int amount, PaymentFlags flags = PaymentFlags.Default)
         {
+            GCHandle pin = default(GCHandle);
             var source = new TaskCompletionSource<PaymentResult>();
 
-            Native.Error error = Native.ProcessPayment(_nativeMpos, amount, flags, (mpos, err, infoPointer) => {
+            Native.MposPaymentCallbackDelegate callback = (mpos, err, infoPointer) =>
+            {
                 var info = (Native.PaymentInfo)Marshal.PtrToStructure(infoPointer, typeof(Native.PaymentInfo));
 
-                HandlePaymentCallback(err, info).ContinueWith(t => {
-                    if (t.Status == TaskStatus.Faulted) {
-                        source.SetException(t.Exception);
-                    } else {
-                        source.SetResult(t.Result);
-                    }
+                pin.Free();
 
-                    OnPaymentProcessed(t.Result);
-                });
+                HandlePaymentCallback(err, info).ContinueWith(t =>
+                    {
+                        if (t.Status == TaskStatus.Faulted)
+                        {
+                            source.SetException(t.Exception);
+                        }
+                        else
+                        {
+                            source.SetResult(t.Result);
+                        }
+
+                        OnPaymentProcessed(t.Result);
+                    });
 
                 return Native.Error.Ok;
-            });
+            };
+
+            pin = GCHandle.Alloc(callback);
+
+            Native.Error error = Native.ProcessPayment(_nativeMpos, amount, flags, callback);
 
             if (error != Native.Error.Ok)
                 throw new MposException(error);
@@ -147,6 +183,7 @@ namespace PagarMe.Mpos
 
         public Task FinishTransaction(int responseCode, string emvData)
         {
+            GCHandle pin = default(GCHandle);
             var source = new TaskCompletionSource<bool>();
             Native.TransactionStatus status;
 
@@ -159,11 +196,18 @@ namespace PagarMe.Mpos
                 status = Native.TransactionStatus.Error;
             }
 
-            Native.Error error = Native.FinishTransaction(_nativeMpos, status, responseCode, emvData.Length, emvData, (mpos, err) => {
+            Native.MposFinishTransacitonCallbackDelegate callback = (mpos, err) =>
+            {
+                pin.Free();
+
                 source.SetResult(true);
 
                 return Native.Error.Ok;
-            });
+            };
+
+            pin = GCHandle.Alloc(callback);
+
+            Native.Error error = Native.FinishTransaction(_nativeMpos, status, responseCode, emvData.Length, emvData, callback);
 
             if (error != Native.Error.Ok)
                 throw new MposException(error);
@@ -299,10 +343,9 @@ namespace PagarMe.Mpos
                 public Decision Decision;
 
                 public int Amount;
-
-                public int acquirer_index;
-                public int record_number;
-                public int application_type;
+                public int AcquirerIndex;
+                public int RecordNumber;
+                public int ApplicationType;
 
                 [MarshalAs(UnmanagedType.ByValArray, SizeConst = 6)]
                 public byte[] ExpirationDate;
