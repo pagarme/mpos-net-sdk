@@ -274,6 +274,7 @@ namespace PagarMe.Mpos
             if (error == Native.Error.Ok)
             {
                 PaymentStatus status = info.Decision == Native.Decision.Refused ? PaymentStatus.Rejected : PaymentStatus.Accepted;
+                PaymentMethod paymentMethod = (PaymentMethod)info.ApplicationType;
                 string emv = GetString(info.EmvData, info.EmvDataLength);
                 string track2 = GetString(info.Track2, info.Track2Length);
                 string pan = GetString(info.Pan, info.PanLength);
@@ -291,7 +292,7 @@ namespace PagarMe.Mpos
                     pinKek = GetString(info.PinKek);
                 }
 
-                await result.BuildAccepted(this.EncryptionKey, status, PaymentMethod.Credit, pan, holderName, expirationDate, track2, emv, isOnlinePin, pin, pinKek);
+                await result.BuildAccepted(this.EncryptionKey, status, paymentMethod, pan, holderName, expirationDate, track2, emv, isOnlinePin, pin, pinKek);
             }
             else
             {

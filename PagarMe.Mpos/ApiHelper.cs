@@ -29,10 +29,7 @@ namespace PagarMe.Mpos
             request.Method = "GET";
 
             if (auth != null)
-            {
-                request.PreAuthenticate = true;
-                request.Credentials = new NetworkCredential(auth, "x");
-            }
+                request.Headers.Add("Authorization", "Basic " + Convert.ToBase64String(Encoding.ASCII.GetBytes(auth + ":x")));
 
             return (HttpWebRequest)request;
         }

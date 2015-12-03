@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package>
+	<metadata>
+	<id>PagarMe.Mpos</id>
+	<version>1.1.3</version>
+	<authors>Joathan Lima</authors>
+	<owners>Pagar.me</owners>
+	<licenseUrl>http://www.opensource.org/licenses/MIT</licenseUrl>
+	<projectUrl>https://github.com/pagarme/pagarme-net</projectUrl>
+	<iconUrl>https://pagar.me/wp-content/uploads/2013/11/icon-pagarme-32x32.png</iconUrl>
+	<requireLicenseAcceptance>false</requireLicenseAcceptance>
+	<description>Pagar.me mPOS .NET library</description>
+	<releaseNotes>Pagar.me</releaseNotes>
+	<copyright>Copyright 2015 Pagar.me</copyright>
+	<tags>pagarme payment mpos emv</tags>
+	<dependencies>
+		<dependency id="Newtonsoft.Json" version="7.0.1" />
+		<dependency id="BouncyCastle" version="1.7.0" />
+	</dependencies>
+	</metadata>
+	<files>
+		<file src="PagarMe.Mpos/bin/Release/PagarMe.Mpos.dll"  target="lib/net45" />
+	</files>
+</package>
