@@ -281,7 +281,7 @@ namespace PagarMe.Mpos
                 string expirationDate = GetString(info.ExpirationDate);
                 string holderName = GetString(info.HolderName);
                 string pin = null, pinKek = null;
-                bool isOnlinePin = info.IsOnlinePin;
+                bool isOnlinePin = info.IsOnlinePin != 0;
 
                 expirationDate = expirationDate.Substring(2, 2) + expirationDate.Substring(0, 2);
                 holderName = holderName.Trim().Split('/').Reverse().Aggregate((a, b) => a + ' ' + b);
@@ -374,8 +374,7 @@ namespace PagarMe.Mpos
                 public byte[] EmvData;
                 public IntPtr EmvDataLength;
 
-                [MarshalAs(UnmanagedType.I1)]
-                public bool IsOnlinePin;
+                public int IsOnlinePin;
 
                 [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
                 public byte[] Pin;

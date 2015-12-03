@@ -30,7 +30,7 @@ namespace PaymentTest
         {
             await _mpos.Initialize();
 
-            await _mpos.SynchronizeTables();
+            //await _mpos.SynchronizeTables();
 			_mpos.Display("Hello, world!");
         }
 
