@@ -59,7 +59,7 @@ namespace PagarMe.Mpos
 
         static byte[] Encrypt(byte[] data, AsymmetricKeyParameter key)
         {
-            List<byte[]> output = new List<byte[]>();
+	    List<byte[]> output = new List<byte[]>();
             Pkcs1Encoding engine = new Pkcs1Encoding(new RsaEngine());
 
             engine.Init(true, key);
@@ -95,12 +95,12 @@ namespace PagarMe.Mpos
             return EncryptWith(hashParameters.Item1, hashParameters.Item2, data);
         }
 
-        public static async Task<T[]> GetTerminalTable<T>(string type)
+        public static async Task<TerminalData<T>> GetTerminalTable<T>(string type)
         {
             var response = (HttpWebResponse)(await CreateRequest("GET", "/terminal/" + type, null).GetResponseAsync());
             var json = new StreamReader(response.GetResponseStream(), Encoding.UTF8).ReadToEnd();
 
-            return JsonConvert.DeserializeObject<T[]>(json);
+			return JsonConvert.DeserializeObject<TerminalData<T>>(json);
         }
     }
 }

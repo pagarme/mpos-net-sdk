@@ -20,6 +20,9 @@ namespace PaymentTest
 
             _mpos = new Mpos(_port.BaseStream, "ek_live_bspDfnKtdZahowfxSxuYTdYxaaDp1v");
             _mpos.NotificationReceived += (sender, e) => Console.WriteLine("Status: {0}", e);
+			_mpos.TableUpdated += (sender, e) => Console.WriteLine("LOADED: {0}", e);
+			_mpos.Errored += (sender, e) => Console.WriteLine ("I GOT ERROR {0}", e);
+			_mpos.PaymentProcessed += (sender, e) => Console.WriteLine("HEY CARD HASH " + e.CardHash);
 
             //PagarMeService.DefaultApiEndpoint = "http://localhost:3000";
             PagarMeService.DefaultEncryptionKey = "ek_live_bspDfnKtdZahowfxSxuYTdYxaaDp1v";
@@ -30,7 +33,7 @@ namespace PaymentTest
         {
             await _mpos.Initialize();
 
-            //await _mpos.SynchronizeTables();
+            await _mpos.SynchronizeTables(false);
 			_mpos.Display("Hello, world!");
         }
 
@@ -48,7 +51,8 @@ namespace PaymentTest
 
             await transaction.SaveAsync();
 
-            await _mpos.FinishTransaction(Int32.Parse(transaction.AcquirerResponseCode), transaction["card_emv_response"].ToString());
+			Console.WriteLine ("Transaction ARC = " + transaction.AuthorizationCode + ", Id = " + transaction.Id);
+			await _mpos.FinishTransaction(Int32.Parse(transaction.AcquirerResponseCode), transaction["card_emv_response"].ToString());
 
         }
     }

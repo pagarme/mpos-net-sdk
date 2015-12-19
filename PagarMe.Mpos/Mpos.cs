@@ -40,9 +40,11 @@ namespace PagarMe.Mpos
 
         private Native.MposNotificationCallbackDelegate NotificationPin;
         private Native.MposOperationCompletedCallbackDelegate OperationPin;
-
+        
+        public event EventHandler<int> Errored;
         public event EventHandler Initialized;
         public event EventHandler<PaymentResult> PaymentProcessed;
+        public event EventHandler<bool> TableUpdated;
         public event EventHandler<string> NotificationReceived;
         public event EventHandler OperationCompleted;
 
@@ -74,14 +76,13 @@ namespace PagarMe.Mpos
             GCHandle pin = default(GCHandle);
             var source = new TaskCompletionSource<bool>();
 
-            Native.MposInitializedCallbackDelegate callback = mpos =>
+            Native.MposInitializedCallbackDelegate callback = (mpos, err) =>
                 {
                     pin.Free();
 
                     try
                     {
-                        OnInitialized();
-
+                        OnInitialized(err);
                         source.TrySetResult(true);
                     }
                     catch (Exception ex)
@@ -102,47 +103,57 @@ namespace PagarMe.Mpos
             return source.Task;
         }
 
-        public async Task SynchronizeTables()
+		private string BuildVersionFromDate(string date) {
+			DateTime dt = DateTime.ParseExact(date, "yyyy-MM-ddTHH:mm:ss.fffZ", null);
+			return String.Format("{0:yyyyMMddHH}", dt);
+		}
+
+		public Task SynchronizeTables(bool forceUpdate)
         {
             GCHandle pin = default(GCHandle);
             var source = new TaskCompletionSource<bool>();
 
-            CapkEntry[] capks = await ApiHelper.GetTerminalTable<CapkEntry>("capks");
-            AidEntry[] aids = await ApiHelper.GetTerminalTable<AidEntry>("aids");
+			ApiHelper.GetTerminalTable<CapkEntry> ("capks").ContinueWith(capk_t => {
+				ApiHelper.GetTerminalTable<AidEntry> ("aids").ContinueWith(aid_t => {
+					TerminalData<CapkEntry> capks = capk_t.Result;
+					TerminalData<AidEntry> aids = aid_t.Result;
 
-            Native.Capk[] nativeCapk = capks.Select(x => new Native.Capk(x)).ToArray();
-            Native.Aid[] nativeAid = aids.Select(x => new Native.Aid(x)).ToArray();
+					Native.Capk[] nativeCapk = capks.Data.Select (x => new Native.Capk (x)).ToArray ();
+					Native.Aid[] nativeAid = aids.Data.Select (x => new Native.Aid (x)).ToArray ();
+					string version = BuildVersionFromDate (aids.CurrentVersion);
 
-            List<IntPtr> tables = new List<IntPtr>();
+					List<IntPtr> tables = new List<IntPtr> ();
 
-            foreach (var aid in nativeAid)
-                tables.Add(GetMarshalBytes(aid));
+					foreach (var aid in nativeAid)
+						tables.Add (GetMarshalBytes (aid));
 
-            foreach (var capk in nativeCapk)
-                tables.Add(GetMarshalBytes(capk));
+					foreach (var capk in nativeCapk)
+						tables.Add (GetMarshalBytes (capk));
 
-            Native.MposFinishTransacitonCallbackDelegate callback = (mpos, err) =>
-                {
-                    pin.Free();
+					Native.MposTablesLoadedCallbackDelegate callback = (mpos, err, loaded) =>
+					{
+						pin.Free();
 
-                    foreach (IntPtr ptr in tables)
-                        Marshal.FreeHGlobal(ptr);
+						foreach (IntPtr ptr in tables)
+							Marshal.FreeHGlobal(ptr);
 
-                    source.SetResult(true);
+						OnTableUpdated(loaded, err);
+						source.SetResult(true);
 
-                    return Native.Error.Ok;
-                };
+						return Native.Error.Ok;
+					};
 
-            pin = GCHandle.Alloc(callback);
+					pin = GCHandle.Alloc (callback);
 
-            Native.Error error = Native.UpdateTables(_nativeMpos, tables.ToArray(), tables.Count, callback);
+					Native.Error error = Native.UpdateTables (_nativeMpos, tables.ToArray (), tables.Count, version, forceUpdate, callback);
 
-            if (error != Native.Error.Ok)
-                throw new MposException(error);
+					if (error != Native.Error.Ok)
+						throw new MposException (error);
+				});
+			});
 
-            await source.Task;
+            return source.Task;
         }
-
 
         public Task<PaymentResult> ProcessPayment(int amount, PaymentFlags flags = PaymentFlags.Default)
         {
@@ -151,13 +162,17 @@ namespace PagarMe.Mpos
 
             Native.MposPaymentCallbackDelegate callback = (mpos, err, infoPointer) =>
             {
-                var info = (Native.PaymentInfo)Marshal.PtrToStructure(infoPointer, typeof(Native.PaymentInfo));
+				if (err != 0) {
+					OnPaymentProcessed(null, err);
+					return Native.Error.Ok;
+				}
+				var info = (Native.PaymentInfo)Marshal.PtrToStructure(infoPointer, typeof(Native.PaymentInfo));
 
                 pin.Free();
 
                 HandlePaymentCallback(err, info).ContinueWith(t =>
                     {
-                        if (t.Status == TaskStatus.Faulted)
+						if (t.Status == TaskStatus.Faulted)
                         {
                             source.SetException(t.Exception);
                         }
@@ -166,7 +181,7 @@ namespace PagarMe.Mpos
                             source.SetResult(t.Result);
                         }
 
-                        OnPaymentProcessed(t.Result);
+                        OnPaymentProcessed(t.Result, err);
                     });
 
                 return Native.Error.Ok;
@@ -255,23 +270,35 @@ namespace PagarMe.Mpos
             }
         }
 
-        protected virtual void OnInitialized()
+        protected virtual void OnInitialized(int error)
         {
-            if (Initialized != null)
-                Initialized(this, new EventArgs());
+			if (error != 0)
+				Errored(this, error);
+			else if (Initialized != null)
+				Initialized(this, new EventArgs());
         }
 
-        protected virtual void OnPaymentProcessed(PaymentResult result)
+        protected virtual void OnPaymentProcessed(PaymentResult result, int error)
         {
-            if (PaymentProcessed != null)
-                PaymentProcessed(this, result);
+			if (error != 0)
+				Errored(this, error);
+			else if (PaymentProcessed != null)
+				PaymentProcessed(this, result);
         }
 
-        private async Task<PaymentResult> HandlePaymentCallback(Native.Error error, Native.PaymentInfo info)
+
+        protected virtual void OnTableUpdated(bool loaded, int error) {
+			if (error != 0)
+				Errored(this, error);
+			else if (TableUpdated != null)
+				TableUpdated(this, loaded);
+        }
+
+        private async Task<PaymentResult> HandlePaymentCallback(int error, Native.PaymentInfo info)
         {
             PaymentResult result = new PaymentResult();
 
-            if (error == Native.Error.Ok)
+            if (error == 0)
             {
                 PaymentStatus status = info.Decision == Native.Decision.Refused ? PaymentStatus.Rejected : PaymentStatus.Accepted;
                 PaymentMethod paymentMethod = (PaymentMethod)info.ApplicationType;
@@ -296,7 +323,7 @@ namespace PagarMe.Mpos
             }
             else
             {
-                result.BuildErrored();
+				result.BuildErrored();
             }
 
             return result;
@@ -568,16 +595,16 @@ namespace PagarMe.Mpos
             public delegate void MposOperationCompletedCallbackDelegate(IntPtr mpos);
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate Error MposInitializedCallbackDelegate(IntPtr mpos);
+            public delegate Error MposInitializedCallbackDelegate(IntPtr mpos, int error);
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate Error MposPaymentCallbackDelegate(IntPtr mpos, Error error, IntPtr info);
+            public delegate Error MposPaymentCallbackDelegate(IntPtr mpos, int error, IntPtr info);
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate Error MposTablesLoadedCallbackDelegate(IntPtr mpos, Error error);
+            public delegate Error MposTablesLoadedCallbackDelegate(IntPtr mpos, int error, bool loaded);
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate Error MposFinishTransacitonCallbackDelegate(IntPtr mpos, Error error);
+            public delegate Error MposFinishTransacitonCallbackDelegate(IntPtr mpos, int error);
 
             [DllImport("mpos", EntryPoint = "mpos_new", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
             public static extern IntPtr Create(IntPtr stream, MposNotificationCallbackDelegate notificationCallback, MposOperationCompletedCallbackDelegate operationCompletedCallback);
@@ -589,7 +616,7 @@ namespace PagarMe.Mpos
             public static extern Error ProcessPayment(IntPtr mpos, int amount, PaymentFlags flags, MposPaymentCallbackDelegate paymentCallback);
 
             [DllImport("mpos", EntryPoint = "mpos_update_tables", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-            public static extern Error UpdateTables(IntPtr mpos, IntPtr[] data, int count, MposFinishTransacitonCallbackDelegate callback);
+			public static extern Error UpdateTables(IntPtr mpos, IntPtr[] data, int count, string version, bool force_update, MposTablesLoadedCallbackDelegate callback);
 
             [DllImport("mpos", EntryPoint = "mpos_finish_transaction", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
             public static extern Error FinishTransaction(IntPtr mpos, TransactionStatus status, int arc, int emvLen, string emv, MposFinishTransacitonCallbackDelegate callback);
