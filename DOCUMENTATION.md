@@ -33,11 +33,13 @@ Fecha uma sessão com o pinpad. Não toma parâmetros.
 
 Não retorna.
 
-##### `SynchronizeTables()`
+##### `SynchronizeTables(bool forceUpdate)`
 
-Baixa da API pagar.me as tabelas EMV mais recentes em disponibilidade, e as transfere ao pinpad. Não toma parâmetros.
+Baixa da API pagar.me as tabelas EMV mais recentes em disponibilidade, e, se necessário, as transfere ao pinpad. Toma os seguintes parâmetros:
 
-Se usado com `await`, retorna um booleano com o status da operação. Não tem eventos associados.
+* `forceUpdate`: Determina se, independentemente da necessidade de uma atualização das tabelas no pinpad, elas devem ser transferidas.
+
+Se usado com `await`, retorna um booleano com o status da operação. Tem associado o evento `TableUpdated`.
 
 ##### `Display(string text)`
 
@@ -72,15 +74,33 @@ Evento chamado quando um pagamento termina de ser processado junto ao pinpad. To
 * `sender`: Objeto da classe `Mpos`.
 * `result`: Objeto `PaymentResult` que contém dados do pagamento efetuado.
 
+##### `TableUpdated`
+
+Evento chamado quando um pedido de atualização de tabelas é terminado. Toma os seguintes parâmetros:
+
+* `sender`: Objeto da classe `Mpos`.
+* `loaded`: Booleano que indica se houve necessidade de transferir as tabelas baixadas da API Pagar.me ao pinpad.
+
 ##### `NotificationReceived`
+
+Evento chamado quando o pinpad envia uma notificação que deve ser mostrada ao usuário final.
 
 * `sender`: Objeto da classe `Mpos`.
 * `notification`: String que contém uma notificação a ser mostrada para o usuário com uma mudança de status do pinpad.
 
 ##### `OperationCompleted`
 
+Evento chamado quando uma operação junto ao pinpad é concluída.
+
 * `sender`: Objeto da classe `Mpos`.
 * `args`: Objeto `EventArgs` vazio.
+
+##### `Errored`
+
+Evento chamado quando há um erro na comunicação com o pinpad.
+
+* `sender`: Objeto da classe `Mpos`.
+* `args`: Número correspondente a um `abecs_stat_t` que indica um erro.
 
 ### PaymentResult
 
