@@ -45,6 +45,7 @@ namespace PagarMe.Mpos
         public event EventHandler Initialized;
         public event EventHandler<PaymentResult> PaymentProcessed;
         public event EventHandler<bool> TableUpdated;
+		public event EventHandler FinishedTransaction;
         public event EventHandler<string> NotificationReceived;
         public event EventHandler OperationCompleted;
 
@@ -198,7 +199,9 @@ namespace PagarMe.Mpos
 
         public Task FinishTransaction(int responseCode, string emvData)
         {
-            GCHandle pin = default(GCHandle);
+			int length = emvData == null ? 0 : emvData.Length;
+
+			GCHandle pin = default(GCHandle);
             var source = new TaskCompletionSource<bool>();
             Native.TransactionStatus status;
 
@@ -211,18 +214,19 @@ namespace PagarMe.Mpos
                 status = Native.TransactionStatus.Error;
             }
 
-            Native.MposFinishTransacitonCallbackDelegate callback = (mpos, err) =>
+			Native.MposFinishTransactionCallbackDelegate callback = (mpos, err) =>
             {
                 pin.Free();
 
-                source.SetResult(true);
+				OnFinishedTransaction(err);
+				source.SetResult(true);
 
                 return Native.Error.Ok;
             };
 
             pin = GCHandle.Alloc(callback);
 
-            Native.Error error = Native.FinishTransaction(_nativeMpos, status, responseCode, emvData.Length, emvData, callback);
+			Native.Error error = Native.FinishTransaction(_nativeMpos, status, responseCode, length, emvData, callback);
 
             if (error != Native.Error.Ok)
                 throw new MposException(error);
@@ -293,6 +297,13 @@ namespace PagarMe.Mpos
 			else if (TableUpdated != null)
 				TableUpdated(this, loaded);
         }
+
+		protected virtual void OnFinishedTransaction(int error) {
+			if (error != 0)
+				Errored(this, error);
+			else if (FinishedTransaction != null)
+				FinishedTransaction(this, new EventArgs());
+		}
 
         private async Task<PaymentResult> HandlePaymentCallback(int error, Native.PaymentInfo info)
         {
@@ -604,7 +615,7 @@ namespace PagarMe.Mpos
             public delegate Error MposTablesLoadedCallbackDelegate(IntPtr mpos, int error, bool loaded);
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate Error MposFinishTransacitonCallbackDelegate(IntPtr mpos, int error);
+			public delegate Error MposFinishTransactionCallbackDelegate(IntPtr mpos, int error);
 
             [DllImport("mpos", EntryPoint = "mpos_new", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
             public static extern IntPtr Create(IntPtr stream, MposNotificationCallbackDelegate notificationCallback, MposOperationCompletedCallbackDelegate operationCompletedCallback);
@@ -619,7 +630,7 @@ namespace PagarMe.Mpos
 			public static extern Error UpdateTables(IntPtr mpos, IntPtr[] data, int count, string version, bool force_update, MposTablesLoadedCallbackDelegate callback);
 
             [DllImport("mpos", EntryPoint = "mpos_finish_transaction", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-            public static extern Error FinishTransaction(IntPtr mpos, TransactionStatus status, int arc, int emvLen, string emv, MposFinishTransacitonCallbackDelegate callback);
+            public static extern Error FinishTransaction(IntPtr mpos, TransactionStatus status, int arc, int emvLen, string emv, MposFinishTransactionCallbackDelegate callback);
 
             [DllImport("mpos", EntryPoint = "mpos_display", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
             public static extern Error Display(IntPtr mpos, string text);

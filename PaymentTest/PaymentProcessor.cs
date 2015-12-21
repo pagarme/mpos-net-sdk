@@ -23,6 +23,7 @@ namespace PaymentTest
 			_mpos.TableUpdated += (sender, e) => Console.WriteLine("LOADED: {0}", e);
 			_mpos.Errored += (sender, e) => Console.WriteLine ("I GOT ERROR {0}", e);
 			_mpos.PaymentProcessed += (sender, e) => Console.WriteLine("HEY CARD HASH " + e.CardHash);
+			_mpos.FinishedTransaction += (sender, e) => Console.WriteLine ("FINISHED TRANSACTION!");
 
             //PagarMeService.DefaultApiEndpoint = "http://localhost:3000";
             PagarMeService.DefaultEncryptionKey = "ek_live_bspDfnKtdZahowfxSxuYTdYxaaDp1v";
@@ -51,8 +52,14 @@ namespace PaymentTest
 
             await transaction.SaveAsync();
 
-			Console.WriteLine ("Transaction ARC = " + transaction.AuthorizationCode + ", Id = " + transaction.Id);
-			await _mpos.FinishTransaction(Int32.Parse(transaction.AcquirerResponseCode), transaction["card_emv_response"].ToString());
+			Console.WriteLine (transaction);
+			Console.WriteLine ("Transaction ARC = " + transaction.AcquirerResponseCode + ", Id = " + transaction.Id);
+			Console.WriteLine ("ACQUIRER RESPONSE CODE = " + transaction.AcquirerResponseCode);
+			int x = Int32.Parse (transaction.AcquirerResponseCode);
+			object obj = transaction["card_emv_response"];
+			string response = obj == null ? null : obj.ToString (); 
+
+			await _mpos.FinishTransaction(Int32.Parse(transaction.AcquirerResponseCode), response);
 
         }
     }
