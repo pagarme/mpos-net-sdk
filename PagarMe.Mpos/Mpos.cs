@@ -457,7 +457,7 @@ namespace PagarMe.Mpos
                     HasChecksum = e.Checksum != null;
 
                     if (HasChecksum)
-                        Checksum = GetHexBytes(Convert.FromBase64String(e.Exponent), 40, false);
+						Checksum = GetHexBytes(Convert.FromBase64String(e.Checksum), 40, false);
                     else
                         Checksum = GetHexBytes("", 40);
                 }
