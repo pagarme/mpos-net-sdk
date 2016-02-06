@@ -197,41 +197,51 @@ namespace PagarMe.Mpos
             return source.Task;
         }
 
-        public Task FinishTransaction(int responseCode, string emvData)
+        public Task FinishTransaction(bool success, int responseCode, string emvData)
         {
-			int length = emvData == null ? 0 : emvData.Length;
+		GCHandle pin = default(GCHandle);
+		var source = new TaskCompletionSource<bool>();
+		
+		Native.TransactionStatus status;
+		int length;
+		
+		if (!success) {
+			status = Native.TransactionStatus.Error;
+			emvData = "";
+			length = 0;
+			responseCode = 0;
+		}
+		else {
+			length = emvData == null ? 0 : emvData.Length;
+			if (responseCode < 1000)
+			{
+				status = responseCode == 0 ? Native.TransactionStatus.Ok : Native.TransactionStatus.NonZero;
+			}
+			else
+			{
+				status = Native.TransactionStatus.Error;
+			}
+		}
+		
 
-			GCHandle pin = default(GCHandle);
-            var source = new TaskCompletionSource<bool>();
-            Native.TransactionStatus status;
+		Native.MposFinishTransactionCallbackDelegate callback = (mpos, err) =>
+		{
+			pin.Free();
 
-            if (responseCode < 1000)
-            {
-                status = responseCode == 0 ? Native.TransactionStatus.Ok : Native.TransactionStatus.NonZero;
-            }
-            else
-            {
-                status = Native.TransactionStatus.Error;
-            }
+			OnFinishedTransaction(err);
+			source.SetResult(true);
 
-			Native.MposFinishTransactionCallbackDelegate callback = (mpos, err) =>
-            {
-                pin.Free();
+			return Native.Error.Ok;
+		};
 
-				OnFinishedTransaction(err);
-				source.SetResult(true);
+		pin = GCHandle.Alloc(callback);
 
-                return Native.Error.Ok;
-            };
+		Native.Error error = Native.FinishTransaction(_nativeMpos, status, responseCode, length, emvData, callback);
 
-            pin = GCHandle.Alloc(callback);
+		if (error != Native.Error.Ok)
+			throw new MposException(error);
 
-			Native.Error error = Native.FinishTransaction(_nativeMpos, status, responseCode, length, emvData, callback);
-
-            if (error != Native.Error.Ok)
-                throw new MposException(error);
-
-            return source.Task;
+		return source.Task;
         }
 
 

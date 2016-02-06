@@ -50,7 +50,7 @@ namespace PaymentTest
                     ShouldCapture = false
                 };
 
-            /*await transaction.SaveAsync();
+            await transaction.SaveAsync();
 
 			Console.WriteLine (transaction);
 			Console.WriteLine ("Transaction ARC = " + transaction.AcquirerResponseCode + ", Id = " + transaction.Id);
@@ -59,7 +59,7 @@ namespace PaymentTest
 			object obj = transaction["card_emv_response"];
 			string response = obj == null ? null : obj.ToString (); 
 
-			await _mpos.FinishTransaction(Int32.Parse(transaction.AcquirerResponseCode), response);*/
+			await _mpos.FinishTransaction(false, 0, null);
 
         }
     }
