@@ -19,6 +19,6 @@
 	</dependencies>
 	</metadata>
 	<files>
-		<file src="PagarMe.Mpos/bin/Release/PagarMe.Mpos.dll"  target="lib/net45" />
+		<file src="PagarMe.Mpos/bin/Release/PagarMe.Mpos.dll" target="lib/net40" />
 	</files>
 </package>
