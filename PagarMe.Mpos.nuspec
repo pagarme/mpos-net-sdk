@@ -2,8 +2,8 @@
 <package>
 	<metadata>
 	<id>PagarMe.Mpos</id>
-	<version>1.1.5</version>
-	<authors>Joathan Lima</authors>
+	<version>1.1.6</version>
+	<authors>Jonathan Lima</authors>
 	<owners>Pagar.me</owners>
 	<licenseUrl>http://www.opensource.org/licenses/MIT</licenseUrl>
 	<projectUrl>https://github.com/pagarme/pagarme-net</projectUrl>
