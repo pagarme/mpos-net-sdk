@@ -10,11 +10,17 @@ namespace PagarMe.Mpos
         DebitCard  = 0x2,
         AllApplications = CreditCard | DebitCard,
 
-        Visa = 0x4,
+        VisaCard = 0x4,
         MasterCard = 0x8,
-        AllBrands = Visa | MasterCard,
+        AllCards = VisaCard | MasterCard,
 
-        Default = AllBrands | AllApplications
+	AllVisa = AllApplications | VisaCard,
+	AllMaster = AllApplications | MasterCard,
+
+	AllCredit = AllCards | CreditCard,
+	AllDebit = AllCards | DebitCard,
+
+        Default = AllCards | AllApplications
     }
 }
 
