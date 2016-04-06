@@ -43,6 +43,7 @@ namespace PagarMe.Mpos
         
         public event EventHandler<int> Errored;
         public event EventHandler Initialized;
+	public event EventHandler Closed;
         public event EventHandler<PaymentResult> PaymentProcessed;
         public event EventHandler<bool> TableUpdated;
 		public event EventHandler FinishedTransaction;
@@ -253,12 +254,29 @@ namespace PagarMe.Mpos
                 throw new MposException(error);
         }
 
-        public void Close()
+		public Task Close()
         {
-            Native.Error error = Native.Close(_nativeMpos);
+		GCHandle pin = default(GCHandle);
+		var source = new TaskCompletionSource<bool>();
 
-            if (error != Native.Error.Ok)
-                throw new MposException(error);
+		Native.MposClosedCallbackDelegate callback = (mpos, err) =>
+		{
+			pin.Free();
+
+			OnClosed(err);
+			source.SetResult(true);
+
+			return Native.Error.Ok;
+		};
+
+		pin = GCHandle.Alloc(callback);
+
+		Native.Error error = Native.Close(_nativeMpos, "", callback);
+
+		if (error != Native.Error.Ok)
+			throw new MposException(error);
+
+			return source.Task;
         }
 
         public void Dispose()
@@ -290,6 +308,14 @@ namespace PagarMe.Mpos
 				Errored(this, error);
 			else if (Initialized != null)
 				Initialized(this, new EventArgs());
+        }
+        
+	protected virtual void OnClosed(int error)
+        {
+			if (error != 0)
+				Errored(this, error);
+			else if (Closed != null)
+				Closed(this, new EventArgs());
         }
 
         protected virtual void OnPaymentProcessed(PaymentResult result, int error)
@@ -627,6 +653,9 @@ namespace PagarMe.Mpos
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 			public delegate Error MposFinishTransactionCallbackDelegate(IntPtr mpos, int error);
 
+            [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+			public delegate Error MposClosedCallbackDelegate(IntPtr mpos, int error);	    
+
             [DllImport("mpos", EntryPoint = "mpos_new", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
             public static extern IntPtr Create(IntPtr stream, MposNotificationCallbackDelegate notificationCallback, MposOperationCompletedCallbackDelegate operationCompletedCallback);
 
@@ -646,7 +675,7 @@ namespace PagarMe.Mpos
             public static extern Error Display(IntPtr mpos, string text);
 
             [DllImport("mpos", EntryPoint = "mpos_close", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-            public static extern Error Close(IntPtr mpos);
+            public static extern Error Close(IntPtr mpos, string text, MposClosedCallbackDelegate callback);
 
             [DllImport("mpos", EntryPoint = "mpos_free", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
             public static extern Error Free(IntPtr mpos);
