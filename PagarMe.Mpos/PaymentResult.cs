@@ -17,7 +17,7 @@ namespace PagarMe.Mpos
             Status = PaymentStatus.Errored;
         }
 
-		internal async Task BuildAccepted(string encryptionKey, PaymentStatus status, CaptureMethod captureMethod, PaymentMethod method, string pan, string holderName, string expirationDate, string track2, string emv, bool isOnlinePin, string pin, string pinKek)
+		internal async Task BuildAccepted(string encryptionKey, PaymentStatus status, CaptureMethod captureMethod, PaymentMethod method, string pan, string holderName, string expirationDate, string track2, string emv, bool isOnlinePin, bool requiredPin, string pin, string pinKek)
         {
 			List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
 
@@ -33,7 +33,7 @@ namespace PagarMe.Mpos
 			}
 
 			parameters.Add(new Tuple<string, string> ("card_pin_mode", isOnlinePin ? "online" : "offline"));
-            if (isOnlinePin)
+            if (requiredPin && isOnlinePin)
             {
                 parameters.Add(new Tuple<string, string>("card_pin", pin));
                 parameters.Add(new Tuple<string, string>("card_pin_kek", pinKek));

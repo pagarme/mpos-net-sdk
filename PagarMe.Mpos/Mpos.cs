@@ -369,7 +369,7 @@ namespace PagarMe.Mpos
                     pinKek = GetString(info.PinKek);
                 }
 
-                await result.BuildAccepted(this.EncryptionKey, status, captureMethod, paymentMethod, pan, holderName, expirationDate, track2, emv, isOnlinePin, pin, pinKek);
+				await result.BuildAccepted(this.EncryptionKey, status, captureMethod, paymentMethod, pan, holderName, expirationDate, track2, emv, isOnlinePin, requiredPin, pin, pinKek);
             }
             else
             {
