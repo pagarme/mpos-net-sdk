@@ -97,7 +97,8 @@ namespace PagarMe.Mpos
 
             pin = GCHandle.Alloc(pin);
 
-            Native.Error error = Native.Initialize(_nativeMpos, IntPtr.Zero, callback);
+			Console.WriteLine ("INITIALIZING NATIVE.");
+			Native.Error error = Native.Initialize(_nativeMpos, IntPtr.Zero, callback);
 
             if (error != Native.Error.Ok)
                 throw new MposException(error);
@@ -347,7 +348,8 @@ namespace PagarMe.Mpos
 
             if (error == 0)
             {
-                PaymentStatus status = info.Decision == Native.Decision.Refused ? PaymentStatus.Rejected : PaymentStatus.Accepted;
+				CaptureMethod captureMethod = info.CaptureMethod == Native.CaptureMethod.EMV ? CaptureMethod.EMV : CaptureMethod.Magstripe;
+				PaymentStatus status = info.Decision == Native.Decision.Refused ? PaymentStatus.Rejected : PaymentStatus.Accepted;
                 PaymentMethod paymentMethod = (PaymentMethod)info.ApplicationType;
                 string emv = GetString(info.EmvData, info.EmvDataLength);
                 string track2 = GetString(info.Track2, info.Track2Length);
@@ -356,17 +358,18 @@ namespace PagarMe.Mpos
                 string holderName = GetString(info.HolderName);
                 string pin = null, pinKek = null;
                 bool isOnlinePin = info.IsOnlinePin != 0;
+				bool requiredPin = info.PinRequired != 0;
 
                 expirationDate = expirationDate.Substring(2, 2) + expirationDate.Substring(0, 2);
                 holderName = holderName.Trim().Split('/').Reverse().Aggregate((a, b) => a + ' ' + b);
 
-                if (isOnlinePin)
+                if (requiredPin && isOnlinePin)
                 {
                     pin = GetString(info.Pin);
                     pinKek = GetString(info.PinKek);
                 }
 
-                await result.BuildAccepted(this.EncryptionKey, status, paymentMethod, pan, holderName, expirationDate, track2, emv, isOnlinePin, pin, pinKek);
+                await result.BuildAccepted(this.EncryptionKey, status, captureMethod, paymentMethod, pan, holderName, expirationDate, track2, emv, isOnlinePin, pin, pinKek);
             }
             else
             {
@@ -397,6 +400,12 @@ namespace PagarMe.Mpos
                 Error
             }
 
+			public enum CaptureMethod
+			{
+				Magstripe = 0,
+				EMV = 3
+			}
+
             public enum Decision
             {
                 Approved = 0,
@@ -414,7 +423,10 @@ namespace PagarMe.Mpos
             [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
             public unsafe struct PaymentInfo
             {
-                [MarshalAs(UnmanagedType.I4)]
+				[MarshalAs(UnmanagedType.I4)]
+				public CaptureMethod CaptureMethod;
+
+				[MarshalAs(UnmanagedType.I4)]
                 public Decision Decision;
 
                 public int Amount;
@@ -448,6 +460,7 @@ namespace PagarMe.Mpos
                 public byte[] EmvData;
                 public IntPtr EmvDataLength;
 
+				public int PinRequired;
                 public int IsOnlinePin;
 
                 [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]

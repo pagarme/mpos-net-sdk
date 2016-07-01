@@ -53,6 +53,7 @@
     <Compile Include="CapkEntry.cs" />
     <Compile Include="ByteArrayConverter.cs" />
     <Compile Include="TerminalData.cs" />
+    <Compile Include="CaptureMethod.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

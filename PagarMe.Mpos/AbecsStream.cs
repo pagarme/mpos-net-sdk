@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace PagarMe.Mpos
 {
@@ -88,11 +89,11 @@ namespace PagarMe.Mpos
 
         private void BeginRead()
         {
-            byte[] buffer = new byte[512];
+            byte[] buffer = new byte[2048];
 
             _baseStream.ReadAsync(buffer, 0, buffer.Length).ContinueWith(t =>
                 {
-                    _nativeStream->DataReceived(_nativeStream, buffer, t.Result);
+					_nativeStream->DataReceived(_nativeStream, buffer, t.Result);
 
                     BeginRead();
                 }, _cancellationToken.Token);
