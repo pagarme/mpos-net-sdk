@@ -22,7 +22,7 @@ namespace PagarMe.Mpos
 			List<Tuple<string, string>> parameters = new List<Tuple<string, string>>();
 
 			parameters.Add(new Tuple<string, string>("capture_method", captureMethod == CaptureMethod.EMV ? "emv" : "magstripe"));
-            parameters.Add(new Tuple<string, string>("payment_method", /*method == PaymentMethod.Credit ? */"debit_card"/* : "debit_card"*/));
+            parameters.Add(new Tuple<string, string>("payment_method", method == PaymentMethod.Credit ? "credit_card" : "debit_card"));
             parameters.Add(new Tuple<string, string>("card_number", pan));
             parameters.Add(new Tuple<string, string>("card_holder_name", holderName));
             parameters.Add(new Tuple<string, string>("card_expiration_date", expirationDate));

@@ -97,7 +97,6 @@ namespace PagarMe.Mpos
 
             pin = GCHandle.Alloc(pin);
 
-			Console.WriteLine ("INITIALIZING NATIVE.");
 			Native.Error error = Native.Initialize(_nativeMpos, IntPtr.Zero, callback);
 
             if (error != Native.Error.Ok)
@@ -158,7 +157,7 @@ namespace PagarMe.Mpos
             return source.Task;
         }
 
-        public Task<PaymentResult> ProcessPayment(int amount, PaymentFlags flags = PaymentFlags.Default)
+		public Task<PaymentResult> ProcessPayment(int amount, List<EmvApplication> applications = null, PaymentMethod magstripePaymentMethod = PaymentMethod.Credit)
         {
             GCHandle pin = default(GCHandle);
             var source = new TaskCompletionSource<PaymentResult>();
@@ -192,7 +191,14 @@ namespace PagarMe.Mpos
 
             pin = GCHandle.Alloc(callback);
 
-            Native.Error error = Native.ProcessPayment(_nativeMpos, amount, flags, callback);
+			if (applications == null) {
+				applications = new List<EmvApplication>();
+				foreach (EmvApplication application in Enum.GetValues(typeof(EmvApplication))) {
+					applications.Add(application);
+				}
+			}
+
+			Native.Error error = Native.ProcessPayment(_nativeMpos, amount, applications.Count, applications.Cast<int>().ToArray(), (int)magstripePaymentMethod, callback);
 
             if (error != Native.Error.Ok)
                 throw new MposException(error);
@@ -680,7 +686,7 @@ namespace PagarMe.Mpos
             public static extern Error Initialize(IntPtr mpos, IntPtr streamData, MposInitializedCallbackDelegate initializedCallback);
 
             [DllImport("mpos", EntryPoint = "mpos_process_payment", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-            public static extern Error ProcessPayment(IntPtr mpos, int amount, PaymentFlags flags, MposPaymentCallbackDelegate paymentCallback);
+			public static extern Error ProcessPayment(IntPtr mpos, int amount, int applicationListLength, int[] applicationList, int magstripePaymentMethod, MposPaymentCallbackDelegate paymentCallback);
 
             [DllImport("mpos", EntryPoint = "mpos_update_tables", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
 			public static extern Error UpdateTables(IntPtr mpos, IntPtr[] data, int count, string version, bool force_update, MposTablesLoadedCallbackDelegate callback);

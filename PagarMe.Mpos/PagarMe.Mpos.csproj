@@ -54,6 +54,7 @@
     <Compile Include="ByteArrayConverter.cs" />
     <Compile Include="TerminalData.cs" />
     <Compile Include="CaptureMethod.cs" />
+    <Compile Include="EmvApplication.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
