@@ -351,14 +351,17 @@ namespace PagarMe.Mpos
 				CaptureMethod captureMethod = info.CaptureMethod == Native.CaptureMethod.EMV ? CaptureMethod.EMV : CaptureMethod.Magstripe;
 				PaymentStatus status = info.Decision == Native.Decision.Refused ? PaymentStatus.Rejected : PaymentStatus.Accepted;
                 PaymentMethod paymentMethod = (PaymentMethod)info.ApplicationType;
-                string emv = GetString(info.EmvData, info.EmvDataLength);
-                string track2 = GetString(info.Track2, info.Track2Length);
+				string emv = captureMethod == CaptureMethod.EMV ? GetString(info.EmvData, info.EmvDataLength) : null;
                 string pan = GetString(info.Pan, info.PanLength);
                 string expirationDate = GetString(info.ExpirationDate);
-                string holderName = GetString(info.HolderName);
+				string holderName = GetString(info.HolderName, info.HolderNameLength);
                 string pin = null, pinKek = null;
                 bool isOnlinePin = info.IsOnlinePin != 0;
 				bool requiredPin = info.PinRequired != 0;
+
+				string track1 = info.Track1Length.ToInt32() > 0 ? GetString(info.Track1, info.Track1Length) : null;
+				string track2 = GetString(info.Track2, info.Track2Length);
+				string track3 = info.Track3Length.ToInt32() > 0 ? GetString(info.Track3, info.Track3Length) : null;
 
                 expirationDate = expirationDate.Substring(2, 2) + expirationDate.Substring(0, 2);
                 holderName = holderName.Trim().Split('/').Reverse().Aggregate((a, b) => a + ' ' + b);
@@ -369,7 +372,7 @@ namespace PagarMe.Mpos
                     pinKek = GetString(info.PinKek);
                 }
 
-				await result.BuildAccepted(this.EncryptionKey, status, captureMethod, paymentMethod, pan, holderName, expirationDate, track2, emv, isOnlinePin, requiredPin, pin, pinKek);
+				await result.BuildAccepted(this.EncryptionKey, status, captureMethod, paymentMethod, pan, holderName, expirationDate, track1, track2, track3, emv, isOnlinePin, requiredPin, pin, pinKek);
             }
             else
             {
@@ -439,6 +442,7 @@ namespace PagarMe.Mpos
 
                 [MarshalAs(UnmanagedType.ByValArray, SizeConst = 26)]
                 public byte[] HolderName;
+				public IntPtr HolderNameLength;
 
                 [MarshalAs(UnmanagedType.ByValArray, SizeConst = 19)]
                 public byte[] Pan;
