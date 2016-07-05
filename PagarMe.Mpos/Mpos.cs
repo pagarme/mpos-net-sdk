@@ -360,7 +360,7 @@ namespace PagarMe.Mpos
 				string emv = captureMethod == CaptureMethod.EMV ? GetString(info.EmvData, info.EmvDataLength) : null;
                 string pan = GetString(info.Pan, info.PanLength);
                 string expirationDate = GetString(info.ExpirationDate);
-				string holderName = GetString(info.HolderName, info.HolderNameLength);
+				string holderName = info.HolderNameLength.ToInt32() > 0 ?  GetString(info.HolderName, info.HolderNameLength) : null;
                 string pin = null, pinKek = null;
                 bool isOnlinePin = info.IsOnlinePin != 0;
 				bool requiredPin = info.PinRequired != 0;
@@ -370,7 +370,8 @@ namespace PagarMe.Mpos
 				string track3 = info.Track3Length.ToInt32() > 0 ? GetString(info.Track3, info.Track3Length) : null;
 
                 expirationDate = expirationDate.Substring(2, 2) + expirationDate.Substring(0, 2);
-                holderName = holderName.Trim().Split('/').Reverse().Aggregate((a, b) => a + ' ' + b);
+				if (holderName != null)
+					holderName = holderName.Trim().Split('/').Reverse().Aggregate((a, b) => a + ' ' + b);
 
                 if (requiredPin && isOnlinePin)
                 {

@@ -24,7 +24,6 @@ namespace PagarMe.Mpos
 			parameters.Add(new Tuple<string, string>("capture_method", captureMethod == CaptureMethod.EMV ? "emv" : "magstripe"));
             parameters.Add(new Tuple<string, string>("payment_method", method == PaymentMethod.Credit ? "credit_card" : "debit_card"));
             parameters.Add(new Tuple<string, string>("card_number", pan));
-            parameters.Add(new Tuple<string, string>("card_holder_name", holderName));
             parameters.Add(new Tuple<string, string>("card_expiration_date", expirationDate));
             
 			parameters.Add(new Tuple<string, string>("card_track_2", track2));
@@ -32,6 +31,9 @@ namespace PagarMe.Mpos
 				parameters.Add(new Tuple<string, string>("card_track_1", track1));
 			if (track3 != null)
 				parameters.Add(new Tuple<string, string>("card_track_3", track3));
+
+			if (holderName != null)
+				parameters.Add(new Tuple<string, string>("card_holder_name", holderName));
 
 			if (captureMethod == CaptureMethod.EMV) {
 				parameters.Add(new Tuple<string, string> ("card_emv_data", emv));
