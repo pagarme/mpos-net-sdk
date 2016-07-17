@@ -2,19 +2,14 @@
 
 namespace PagarMe.Mpos
 {
-	public enum EmvApplication
-	{
-		/* Stone */
-		VisaCredit = 2,
-		VisaDebit = 3,
-		MasterCredit = 4,
-		MasterDebit = 5,
-		Cirrus = 6,
+	public struct EmvApplication {
+		public string Brand;
+		public PaymentMethod PaymentMethod;
 
-		/* Pagar.me */
-		AmexCredit = 20,
-		EloCredit = 21,
-		DinersCredit = 22
+		public EmvApplication(string brand, PaymentMethod paymentMethod) {
+			Brand = brand;
+			PaymentMethod = paymentMethod;
+		}
 	}
 }
 

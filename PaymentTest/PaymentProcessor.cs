@@ -15,38 +15,43 @@ namespace PaymentTest
 
         public PaymentProcessor(string device)
         {
-            _port = new SerialPort(device, 240000, Parity.None, 8, StopBits.One);
+            _port = new SerialPort(device, 140000, Parity.None, 8, StopBits.One);
             _port.Open();
 
-			_mpos = new Mpos(_port.BaseStream, "ek_test_7Qs2v09pAN9MD29vGrn0JQhARBV7zl");
+			_mpos = new Mpos(_port.BaseStream, "ak_live_XImGKN3SU9TkcTBG9pBGMA1Y3PrO0x", "ek_live_lp7pazd0Xia9yfSuMR3h8Y493rhXxK", "/tmp/");
+			//_mpos = new Mpos(_port.BaseStream, "ek_test_UT6AN4fDN3BCUgo6kxUiOq6S20dbKc");
             _mpos.NotificationReceived += (sender, e) => Console.WriteLine("Status: {0}", e);
 			_mpos.TableUpdated += (sender, e) => Console.WriteLine("LOADED: {0}", e);
 			_mpos.Errored += (sender, e) => Console.WriteLine ("I GOT ERROR {0}", e);
 			_mpos.PaymentProcessed += (sender, e) => Console.WriteLine("HEY CARD HASH " + e.CardHash);
 			_mpos.FinishedTransaction += (sender, e) => Console.WriteLine ("FINISHED TRANSACTION!");
 
-            //PagarMeService.DefaultApiEndpoint = "http://localhost:3000";
-			PagarMeService.DefaultEncryptionKey = "ek_test_7Qs2v09pAN9MD29vGrn0JQhARBV7zl";
-			PagarMeService.DefaultApiKey = "ak_test_9EKGpSGFlpjEFQU6QidTmPzGCUHFeD";
+            PagarMeService.DefaultApiEndpoint = "http://192.168.64.2:3000";
+			PagarMeService.DefaultEncryptionKey = "ek_live_lp7pazd0Xia9yfSuMR3h8Y493rhXxK";
+			PagarMeService.DefaultApiKey = "ak_live_XImGKN3SU9TkcTBG9pBGMA1Y3PrO0x";
+			//PagarMeService.DefaultEncryptionKey = "ek_test_UT6AN4fDN3BCUgo6kxUiOq6S20dbKc";
+			//PagarMeService.DefaultApiKey = "ak_test_TSgC3nvXtdYnDoGKgNLIOfk3TFfkl9";
         }
 
         public async Task Initialize()
         {
             await _mpos.Initialize();
 
-            //await _mpos.SynchronizeTables(false);
+			Console.WriteLine ("Asking for tables to be synchronized...");
+			//await _mpos.SynchronizeTables(true);
+			//Console.WriteLine ("SynchronizeTables called.");
 			//_mpos.Display("Hello, world!");
         }
 
         public async Task Pay(int amount)
         {
-			var result = await _mpos.ProcessPayment(amount, PaymentFlags.Default);
+			var result = await _mpos.ProcessPayment(amount, null, PagarMe.Mpos.PaymentMethod.Debit);
 			Console.WriteLine ("CARD HASH = " + result.CardHash);
 
-			//await _mpos.Close ();
+			await _mpos.Close ();
 			Console.WriteLine ("CLOSED!");
 
-            /*var transaction = new Transaction
+            var transaction = new Transaction
                 {
                     CardHash = result.CardHash,
                     Amount = amount,
@@ -63,8 +68,8 @@ namespace PaymentTest
 			object obj = transaction["card_emv_response"];
 			string response = obj == null ? null : obj.ToString (); 
 
-			await _mpos.FinishTransaction(false, 0, null);*/
-
+			await _mpos.FinishTransaction(true, x, (string)obj);
+			await _mpos.Close ();
         }
     }
 }

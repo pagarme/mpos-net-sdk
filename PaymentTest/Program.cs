@@ -16,7 +16,7 @@ namespace PaymentTest
 
         public static async Task Process()
         {
-			var processor = new PaymentProcessor("/dev/tty.usbmodem1411");
+			var processor = new PaymentProcessor("/dev/tty.PAX-50346373-BluetoothS");
 
             Console.WriteLine("Welcome to Pagador 9000");
             Console.WriteLine("Initializing...");
@@ -29,7 +29,7 @@ namespace PaymentTest
 			//String x = Console.ReadLine ();
 			//Console.WriteLine ("read line " + x);
 			//Int32 integer = Int32.Parse (x);
-			await processor.Pay(314);
+			await processor.Pay(100);
 
            // Console.WriteLine("Created transaction {0}.", transaction.Id);
         }

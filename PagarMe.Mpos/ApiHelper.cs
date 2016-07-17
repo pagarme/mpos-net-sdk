@@ -36,7 +36,7 @@ namespace PagarMe.Mpos
 
         static async Task<Tuple<string, string>> GetCardHashKey(string encryptionKey)
         {
-		var response = (HttpWebResponse)(await CreateRequest("GET", "/transactions/card_hash_key", encryptionKey).GetResponseAsync());
+			var response = (HttpWebResponse)(await CreateRequest("GET", "/transactions/card_hash_key", encryptionKey).GetResponseAsync());
 
             var json = new StreamReader(response.GetResponseStream(), Encoding.UTF8).ReadToEnd();
             var result = JsonConvert.DeserializeObject<dynamic>(json);
@@ -95,12 +95,10 @@ namespace PagarMe.Mpos
             return EncryptWith(hashParameters.Item1, hashParameters.Item2, data);
         }
 
-        public static async Task<TerminalData<T>> GetTerminalTable<T>(string type)
+        public static async Task<string> GetTerminalTables(string apiKey)
         {
-            var response = (HttpWebResponse)(await CreateRequest("GET", "/terminal/" + type, null).GetResponseAsync());
-            var json = new StreamReader(response.GetResponseStream(), Encoding.UTF8).ReadToEnd();
-
-			return JsonConvert.DeserializeObject<TerminalData<T>>(json);
+            var response = (HttpWebResponse)(await CreateRequest("GET", "/terminal/updates", apiKey).GetResponseAsync());
+            return new StreamReader(response.GetResponseStream(), Encoding.UTF8).ReadToEnd();
         }
     }
 }
