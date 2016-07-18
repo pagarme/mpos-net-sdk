@@ -104,7 +104,7 @@ namespace PagarMe.Mpos
 				return Native.Error.Ok;
 			};
 
-			pin = GCHandle.Alloc(pin);
+			pin = GCHandle.Alloc(callback);
 
 			Native.Error error = Native.Initialize(_nativeMpos, IntPtr.Zero, callback);
 
@@ -119,7 +119,8 @@ namespace PagarMe.Mpos
 			GCHandle pin = default(GCHandle);
 			var source = new TaskCompletionSource<bool>();
 
-			Native.TmsStoreCallbackDelegate tmsCallback = (string version, IntPtr[] tables, Native.Application[] applications, Native.Acquirer[] acquirers, Native.RiskManagement[] riskProfiles) => {
+			Native.TmsStoreCallbackDelegate tmsCallback = (version, tableLen, tables, appLen, applications, riskProfiles, acqLen, acquirers) => {
+				Console.WriteLine("Callback called!");
 				pin.Free();
 
 				GCHandle tablePin = default(GCHandle);
@@ -132,24 +133,40 @@ namespace PagarMe.Mpos
 
 					return Native.Error.Ok;
 				};
+				tablePin = GCHandle.Alloc(callback);
 				
-				foreach (Native.Application application in applications) {
-					this.TMSStorage.StoreApplicationRow(application.PaymentMethod, application.CardBrand, application.AcquirerNumber, application.RecordNumber);
+				Console.WriteLine("Populating applications...");
+				for (int i = 0; i < appLen; i++) {
+					IntPtr pointer = IntPtr.Add(applications, i * Marshal.SizeOf(typeof(Native.Application)));
+					var app = (Native.Application)Marshal.PtrToStructure(pointer, typeof(Native.Application));
+					
+					this.TMSStorage.StoreApplicationRow(app.PaymentMethod, app.CardBrand, app.AcquirerNumber, app.RecordNumber);
 				}
-				foreach (Native.Acquirer acquirer in acquirers) {
-					this.TMSStorage.StoreAcquirerRow(acquirer.Number, acquirer.CryptographyMethod, acquirer.KeyIndex, acquirer.SessionKey, acquirer.EmvTagsLength, acquirer.EmvTags);
-				}
-				foreach (Native.RiskManagement riskManagement in riskProfiles) {
-					this.TMSStorage.StoreRiskManagementRow(riskManagement.AcquirerNumber, riskManagement.RecordNumber, riskManagement.MustRiskManagement, riskManagement.FloorLimit, riskManagement.BiasedRandomSelectionPercentage, riskManagement.BiasedRandomSelectionThreshold, riskManagement.BiasedRandomSelectionMaxPercentage);
+				
+				Console.WriteLine("Populating risk profiles...");
+				for (int i = 0; i < appLen; i++) {
+					IntPtr pointer = IntPtr.Add(riskProfiles, i * Marshal.SizeOf(typeof(Native.RiskManagement)));
+					var profile = (Native.RiskManagement)Marshal.PtrToStructure(pointer, typeof(Native.RiskManagement));
+
+					Console.WriteLine("Marshal got us acqidx " + profile.AcquirerNumber + " and recidx " + profile.RecordNumber);
+					
+					this.TMSStorage.StoreRiskManagementRow(profile.AcquirerNumber, profile.RecordNumber, profile.MustRiskManagement, profile.FloorLimit, profile.BiasedRandomSelectionPercentage, profile.BiasedRandomSelectionThreshold, profile.BiasedRandomSelectionMaxPercentage);
 				}
 
-				Native.Error error = Native.UpdateTables(_nativeMpos, tables, tables.Length, version, forceUpdate, callback);
-				return error;
+				Console.WriteLine("Populating acquirers...");
+				for (int i = 0; i < acqLen; i++) {
+					IntPtr pointer = IntPtr.Add(acquirers, i * Marshal.SizeOf(typeof(Native.Acquirer)));
+					var acquirer = (Native.Acquirer)Marshal.PtrToStructure(pointer, typeof(Native.Acquirer));
+
+					this.TMSStorage.StoreAcquirerRow(acquirer.Number, acquirer.CryptographyMethod, acquirer.KeyIndex, acquirer.SessionKey, acquirer.EmvTagsLength, acquirer.EmvTags);
+				}
+				
+				Native.Error error = Native.UpdateTables(_nativeMpos, tables, tableLen, version, forceUpdate, callback);
+				return Native.Error.Ok;
 			};
+			pin = GCHandle.Alloc(tmsCallback);
 			
 			ApiHelper.GetTerminalTables(this.ApiKey).ContinueWith(t => {
-				pin = GCHandle.Alloc(tmsCallback);
-				
 				Native.Error error = Native.TmsGetTables(t.Result, t.Result.Length, tmsCallback);
 				if (error != Native.Error.Ok) {
 					throw new MposException(error);					
@@ -206,16 +223,20 @@ namespace PagarMe.Mpos
 
 			List<Native.Application> rawApplications = new List<Native.Application>();
 			foreach (EmvApplication application in applications) {
-				TMSStorage.ApplicationEntry? entry = this.TMSStorage.SelectApplication(application.Brand, (int)application.PaymentMethod);
+				ApplicationEntry entry = this.TMSStorage.SelectApplication(application.Brand, (int)application.PaymentMethod);
 				if (entry != null) {
-					rawApplications.Add(new Native.Application(entry.Value));
+					Console.WriteLine("Got entry. CB=" + entry.CardBrand + ", ACQIDX=" + entry.AcquirerNumber);
+					rawApplications.Add(new Native.Application(entry));
 				}
 			}
 
-			foreach (TMSStorage.AcquirerEntry entry in this.TMSStorage.GetAcquirerRows()) {
+			foreach (AcquirerEntry entry in this.TMSStorage.GetAcquirerRows()) {
+				Console.WriteLine("Got entry. ACQIDX=" + entry.Number);
 				acquirers.Add(new Native.Acquirer(entry));
 			}
-			foreach (TMSStorage.RiskManagementEntry entry in this.TMSStorage.GetRiskManagementRows()) {
+			
+			foreach (RiskManagementEntry entry in this.TMSStorage.GetRiskManagementRows()) {
+				Console.WriteLine("Got entry. ACQIDX=" + entry.AcquirerNumber);
 				riskProfiles.Add(new Native.RiskManagement(entry));
 			}
 
@@ -467,7 +488,7 @@ namespace PagarMe.Mpos
 						[MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)]
 							public int[] EmvTags;
 
-						public Acquirer(TMSStorage.AcquirerEntry e) {
+						public Acquirer(AcquirerEntry e) {
 							Number = e.Number;
 							CryptographyMethod = e.CryptographyMethod;
 							KeyIndex = e.KeyIndex;
@@ -476,7 +497,7 @@ namespace PagarMe.Mpos
 							else SessionKey = GetHexBytes("", 32);
 
 							EmvTagsLength = e.EmvTags.Length;
-							EmvTags = e.EmvTags;
+							EmvTags = e.EmvTags.Split(',').Select(int.Parse).ToArray();
 						}
 					}
 
@@ -493,7 +514,7 @@ namespace PagarMe.Mpos
 						public int BiasedRandomSelectionThreshold;
 						public int BiasedRandomSelectionMaxPercentage;
 
-						public RiskManagement(TMSStorage.RiskManagementEntry e) {
+						public RiskManagement(RiskManagementEntry e) {
 							AcquirerNumber = e.AcquirerNumber;
 							RecordNumber = e.RecordNumber;
 
@@ -508,12 +529,13 @@ namespace PagarMe.Mpos
 				[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
 					public unsafe struct Application {
 						public int PaymentMethod;
-						public string CardBrand;
+						[MarshalAs(UnmanagedType.ByValTStr, SizeConst = 100)]
+							public string CardBrand;
 
 						public int AcquirerNumber;
 						public int RecordNumber;
 
-						public Application(TMSStorage.ApplicationEntry e) {
+						public Application(ApplicationEntry e) {
 							PaymentMethod = e.PaymentMethod;
 							CardBrand = e.CardBrand;
 
@@ -643,7 +665,7 @@ namespace PagarMe.Mpos
 					public delegate Error MposClosedCallbackDelegate(IntPtr mpos, int error);
 
 				[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-					public delegate Error TmsStoreCallbackDelegate(string version, IntPtr[] tables, Native.Application[] applications, Native.Acquirer[] acquirers, Native.RiskManagement[] riskManagement);
+					public delegate Error TmsStoreCallbackDelegate(string version, int tableLen, IntPtr tables, int appLen, IntPtr applications, IntPtr riskManagement, int acqLen, IntPtr acquirers);
 
 				[DllImport("mpos", EntryPoint = "mpos_new", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
 					public static extern IntPtr Create(IntPtr stream, MposNotificationCallbackDelegate notificationCallback, MposOperationCompletedCallbackDelegate operationCompletedCallback);
@@ -655,7 +677,7 @@ namespace PagarMe.Mpos
 					public static extern Error ProcessPayment(IntPtr mpos, int amount, int applicationListLength, Native.Application[] applicationList, int acquirerListLength, Native.Acquirer[] acquirers, int riskManagementListLength, Native.RiskManagement[] riskManagementList, int magstripePaymentMethod, MposPaymentCallbackDelegate paymentCallback);
 
 				[DllImport("mpos", EntryPoint = "mpos_update_tables", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-					public static extern Error UpdateTables(IntPtr mpos, IntPtr[] data, int count, string version, bool force_update, MposTablesLoadedCallbackDelegate callback);
+					public static extern Error UpdateTables(IntPtr mpos, IntPtr data, int count, string version, bool force_update, MposTablesLoadedCallbackDelegate callback);
 
 				[DllImport("mpos", EntryPoint = "mpos_finish_transaction", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
 					public static extern Error FinishTransaction(IntPtr mpos, TransactionStatus status, int arc, int emvLen, string emv, MposFinishTransactionCallbackDelegate callback);
