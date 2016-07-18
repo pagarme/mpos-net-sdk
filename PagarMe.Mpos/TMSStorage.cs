@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using SQLite;
 
 namespace PagarMe.Mpos
@@ -47,18 +48,23 @@ namespace PagarMe.Mpos
 		public void StoreAcquirerRow(int number, int cryptographyMethod, int keyIndex, byte[] sessionKey, int emvTagsLength, int[] emvTags) {
 			var acquirer = db.Table<AcquirerEntry>().Where(e => (e.Number == number)).FirstOrDefault();
 			if (acquirer != null) {
-				db.Delete(acquirer);
+				db.Table<AcquirerEntry>().Delete(e => (e.Number == number));				
+			}
+			
+			int[] cleanEmvTags = new int[emvTagsLength];
+			for (int i = 0; i < emvTagsLength; i++) {
+				cleanEmvTags[i] = emvTags[i];
 			}
 
-			Console.WriteLine("[Storage] SessionKey = " + System.Text.Encoding.UTF8.GetString(sessionKey));
-			Console.WriteLine("[Srtorage] EmvTags = " + String.Join(",", emvTags));
+			Console.WriteLine("[Storage] SessionKey = " + Encoding.ASCII.GetString(sessionKey, 0, 32));
+			Console.WriteLine("[Storage] EmvTags = " + String.Join(",", cleanEmvTags));
 
 			AcquirerEntry entry = new AcquirerEntry {
 				Number = number,
 				CryptographyMethod = cryptographyMethod,
 				KeyIndex = keyIndex,
-				SessionKey = System.Text.Encoding.UTF8.GetString(sessionKey),
-				EmvTags = String.Join(",", emvTags)
+				SessionKey = Encoding.ASCII.GetString(sessionKey, 0, 32),
+				EmvTags = String.Join(",", cleanEmvTags)
 			};
 			db.Insert(entry);
 		}
@@ -66,7 +72,7 @@ namespace PagarMe.Mpos
 		public void StoreRiskManagementRow(int acquirerNumber, int recordNumber, bool mustRiskManagement, int floorLimit, int brsPercentage, int brsThreshold, int brsMaxPercentage) {
 			var profile = db.Table<RiskManagementEntry>().Where(e => (e.AcquirerNumber == acquirerNumber && e.RecordNumber == recordNumber)).FirstOrDefault();
 			if (profile != null) {
-				db.Delete(profile);
+				db.Table<RiskManagementEntry>().Delete(e => (e.AcquirerNumber == acquirerNumber && e.RecordNumber == recordNumber));
 			}
 			
 			RiskManagementEntry entry = new RiskManagementEntry {
@@ -84,16 +90,15 @@ namespace PagarMe.Mpos
 		public void StoreApplicationRow(int paymentMethod, string cardBrand, int acquirerNumber, int recordNumber) {
 			var application = SelectApplication(cardBrand, paymentMethod);
 			if (application != null) {
-				db.Delete(application);
+				db.Table<ApplicationEntry>().Delete(e => (e.PaymentMethod == paymentMethod && e.CardBrand == cardBrand));
 			}
-			
-			ApplicationEntry e = new ApplicationEntry {
+			ApplicationEntry entry = new ApplicationEntry {
 				PaymentMethod = paymentMethod,
 				CardBrand = cardBrand,
 				AcquirerNumber = acquirerNumber,
 				RecordNumber = recordNumber
 			};
-			db.Insert(e);
+			db.Insert(entry);
 		}		
 
 		public AcquirerEntry[] GetAcquirerRows() {
@@ -106,7 +111,6 @@ namespace PagarMe.Mpos
 
 		public ApplicationEntry SelectApplication(string brand, int paymentMethod) {
 			var query = db.Table<ApplicationEntry>().Where(e => (e.PaymentMethod == paymentMethod && e.CardBrand == brand));
-			
 			return query.FirstOrDefault();
 		}
 	}

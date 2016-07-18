@@ -135,10 +135,14 @@ namespace PagarMe.Mpos
 				};
 				tablePin = GCHandle.Alloc(callback);
 				
-				Console.WriteLine("Populating applications...");
+				Console.WriteLine("Populating applications... (appLen = " + appLen + ")");
 				for (int i = 0; i < appLen; i++) {
+					Console.WriteLine("Iterating through application 1.");
+
 					IntPtr pointer = IntPtr.Add(applications, i * Marshal.SizeOf(typeof(Native.Application)));
+					Console.WriteLine("Got ptr " + pointer);
 					var app = (Native.Application)Marshal.PtrToStructure(pointer, typeof(Native.Application));
+					Console.WriteLine("Marshaled ptr to Native.Application.");
 					
 					this.TMSStorage.StoreApplicationRow(app.PaymentMethod, app.CardBrand, app.AcquirerNumber, app.RecordNumber);
 				}
@@ -153,7 +157,7 @@ namespace PagarMe.Mpos
 					this.TMSStorage.StoreRiskManagementRow(profile.AcquirerNumber, profile.RecordNumber, profile.MustRiskManagement, profile.FloorLimit, profile.BiasedRandomSelectionPercentage, profile.BiasedRandomSelectionThreshold, profile.BiasedRandomSelectionMaxPercentage);
 				}
 
-				Console.WriteLine("Populating acquirers...");
+				Console.WriteLine("Populating acquirers... (acqlen = " + acqLen + ")");
 				for (int i = 0; i < acqLen; i++) {
 					IntPtr pointer = IntPtr.Add(acquirers, i * Marshal.SizeOf(typeof(Native.Acquirer)));
 					var acquirer = (Native.Acquirer)Marshal.PtrToStructure(pointer, typeof(Native.Acquirer));
