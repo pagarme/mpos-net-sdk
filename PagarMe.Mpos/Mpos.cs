@@ -134,23 +134,25 @@ namespace PagarMe.Mpos
 					return Native.Error.Ok;
 				};
 				tablePin = GCHandle.Alloc(callback);
+
+				this.TMSStorage.PurgeIndex();
 				
 				Console.WriteLine("Populating applications... (appLen = " + appLen + ")");
 				for (int i = 0; i < appLen; i++) {
-					Console.WriteLine("Iterating through application 1.");
+					IntPtr pointer = IntPtr.Add(applications, i * Marshal.SizeOf(typeof(IntPtr)));
+					IntPtr deref = (IntPtr)Marshal.PtrToStructure(pointer, typeof(IntPtr));
 
-					IntPtr pointer = IntPtr.Add(applications, i * Marshal.SizeOf(typeof(Native.Application)));
-					Console.WriteLine("Got ptr " + pointer);
-					var app = (Native.Application)Marshal.PtrToStructure(pointer, typeof(Native.Application));
-					Console.WriteLine("Marshaled ptr to Native.Application.");
+					var app = (Native.Application)Marshal.PtrToStructure(deref, typeof(Native.Application));
 					
 					this.TMSStorage.StoreApplicationRow(app.PaymentMethod, app.CardBrand, app.AcquirerNumber, app.RecordNumber);
 				}
 				
 				Console.WriteLine("Populating risk profiles...");
 				for (int i = 0; i < appLen; i++) {
-					IntPtr pointer = IntPtr.Add(riskProfiles, i * Marshal.SizeOf(typeof(Native.RiskManagement)));
-					var profile = (Native.RiskManagement)Marshal.PtrToStructure(pointer, typeof(Native.RiskManagement));
+					IntPtr pointer = IntPtr.Add(riskProfiles, i * Marshal.SizeOf(typeof(IntPtr)));
+					IntPtr deref = (IntPtr)Marshal.PtrToStructure(pointer, typeof(IntPtr));
+
+					var profile = (Native.RiskManagement)Marshal.PtrToStructure(deref, typeof(Native.RiskManagement));
 
 					Console.WriteLine("Marshal got us acqidx " + profile.AcquirerNumber + " and recidx " + profile.RecordNumber);
 					
@@ -159,8 +161,10 @@ namespace PagarMe.Mpos
 
 				Console.WriteLine("Populating acquirers... (acqlen = " + acqLen + ")");
 				for (int i = 0; i < acqLen; i++) {
-					IntPtr pointer = IntPtr.Add(acquirers, i * Marshal.SizeOf(typeof(Native.Acquirer)));
-					var acquirer = (Native.Acquirer)Marshal.PtrToStructure(pointer, typeof(Native.Acquirer));
+					IntPtr pointer = IntPtr.Add(acquirers, i * Marshal.SizeOf(typeof(IntPtr)));
+					IntPtr deref = (IntPtr)Marshal.PtrToStructure(pointer, typeof(IntPtr));
+					
+					var acquirer = (Native.Acquirer)Marshal.PtrToStructure(deref, typeof(Native.Acquirer));
 
 					this.TMSStorage.StoreAcquirerRow(acquirer.Number, acquirer.CryptographyMethod, acquirer.KeyIndex, acquirer.SessionKey, acquirer.EmvTagsLength, acquirer.EmvTags);
 				}
@@ -500,8 +504,8 @@ namespace PagarMe.Mpos
 							if (e.SessionKey != null) SessionKey = GetHexBytes(e.SessionKey, 32);
 							else SessionKey = GetHexBytes("", 32);
 
-							EmvTagsLength = e.EmvTags.Length;
 							EmvTags = e.EmvTags.Split(',').Select(int.Parse).ToArray();
+							EmvTagsLength = EmvTags.Length;
 						}
 					}
 

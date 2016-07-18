@@ -45,12 +45,13 @@ namespace PagarMe.Mpos
 			db.CreateTable<RiskManagementEntry>();
 		}
 
+		public void PurgeIndex() {
+			db.DeleteAll<ApplicationEntry>();
+			db.DeleteAll<AcquirerEntry>();
+			db.DeleteAll<RiskManagementEntry>();
+		}
+		
 		public void StoreAcquirerRow(int number, int cryptographyMethod, int keyIndex, byte[] sessionKey, int emvTagsLength, int[] emvTags) {
-			var acquirer = db.Table<AcquirerEntry>().Where(e => (e.Number == number)).FirstOrDefault();
-			if (acquirer != null) {
-				db.Table<AcquirerEntry>().Delete(e => (e.Number == number));				
-			}
-			
 			int[] cleanEmvTags = new int[emvTagsLength];
 			for (int i = 0; i < emvTagsLength; i++) {
 				cleanEmvTags[i] = emvTags[i];
@@ -70,11 +71,6 @@ namespace PagarMe.Mpos
 		}
 
 		public void StoreRiskManagementRow(int acquirerNumber, int recordNumber, bool mustRiskManagement, int floorLimit, int brsPercentage, int brsThreshold, int brsMaxPercentage) {
-			var profile = db.Table<RiskManagementEntry>().Where(e => (e.AcquirerNumber == acquirerNumber && e.RecordNumber == recordNumber)).FirstOrDefault();
-			if (profile != null) {
-				db.Table<RiskManagementEntry>().Delete(e => (e.AcquirerNumber == acquirerNumber && e.RecordNumber == recordNumber));
-			}
-			
 			RiskManagementEntry entry = new RiskManagementEntry {
 				AcquirerNumber = acquirerNumber,
 				RecordNumber = recordNumber,
@@ -88,10 +84,6 @@ namespace PagarMe.Mpos
 		}
 
 		public void StoreApplicationRow(int paymentMethod, string cardBrand, int acquirerNumber, int recordNumber) {
-			var application = SelectApplication(cardBrand, paymentMethod);
-			if (application != null) {
-				db.Table<ApplicationEntry>().Delete(e => (e.PaymentMethod == paymentMethod && e.CardBrand == cardBrand));
-			}
 			ApplicationEntry entry = new ApplicationEntry {
 				PaymentMethod = paymentMethod,
 				CardBrand = cardBrand,
