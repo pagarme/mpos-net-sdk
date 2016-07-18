@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2012 Krueger Systems, Inc.
+// Copyright (c) 2012-2016 Krueger Systems, Inc.
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -28,77 +28,84 @@ using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 
+#pragma warning disable 1591 // XML Doc Comments
+
 namespace SQLite
 {
 	public partial class SQLiteAsyncConnection
 	{
 		SQLiteConnectionString _connectionString;
-        SQLiteOpenFlags _openFlags;
+		SQLiteOpenFlags _openFlags;
 
-        public SQLiteAsyncConnection(string databasePath, bool storeDateTimeAsTicks = false)
-            : this(databasePath, SQLiteOpenFlags.ReadWrite | SQLiteOpenFlags.Create, storeDateTimeAsTicks)
-        {
-        }
-        
-        public SQLiteAsyncConnection(string databasePath, SQLiteOpenFlags openFlags, bool storeDateTimeAsTicks = false)
-        {
-            _openFlags = openFlags;
-            _connectionString = new SQLiteConnectionString(databasePath, storeDateTimeAsTicks);
-        }
+		public SQLiteAsyncConnection(string databasePath, bool storeDateTimeAsTicks = true)
+			: this(databasePath, SQLiteOpenFlags.ReadWrite | SQLiteOpenFlags.Create, storeDateTimeAsTicks)
+		{
+		}
+
+		public SQLiteAsyncConnection(string databasePath, SQLiteOpenFlags openFlags, bool storeDateTimeAsTicks = true)
+		{
+			_openFlags = openFlags;
+			_connectionString = new SQLiteConnectionString(databasePath, storeDateTimeAsTicks);
+		}
+
+		public static void ResetPool()
+		{
+			SQLiteConnectionPool.Shared.Reset();
+		}
 
 		SQLiteConnectionWithLock GetConnection ()
 		{
 			return SQLiteConnectionPool.Shared.GetConnection (_connectionString, _openFlags);
 		}
 
-		public Task<CreateTablesResult> CreateTableAsync<T> ()
+		public Task<CreateTablesResult> CreateTableAsync<T> (CreateFlags createFlags = CreateFlags.None)
 			where T : new ()
 		{
-			return CreateTablesAsync (typeof (T));
+			return CreateTablesAsync (createFlags, typeof(T));
 		}
 
-		public Task<CreateTablesResult> CreateTablesAsync<T, T2> ()
+		public Task<CreateTablesResult> CreateTablesAsync<T, T2> (CreateFlags createFlags = CreateFlags.None)
 			where T : new ()
 			where T2 : new ()
 		{
-			return CreateTablesAsync (typeof (T), typeof (T2));
+			return CreateTablesAsync (createFlags, typeof (T), typeof (T2));
 		}
 
-		public Task<CreateTablesResult> CreateTablesAsync<T, T2, T3> ()
+		public Task<CreateTablesResult> CreateTablesAsync<T, T2, T3> (CreateFlags createFlags = CreateFlags.None)
 			where T : new ()
 			where T2 : new ()
 			where T3 : new ()
 		{
-			return CreateTablesAsync (typeof (T), typeof (T2), typeof (T3));
+			return CreateTablesAsync (createFlags, typeof (T), typeof (T2), typeof (T3));
 		}
 
-		public Task<CreateTablesResult> CreateTablesAsync<T, T2, T3, T4> ()
+		public Task<CreateTablesResult> CreateTablesAsync<T, T2, T3, T4> (CreateFlags createFlags = CreateFlags.None)
 			where T : new ()
 			where T2 : new ()
 			where T3 : new ()
 			where T4 : new ()
 		{
-			return CreateTablesAsync (typeof (T), typeof (T2), typeof (T3), typeof (T4));
+			return CreateTablesAsync (createFlags, typeof (T), typeof (T2), typeof (T3), typeof (T4));
 		}
 
-		public Task<CreateTablesResult> CreateTablesAsync<T, T2, T3, T4, T5> ()
+		public Task<CreateTablesResult> CreateTablesAsync<T, T2, T3, T4, T5> (CreateFlags createFlags = CreateFlags.None)
 			where T : new ()
 			where T2 : new ()
 			where T3 : new ()
 			where T4 : new ()
 			where T5 : new ()
 		{
-			return CreateTablesAsync (typeof (T), typeof (T2), typeof (T3), typeof (T4), typeof (T5));
+			return CreateTablesAsync (createFlags, typeof (T), typeof (T2), typeof (T3), typeof (T4), typeof (T5));
 		}
 
-		public Task<CreateTablesResult> CreateTablesAsync (params Type[] types)
+		public Task<CreateTablesResult> CreateTablesAsync (CreateFlags createFlags = CreateFlags.None, params Type[] types)
 		{
 			return Task.Factory.StartNew (() => {
 				CreateTablesResult result = new CreateTablesResult ();
 				var conn = GetConnection ();
 				using (conn.Lock ()) {
 					foreach (Type type in types) {
-						int aResult = conn.CreateTable (type);
+						int aResult = conn.CreateTable (type, createFlags);
 						result.Results[type] = aResult;
 					}
 				}
@@ -127,6 +134,18 @@ namespace SQLite
 			});
 		}
 
+		public Task<int> InsertOrReplaceAsync(object item)
+		{
+			return Task.Factory.StartNew(() =>
+				{
+					var conn = GetConnection();
+					using (conn.Lock())
+					{
+						return conn.InsertOrReplace(item);
+					}
+				});
+		}
+
 		public Task<int> UpdateAsync (object item)
 		{
 			return Task.Factory.StartNew (() => {
@@ -147,18 +166,18 @@ namespace SQLite
 			});
 		}
 
-        public Task<T> GetAsync<T>(object pk)
-            where T : new()
-        {
-            return Task.Factory.StartNew(() =>
-            {
-                var conn = GetConnection();
-                using (conn.Lock())
-                {
-                    return conn.Get<T>(pk);
-                }
-            });
-        }
+		public Task<T> GetAsync<T>(object pk)
+			where T : new()
+		{
+			return Task.Factory.StartNew(() =>
+				{
+					var conn = GetConnection();
+					using (conn.Lock())
+					{
+						return conn.Get<T>(pk);
+					}
+				});
+		}
 
 		public Task<T> FindAsync<T> (object pk)
 			where T : new ()
@@ -170,19 +189,19 @@ namespace SQLite
 				}
 			});
 		}
-		
+
 		public Task<T> GetAsync<T> (Expression<Func<T, bool>> predicate)
-            where T : new()
-        {
-            return Task.Factory.StartNew(() =>
-            {
-                var conn = GetConnection();
-                using (conn.Lock())
-                {
-                    return conn.Get<T> (predicate);
-                }
-            });
-        }
+			where T : new()
+		{
+			return Task.Factory.StartNew(() =>
+				{
+					var conn = GetConnection();
+					using (conn.Lock())
+					{
+						return conn.Get<T> (predicate);
+					}
+				});
+		}
 
 		public Task<T> FindAsync<T> (Expression<Func<T, bool>> predicate)
 			where T : new ()
@@ -214,7 +233,7 @@ namespace SQLite
 				}
 			});
 		}
-		
+
 		public Task<int> UpdateAllAsync (IEnumerable items)
 		{
 			return Task.Factory.StartNew (() => {
@@ -225,7 +244,7 @@ namespace SQLite
 			});
 		}
 
-        [Obsolete("Will cause a deadlock if any call in action ends up in a different thread. Use RunInTransactionAsync(Action<SQLiteConnection>) instead.")]
+		[Obsolete("Will cause a deadlock if any call in action ends up in a different thread. Use RunInTransactionAsync(Action<SQLiteConnection>) instead.")]
 		public Task RunInTransactionAsync (Action<SQLiteAsyncConnection> action)
 		{
 			return Task.Factory.StartNew (() => {
@@ -244,27 +263,27 @@ namespace SQLite
 			});
 		}
 
-        public Task RunInTransactionAsync(Action<SQLiteConnection> action)
-        {
-            return Task.Factory.StartNew(() =>
-            {
-                var conn = this.GetConnection();
-                using (conn.Lock())
-                {
-                    conn.BeginTransaction();
-                    try
-                    {
-                        action(conn);
-                        conn.Commit();
-                    }
-                    catch (Exception)
-                    {
-                        conn.Rollback();
-                        throw;
-                    }
-                }
-            });
-        }
+		public Task RunInTransactionAsync(Action<SQLiteConnection> action)
+		{
+			return Task.Factory.StartNew(() =>
+				{
+					var conn = this.GetConnection();
+					using (conn.Lock())
+					{
+						conn.BeginTransaction();
+						try
+						{
+							action(conn);
+							conn.Commit();
+						}
+						catch (Exception)
+						{
+							conn.Rollback();
+							throw;
+						}
+					}
+				});
+		}
 
 		public AsyncTableQuery<T> Table<T> ()
 			where T : new ()
@@ -383,7 +402,7 @@ namespace SQLite
 				}
 			});
 		}
-    }
+	}
 
 	public class CreateTablesResult
 	{
@@ -402,7 +421,7 @@ namespace SQLite
 			public SQLiteConnectionString ConnectionString { get; private set; }
 			public SQLiteConnectionWithLock Connection { get; private set; }
 
-            public Entry (SQLiteConnectionString connectionString, SQLiteOpenFlags openFlags)
+			public Entry (SQLiteConnectionString connectionString, SQLiteOpenFlags openFlags)
 			{
 				ConnectionString = connectionString;
 				Connection = new SQLiteConnectionWithLock (connectionString, openFlags);
@@ -473,7 +492,7 @@ namespace SQLite
 	{
 		readonly object _lockPoint = new object ();
 
-        public SQLiteConnectionWithLock (SQLiteConnectionString connectionString, SQLiteOpenFlags openFlags)
+		public SQLiteConnectionWithLock (SQLiteConnectionString connectionString, SQLiteOpenFlags openFlags)
 			: base (connectionString.DatabasePath, openFlags, connectionString.StoreDateTimeAsTicks)
 		{
 		}
@@ -500,4 +519,3 @@ namespace SQLite
 		}
 	}
 }
-
