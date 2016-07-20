@@ -19,14 +19,15 @@ namespace PagarMe.Mpos
 
         static ApiHelper()
         {
-            ApiEndpoint = "https://api.pagar.me/1";
+            //ApiEndpoint = "https://api.pagar.me/1";
+			ApiEndpoint = "http://192.168.64.2:3000";
         }
 
         static HttpWebRequest CreateRequest(string method, string path, string auth)
         {
             var request = WebRequest.Create(ApiEndpoint + path);
 
-            request.Method = "GET";
+            request.Method = method;
 
             if (auth != null)
                 request.Headers.Add("Authorization", "Basic " + Convert.ToBase64String(Encoding.ASCII.GetBytes(auth + ":x")));
@@ -95,10 +96,19 @@ namespace PagarMe.Mpos
             return EncryptWith(hashParameters.Item1, hashParameters.Item2, data);
         }
 
-        public static async Task<string> GetTerminalTables(string apiKey)
+        public static async Task<string> GetTerminalTables(string apiKey, string checksum, int[] dukptKeys)
         {
-            var response = (HttpWebResponse)(await CreateRequest("GET", "/terminal/updates", apiKey).GetResponseAsync());
-            return new StreamReader(response.GetResponseStream(), Encoding.UTF8).ReadToEnd();
+			var request = CreateRequest("GET", "/terminal/updates?checksum=" + WebUtility.UrlEncode(checksum) + "&dukpt_keys=[" + String.Join(",", dukptKeys) + "]", apiKey);
+			try {
+				var response = (HttpWebResponse)(await request.GetResponseAsync());
+				return new StreamReader(response.GetResponseStream(), Encoding.UTF8).ReadToEnd();
+			}
+			catch (WebException ex) {
+				if (((HttpWebResponse)ex.Response).StatusCode == HttpStatusCode.NotModified)
+					return "";
+
+				throw;
+			}
         }
     }
 }

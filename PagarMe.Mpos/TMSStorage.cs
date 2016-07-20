@@ -33,6 +33,10 @@ namespace PagarMe.Mpos
 		public int BiasedRandomSelectionThreshold { get; set; }
 		public int BiasedRandomSelectionMaxPercentage { get; set; }
 	}
+
+	public class GlobalVersionEntry {
+		public string Version { get; set; }
+	}
 	
 	public class TMSStorage
 	{
@@ -43,22 +47,25 @@ namespace PagarMe.Mpos
 			db.CreateTable<ApplicationEntry>();
 			db.CreateTable<AcquirerEntry>();
 			db.CreateTable<RiskManagementEntry>();
+			db.CreateTable<GlobalVersionEntry>();
 		}
 
 		public void PurgeIndex() {
 			db.DeleteAll<ApplicationEntry>();
 			db.DeleteAll<AcquirerEntry>();
 			db.DeleteAll<RiskManagementEntry>();
+			db.DeleteAll<GlobalVersionEntry>();
 		}
 		
+		public void StoreGlobalVersion(string version) {
+			db.Insert(new GlobalVersionEntry { Version = version });
+		}
+
 		public void StoreAcquirerRow(int number, int cryptographyMethod, int keyIndex, byte[] sessionKey, int emvTagsLength, int[] emvTags) {
 			int[] cleanEmvTags = new int[emvTagsLength];
 			for (int i = 0; i < emvTagsLength; i++) {
 				cleanEmvTags[i] = emvTags[i];
 			}
-
-			Console.WriteLine("[Storage] SessionKey = " + Encoding.ASCII.GetString(sessionKey, 0, 32));
-			Console.WriteLine("[Storage] EmvTags = " + String.Join(",", cleanEmvTags));
 
 			AcquirerEntry entry = new AcquirerEntry {
 				Number = number,
@@ -93,6 +100,12 @@ namespace PagarMe.Mpos
 			db.Insert(entry);
 		}		
 
+		public string GetGlobalVersion() {
+			GlobalVersionEntry e = db.Table<GlobalVersionEntry>().FirstOrDefault();
+			if (e != null) return e.Version;
+			return "";
+		}
+		
 		public AcquirerEntry[] GetAcquirerRows() {
 			return db.Table<AcquirerEntry>().ToArray();
 		}

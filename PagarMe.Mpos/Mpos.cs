@@ -116,70 +116,96 @@ namespace PagarMe.Mpos
 
 		public Task SynchronizeTables(bool forceUpdate)
 		{
-			GCHandle pin = default(GCHandle);
 			var source = new TaskCompletionSource<bool>();
+			GCHandle keysPin = default(GCHandle);
 
-			Native.TmsStoreCallbackDelegate tmsCallback = (version, tableLen, tables, appLen, applications, riskProfiles, acqLen, acquirers) => {
-				Console.WriteLine("Callback called!");
-				pin.Free();
+			Native.MposExtractKeysCallbackDelegate keysCallback = (mpos, err, keyLength, keys) => {
+				GCHandle pin = default(GCHandle);
 
-				GCHandle tablePin = default(GCHandle);
-				
-				Native.MposTablesLoadedCallbackDelegate callback = (mpos, err, loaded) => {
-					tablePin.Free();
+				Native.TmsStoreCallbackDelegate tmsCallback = (version, tableLen, tables, appLen, applications, riskProfiles, acqLen, acquirers) => {
+					Console.WriteLine("Callback called!");
+					pin.Free();
 
-					OnTableUpdated(loaded, err);
-					source.SetResult(true);
+					GCHandle tablePin = default(GCHandle);
+					
+					Native.MposTablesLoadedCallbackDelegate callback = (mpos2, tableError, loaded) => {
+						tablePin.Free();
 
-					return Native.Error.Ok;
+						OnTableUpdated(loaded, tableError);
+						source.SetResult(true);
+
+						return Native.Error.Ok;
+					};
+					tablePin = GCHandle.Alloc(callback);
+
+					this.TMSStorage.PurgeIndex();
+					this.TMSStorage.StoreGlobalVersion(version);
+					
+					for (int i = 0; i < appLen; i++) {
+						IntPtr pointer = IntPtr.Add(applications, i * Marshal.SizeOf(typeof(IntPtr)));
+						IntPtr deref = (IntPtr)Marshal.PtrToStructure(pointer, typeof(IntPtr));
+
+						var app = (Native.Application)Marshal.PtrToStructure(deref, typeof(Native.Application));
+						
+						this.TMSStorage.StoreApplicationRow(app.PaymentMethod, app.CardBrand, app.AcquirerNumber, app.RecordNumber);
+					}
+					
+					for (int i = 0; i < appLen; i++) {
+						IntPtr pointer = IntPtr.Add(riskProfiles, i * Marshal.SizeOf(typeof(IntPtr)));
+						IntPtr deref = (IntPtr)Marshal.PtrToStructure(pointer, typeof(IntPtr));
+
+						var profile = (Native.RiskManagement)Marshal.PtrToStructure(deref, typeof(Native.RiskManagement));
+
+						this.TMSStorage.StoreRiskManagementRow(profile.AcquirerNumber, profile.RecordNumber, profile.MustRiskManagement, profile.FloorLimit, profile.BiasedRandomSelectionPercentage, profile.BiasedRandomSelectionThreshold, profile.BiasedRandomSelectionMaxPercentage);
+					}
+
+					for (int i = 0; i < acqLen; i++) {
+						IntPtr pointer = IntPtr.Add(acquirers, i * Marshal.SizeOf(typeof(IntPtr)));
+						IntPtr deref = (IntPtr)Marshal.PtrToStructure(pointer, typeof(IntPtr));
+						
+						var acquirer = (Native.Acquirer)Marshal.PtrToStructure(deref, typeof(Native.Acquirer));
+
+						this.TMSStorage.StoreAcquirerRow(acquirer.Number, acquirer.CryptographyMethod, acquirer.KeyIndex, acquirer.SessionKey, acquirer.EmvTagsLength, acquirer.EmvTags);
+					}
+
+					Native.Error updateError = Native.UpdateTables(_nativeMpos, tables, tableLen, version, forceUpdate, callback);
+					if (updateError != Native.Error.Ok) {
+						throw new MposException(updateError);
+					}
+					
+					return updateError;
 				};
-				tablePin = GCHandle.Alloc(callback);
-
-				this.TMSStorage.PurgeIndex();
+				pin = GCHandle.Alloc(tmsCallback);
 				
-				Console.WriteLine("Populating applications... (appLen = " + appLen + ")");
-				for (int i = 0; i < appLen; i++) {
-					IntPtr pointer = IntPtr.Add(applications, i * Marshal.SizeOf(typeof(IntPtr)));
-					IntPtr deref = (IntPtr)Marshal.PtrToStructure(pointer, typeof(IntPtr));
-
-					var app = (Native.Application)Marshal.PtrToStructure(deref, typeof(Native.Application));
-					
-					this.TMSStorage.StoreApplicationRow(app.PaymentMethod, app.CardBrand, app.AcquirerNumber, app.RecordNumber);
+				int[] cleanKeys = new int[keyLength];
+				for (int i = 0; i < keyLength; i++) {
+					IntPtr pointer = IntPtr.Add(keys, i * Marshal.SizeOf(typeof(int)));
+					cleanKeys[i] = (int)Marshal.PtrToStructure(pointer, typeof(int));
 				}
 				
-				Console.WriteLine("Populating risk profiles...");
-				for (int i = 0; i < appLen; i++) {
-					IntPtr pointer = IntPtr.Add(riskProfiles, i * Marshal.SizeOf(typeof(IntPtr)));
-					IntPtr deref = (IntPtr)Marshal.PtrToStructure(pointer, typeof(IntPtr));
+				ApiHelper.GetTerminalTables(this.ApiKey, this.TMSStorage.GetGlobalVersion(), cleanKeys).ContinueWith(t => {
+					if (t.Result.Length > 0) {
+						Native.Error error = Native.TmsGetTables(t.Result, t.Result.Length, tmsCallback);
+						if (error != Native.Error.Ok) {
+							throw new MposException(error);					
+						}
+					}
 
-					var profile = (Native.RiskManagement)Marshal.PtrToStructure(deref, typeof(Native.RiskManagement));
+					else {
+						// We don't need to do anything; complete operation.	
+						OnTableUpdated(false, 0);
+						source.SetResult(true);						
+					}
+				});
 
-					Console.WriteLine("Marshal got us acqidx " + profile.AcquirerNumber + " and recidx " + profile.RecordNumber);
-					
-					this.TMSStorage.StoreRiskManagementRow(profile.AcquirerNumber, profile.RecordNumber, profile.MustRiskManagement, profile.FloorLimit, profile.BiasedRandomSelectionPercentage, profile.BiasedRandomSelectionThreshold, profile.BiasedRandomSelectionMaxPercentage);
-				}
-
-				Console.WriteLine("Populating acquirers... (acqlen = " + acqLen + ")");
-				for (int i = 0; i < acqLen; i++) {
-					IntPtr pointer = IntPtr.Add(acquirers, i * Marshal.SizeOf(typeof(IntPtr)));
-					IntPtr deref = (IntPtr)Marshal.PtrToStructure(pointer, typeof(IntPtr));
-					
-					var acquirer = (Native.Acquirer)Marshal.PtrToStructure(deref, typeof(Native.Acquirer));
-
-					this.TMSStorage.StoreAcquirerRow(acquirer.Number, acquirer.CryptographyMethod, acquirer.KeyIndex, acquirer.SessionKey, acquirer.EmvTagsLength, acquirer.EmvTags);
-				}
-				
-				Native.Error error = Native.UpdateTables(_nativeMpos, tables, tableLen, version, forceUpdate, callback);
 				return Native.Error.Ok;
 			};
-			pin = GCHandle.Alloc(tmsCallback);
-			
-			ApiHelper.GetTerminalTables(this.ApiKey).ContinueWith(t => {
-				Native.Error error = Native.TmsGetTables(t.Result, t.Result.Length, tmsCallback);
-				if (error != Native.Error.Ok) {
-					throw new MposException(error);					
-				}
-			});
+			keysPin = GCHandle.Alloc(keysCallback);
+
+			Native.Error keysError = Native.ExtractKeys(_nativeMpos, keysCallback);
+			if (keysError != Native.Error.Ok) {
+				throw new MposException(keysError);
+			}
 
 			return source.Task;
 		}
@@ -670,6 +696,9 @@ namespace PagarMe.Mpos
 					public delegate Error MposFinishTransactionCallbackDelegate(IntPtr mpos, int error);
 
 				[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+					public delegate Error MposExtractKeysCallbackDelegate(IntPtr mpos, int error, int keysLength, IntPtr keys);
+
+				[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 					public delegate Error MposClosedCallbackDelegate(IntPtr mpos, int error);
 
 				[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -689,6 +718,9 @@ namespace PagarMe.Mpos
 
 				[DllImport("mpos", EntryPoint = "mpos_finish_transaction", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
 					public static extern Error FinishTransaction(IntPtr mpos, TransactionStatus status, int arc, int emvLen, string emv, MposFinishTransactionCallbackDelegate callback);
+
+				[DllImport("mpos", EntryPoint = "mpos_extract_keys", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+					public static extern Error ExtractKeys(IntPtr mpos, MposExtractKeysCallbackDelegate callback);
 
 				[DllImport("mpos", EntryPoint = "mpos_display", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
 					public static extern Error Display(IntPtr mpos, string text);
