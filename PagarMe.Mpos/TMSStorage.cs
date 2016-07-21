@@ -12,6 +12,8 @@ namespace PagarMe.Mpos
 
 		public int AcquirerNumber { get; set; }
 		public int RecordNumber { get; set; }
+		
+		public string EmvTags { get; set; }
 	}
 
 	public class AcquirerEntry {
@@ -20,7 +22,6 @@ namespace PagarMe.Mpos
 		public int KeyIndex { get; set; }
 
 		public string SessionKey { get; set; }
-		public string EmvTags { get; set; }
 	}
 
 	public class RiskManagementEntry {
@@ -61,18 +62,12 @@ namespace PagarMe.Mpos
 			db.Insert(new GlobalVersionEntry { Version = version });
 		}
 
-		public void StoreAcquirerRow(int number, int cryptographyMethod, int keyIndex, byte[] sessionKey, int emvTagsLength, int[] emvTags) {
-			int[] cleanEmvTags = new int[emvTagsLength];
-			for (int i = 0; i < emvTagsLength; i++) {
-				cleanEmvTags[i] = emvTags[i];
-			}
-
+		public void StoreAcquirerRow(int number, int cryptographyMethod, int keyIndex, byte[] sessionKey) {
 			AcquirerEntry entry = new AcquirerEntry {
 				Number = number,
 				CryptographyMethod = cryptographyMethod,
 				KeyIndex = keyIndex,
 				SessionKey = Encoding.ASCII.GetString(sessionKey, 0, 32),
-				EmvTags = String.Join(",", cleanEmvTags)
 			};
 			db.Insert(entry);
 		}
@@ -90,12 +85,18 @@ namespace PagarMe.Mpos
 			db.Insert(entry);			
 		}
 
-		public void StoreApplicationRow(int paymentMethod, string cardBrand, int acquirerNumber, int recordNumber) {
+		public void StoreApplicationRow(int paymentMethod, string cardBrand, int acquirerNumber, int recordNumber, int emvTagsLength, int[] emvTags) {
+			int[] cleanEmvTags = new int[emvTagsLength];
+			for (int i = 0; i < emvTagsLength; i++) {
+				cleanEmvTags[i] = emvTags[i];
+			}
+
 			ApplicationEntry entry = new ApplicationEntry {
 				PaymentMethod = paymentMethod,
 				CardBrand = cardBrand,
 				AcquirerNumber = acquirerNumber,
-				RecordNumber = recordNumber
+				RecordNumber = recordNumber,
+				EmvTags = String.Join(",", cleanEmvTags)
 			};
 			db.Insert(entry);
 		}		

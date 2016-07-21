@@ -147,7 +147,7 @@ namespace PagarMe.Mpos
 
 						var app = (Native.Application)Marshal.PtrToStructure(deref, typeof(Native.Application));
 						
-						this.TMSStorage.StoreApplicationRow(app.PaymentMethod, app.CardBrand, app.AcquirerNumber, app.RecordNumber);
+						this.TMSStorage.StoreApplicationRow(app.PaymentMethod, app.CardBrand, app.AcquirerNumber, app.RecordNumber, app.EmvTagsLength, app.EmvTags);
 					}
 					
 					for (int i = 0; i < appLen; i++) {
@@ -165,7 +165,7 @@ namespace PagarMe.Mpos
 						
 						var acquirer = (Native.Acquirer)Marshal.PtrToStructure(deref, typeof(Native.Acquirer));
 
-						this.TMSStorage.StoreAcquirerRow(acquirer.Number, acquirer.CryptographyMethod, acquirer.KeyIndex, acquirer.SessionKey, acquirer.EmvTagsLength, acquirer.EmvTags);
+						this.TMSStorage.StoreAcquirerRow(acquirer.Number, acquirer.CryptographyMethod, acquirer.KeyIndex, acquirer.SessionKey);
 					}
 
 					Native.Error updateError = Native.UpdateTables(_nativeMpos, tables, tableLen, version, forceUpdate, callback);
@@ -518,10 +518,6 @@ namespace PagarMe.Mpos
 						[MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
 							public byte[] SessionKey;
 
-						public int EmvTagsLength;
-						[MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)]
-							public int[] EmvTags;
-
 						public Acquirer(AcquirerEntry e) {
 							Number = e.Number;
 							CryptographyMethod = e.CryptographyMethod;
@@ -529,9 +525,6 @@ namespace PagarMe.Mpos
 
 							if (e.SessionKey != null) SessionKey = GetHexBytes(e.SessionKey, 32);
 							else SessionKey = GetHexBytes("", 32);
-
-							EmvTags = e.EmvTags.Split(',').Select(int.Parse).ToArray();
-							EmvTagsLength = EmvTags.Length;
 						}
 					}
 
@@ -568,6 +561,10 @@ namespace PagarMe.Mpos
 
 						public int AcquirerNumber;
 						public int RecordNumber;
+						
+						public int EmvTagsLength;
+						[MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)]
+							public int[] EmvTags;
 
 						public Application(ApplicationEntry e) {
 							PaymentMethod = e.PaymentMethod;
@@ -575,6 +572,9 @@ namespace PagarMe.Mpos
 
 							AcquirerNumber = e.AcquirerNumber;
 							RecordNumber = e.RecordNumber;
+
+							EmvTags = e.EmvTags.Split(',').Select(int.Parse).ToArray();
+							EmvTagsLength = EmvTags.Length;
 						}
 					}
 				
