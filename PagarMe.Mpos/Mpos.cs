@@ -141,6 +141,23 @@ namespace PagarMe.Mpos
 					this.TMSStorage.PurgeIndex();
 					this.TMSStorage.StoreGlobalVersion(version);
 					
+					for (int i = 0; i < tableLen; i++) {
+						IntPtr pointer = IntPtr.Add(tables, i * Marshal.SizeOf(typeof(IntPtr)));
+						IntPtr deref = (IntPtr)Marshal.PtrToStructure(pointer, typeof(IntPtr));
+
+						// We assume everything is the smaller member
+						var capk = (Native.Capk)Marshal.PtrToStructure(deref, typeof(Native.Capk));
+						var isAid = capk.IsAid;
+
+						if (isAid) {
+							var aid = (Native.Aid)Marshal.PtrToStructure(deref, typeof(Native.Aid));
+							this.TMSStorage.StoreAidRow(aid.AcquirerNumber, aid.RecordIndex, aid.AidLength, aid.AidNumber, aid.ApplicationType, aid.ApplicationNameLength, aid.ApplicationName, aid.AppVersion1, aid.AppVersion2, aid.AppVersion3, aid.CountryCode, aid.Currency, aid.CurrencyExponent, aid.MerchantId, aid.Mcc, aid.TerminalId, aid.TerminalCapabilities, aid.AdditionalTerminalCapabilities, aid.TerminalType, aid.DefaultTac, aid.DenialTac, aid.OnlineTac, aid.FloorLimit, aid.Tcc, aid.CtlsZeroAm, aid.CtlsMode, aid.CtlsTransactionLimit, aid.CtlsFloorLimit, aid.CtlsCvmLimit, aid.CtlsApplicationVersion, aid.TdolLength, aid.Tdol, aid.DdolLength, aid.Ddol);
+						}
+						else {
+							this.TMSStorage.StoreCapkRow(capk.AcquirerNumber, capk.RecordIndex, capk.Rid, capk.CapkIndex, capk.ExponentLength, capk.Exponent, capk.ModulusLength, capk.Modulus, capk.HasChecksum, capk.Checksum);
+						}
+					}
+					
 					for (int i = 0; i < appLen; i++) {
 						IntPtr pointer = IntPtr.Add(applications, i * Marshal.SizeOf(typeof(IntPtr)));
 						IntPtr deref = (IntPtr)Marshal.PtrToStructure(pointer, typeof(IntPtr));
@@ -212,72 +229,123 @@ namespace PagarMe.Mpos
 
 		public Task<PaymentResult> ProcessPayment(int amount, List<EmvApplication> applications = null, PaymentMethod magstripePaymentMethod = PaymentMethod.Credit)
 		{
-			GCHandle pin = default(GCHandle);
 			var source = new TaskCompletionSource<PaymentResult>();
 
-			Native.MposPaymentCallbackDelegate callback = (mpos, err, infoPointer) =>
-			{
-				if (err != 0) {
-					OnPaymentProcessed(null, err);
+			GCHandle tablePin = default(GCHandle);
+			Native.MposTablesLoadedCallbackDelegate tableCallback = (mpos2, tableError, loaded) => {
+				tablePin.Free();
+
+				GCHandle pin = default(GCHandle);
+				Native.MposPaymentCallbackDelegate callback = (mpos, err, infoPointer) => {
+					pin.Free();
+					
+					if (err != 0) {
+						OnPaymentProcessed(null, err);
+						return Native.Error.Ok;
+					}
+					var info = (Native.PaymentInfo)Marshal.PtrToStructure(infoPointer, typeof(Native.PaymentInfo));
+
+					HandlePaymentCallback(err, info).ContinueWith(t => {
+						if (t.Status == TaskStatus.Faulted) {
+							source.SetException(t.Exception);
+						}
+						else {
+							source.SetResult(t.Result);
+						}
+
+						OnPaymentProcessed(t.Result, err);
+					});
+
 					return Native.Error.Ok;
+				};
+				pin = GCHandle.Alloc(callback);
+
+				List<Native.Acquirer> acquirers = new List<Native.Acquirer>();
+				List<Native.RiskManagement> riskProfiles = new List<Native.RiskManagement>();
+
+				List<Native.Application> rawApplications = new List<Native.Application>();
+				if (applications != null) {
+					foreach (EmvApplication application in applications) {
+						ApplicationEntry entry = this.TMSStorage.SelectApplication(application.Brand, (int)application.PaymentMethod);
+						if (entry != null) {
+							rawApplications.Add(new Native.Application(entry));
+						}
+					}
 				}
-				var info = (Native.PaymentInfo)Marshal.PtrToStructure(infoPointer, typeof(Native.PaymentInfo));
-
-				pin.Free();
-
-				HandlePaymentCallback(err, info).ContinueWith(t =>
-				{
-					if (t.Status == TaskStatus.Faulted)
-					{
-						source.SetException(t.Exception);
+				else {
+					foreach (ApplicationEntry entry in this.TMSStorage.GetApplicationRows()) {
+						rawApplications.Add(new Native.Application(entry));
 					}
-					else
-					{
-						source.SetResult(t.Result);
-					}
+				}
 
-					OnPaymentProcessed(t.Result, err);
-				});
+				foreach (AcquirerEntry entry in this.TMSStorage.GetAcquirerRows()) {
+					acquirers.Add(new Native.Acquirer(entry));
+				}
+				
+				foreach (RiskManagementEntry entry in this.TMSStorage.GetRiskManagementRows()) {
+					riskProfiles.Add(new Native.RiskManagement(entry));
+				}
+
+				Native.Error error = Native.ProcessPayment(_nativeMpos, amount, rawApplications.Count, rawApplications.ToArray(), acquirers.Count, acquirers.ToArray(), riskProfiles.Count, riskProfiles.ToArray(), (int)magstripePaymentMethod, callback);
+
+				if (error != Native.Error.Ok)
+					throw new MposException(error);
 
 				return Native.Error.Ok;
 			};
-
-			pin = GCHandle.Alloc(callback);
-
-			if (applications == null) {
-				applications = new List<EmvApplication>();
-				applications.Add(new EmvApplication("visa", PaymentMethod.Credit));
-				applications.Add(new EmvApplication("visa", PaymentMethod.Debit));
-				applications.Add(new EmvApplication("mastercard", PaymentMethod.Credit));
-				applications.Add(new EmvApplication("mastercard", PaymentMethod.Debit));
-			}
+			tablePin = GCHandle.Alloc(tableCallback);					
 			
-			List<Native.Acquirer> acquirers = new List<Native.Acquirer>();
-			List<Native.RiskManagement> riskProfiles = new List<Native.RiskManagement>();
-
-			List<Native.Application> rawApplications = new List<Native.Application>();
-			foreach (EmvApplication application in applications) {
-				ApplicationEntry entry = this.TMSStorage.SelectApplication(application.Brand, (int)application.PaymentMethod);
-				if (entry != null) {
-					Console.WriteLine("Got entry. CB=" + entry.CardBrand + ", ACQIDX=" + entry.AcquirerNumber);
-					rawApplications.Add(new Native.Application(entry));
+			GCHandle versionPin = default(GCHandle);
+			Native.MposGetTableVersionCallbackDelegate versionCallback = (mpos, err, version) => {
+				versionPin.Free();
+				
+				byte[] cleanVersionBytes = new byte[10];
+				for (int i = 0; i < 10; i++) {
+					IntPtr pointer = IntPtr.Add(version, i * Marshal.SizeOf(typeof(byte)));
+					cleanVersionBytes[i] = (byte)Marshal.PtrToStructure(pointer, typeof(byte));
 				}
-			}
+				string cleanVersion = GetString(cleanVersionBytes);
 
-			foreach (AcquirerEntry entry in this.TMSStorage.GetAcquirerRows()) {
-				Console.WriteLine("Got entry. ACQIDX=" + entry.Number);
-				acquirers.Add(new Native.Acquirer(entry));
-			}
-			
-			foreach (RiskManagementEntry entry in this.TMSStorage.GetRiskManagementRows()) {
-				Console.WriteLine("Got entry. ACQIDX=" + entry.AcquirerNumber);
-				riskProfiles.Add(new Native.RiskManagement(entry));
-			}
+				if (!this.TMSStorage.GetGlobalVersion().StartsWith(cleanVersion)) {
+					AidEntry[] aidEntries = this.TMSStorage.GetAidRows();
+					CapkEntry[] capkEntries = this.TMSStorage.GetCapkRows();
+					
+					IntPtr tablePointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(IntPtr)) * (aidEntries.Length + capkEntries.Length));
+					for (int i = 0; i < aidEntries.Length; i++) {
+						Native.Aid nativeAid = new Native.Aid(aidEntries[i]);
+						IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(Native.Aid)));
+						Marshal.StructureToPtr(nativeAid, ptr, false);
 
-			Native.Error error = Native.ProcessPayment(_nativeMpos, amount, rawApplications.Count, rawApplications.ToArray(), acquirers.Count, acquirers.ToArray(), riskProfiles.Count, riskProfiles.ToArray(), (int)magstripePaymentMethod, callback);
+						Marshal.StructureToPtr(ptr, IntPtr.Add(tablePointer, i * Marshal.SizeOf(typeof(IntPtr))), false);
+					}
+					for (int i = 0; i < capkEntries.Length; i++) {
+						Native.Capk nativeCapk = new Native.Capk(capkEntries[i]);
+						IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(Native.Capk)));
+						Marshal.StructureToPtr(nativeCapk, ptr, false);
 
-			if (error != Native.Error.Ok)
-				throw new MposException(error);
+						Marshal.StructureToPtr(ptr, IntPtr.Add(tablePointer, i * Marshal.SizeOf(typeof(IntPtr))), false);						
+					}
+					
+					Native.Error updateError = Native.UpdateTables(mpos, tablePointer, aidEntries.Length + capkEntries.Length, this.TMSStorage.GetGlobalVersion(), false, tableCallback);
+					if (updateError != Native.Error.Ok) {
+						throw new MposException(updateError);
+					}					
+
+					Console.WriteLine("FREEEEEE");
+					for (int i = 0; i < (aidEntries.Length + capkEntries.Length); i++) {
+						Marshal.FreeHGlobal(IntPtr.Add(tablePointer, i * Marshal.SizeOf(typeof(IntPtr))));
+					}
+					Marshal.FreeHGlobal(tablePointer);
+				}
+				else {
+					tableCallback(_nativeMpos, 0, false);
+				}
+
+				return Native.Error.Ok;
+			};
+			versionPin = GCHandle.Alloc(versionCallback);
+
+			Native.GetTableVersion(_nativeMpos, versionCallback);
 			
 			return source.Task;
 		}
@@ -629,6 +697,148 @@ namespace PagarMe.Mpos
 							public byte[] PinKek;
 					}
 
+				 [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
+					public unsafe struct Capk
+					{
+						[MarshalAs(UnmanagedType.I1)]
+							public bool IsAid;
+						public int AcquirerNumber;
+						public int RecordIndex;
+
+						[MarshalAs(UnmanagedType.ByValArray, SizeConst = 10)]
+							public byte[] Rid;
+						public int CapkIndex;
+						public int ExponentLength;
+						[MarshalAs(UnmanagedType.ByValArray, SizeConst = 6)]
+							public byte[] Exponent;
+						public int ModulusLength;
+						[MarshalAs(UnmanagedType.ByValArray, SizeConst = 496)]
+							public byte[] Modulus;
+
+						[MarshalAs(UnmanagedType.I1)]
+							public bool HasChecksum;
+						[MarshalAs(UnmanagedType.ByValArray, SizeConst = 40)]
+							public byte[] Checksum;
+
+						public Capk(CapkEntry e)
+						{
+							IsAid = false;
+							AcquirerNumber = e.AcquirerNumber;
+							RecordIndex = e.RecordIndex;
+
+							Rid = GetBytes(e.Rid, 10);
+							CapkIndex = e.PublicKeyId;
+							Exponent = GetBytes(e.Exponent, 6, out ExponentLength, '0');
+							Modulus = GetBytes(e.Modulus, 496, out ModulusLength, '0');
+							HasChecksum = e.Checksum != null;
+
+							if (HasChecksum)
+								Checksum = GetBytes(e.Checksum, 40);
+							else
+								Checksum = GetHexBytes("", 40);
+						}
+					}
+
+					[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
+					public unsafe struct Aid
+					{
+						[MarshalAs(UnmanagedType.I1)]
+							public bool IsAid;
+						public int AcquirerNumber;
+						public int RecordIndex;
+
+						public int AidLength;
+						[MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
+							public byte[] AidNumber;
+						public int ApplicationType;
+						public int ApplicationNameLength;
+						[MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
+							public byte[] ApplicationName;
+						[MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
+							public byte[] AppVersion1;
+						[MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
+							public byte[] AppVersion2;
+						[MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
+							public byte[] AppVersion3;
+						public int CountryCode;
+						public int Currency;
+						public int CurrencyExponent;
+						[MarshalAs(UnmanagedType.ByValArray, SizeConst = 15)]
+							public byte[] MerchantId;
+						public int Mcc;
+						[MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
+							public byte[] TerminalId;
+						[MarshalAs(UnmanagedType.ByValArray, SizeConst = 6)]
+							public byte[] TerminalCapabilities;
+						[MarshalAs(UnmanagedType.ByValArray, SizeConst = 10)]
+							public byte[] AdditionalTerminalCapabilities;
+						public int TerminalType;
+						[MarshalAs(UnmanagedType.ByValArray, SizeConst = 10)]
+							public byte[] DefaultTac;
+						[MarshalAs(UnmanagedType.ByValArray, SizeConst = 10)]
+							public byte[] DenialTac;
+						[MarshalAs(UnmanagedType.ByValArray, SizeConst = 10)]
+							public byte[] OnlineTac;
+						public int FloorLimit;
+						[MarshalAs(UnmanagedType.I1)]
+							public byte Tcc;
+
+						[MarshalAs(UnmanagedType.I1)]
+							public bool CtlsZeroAm;
+						public int CtlsMode;
+						public int CtlsTransactionLimit;
+						public int CtlsFloorLimit;
+						public int CtlsCvmLimit;
+						[MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
+							public byte[] CtlsApplicationVersion;
+
+						public int TdolLength;
+						[MarshalAs(UnmanagedType.ByValArray, SizeConst = 40)]
+							public byte[] Tdol;
+						public int DdolLength;
+						[MarshalAs(UnmanagedType.ByValArray, SizeConst = 40)]
+							public byte[] Ddol;
+
+						public Aid(AidEntry e)
+						{
+							IsAid = true;
+							AcquirerNumber = e.AcquirerNumber;
+							RecordIndex = e.RecordIndex;
+
+							AidNumber = GetBytes(e.Aid, 32, out AidLength, '0');
+							ApplicationType = e.ApplicationType;
+							ApplicationName = GetBytes(e.ApplicationName, 16, out ApplicationNameLength);
+							AppVersion1 = GetBytes(e.AppVersion1, 4);
+							AppVersion2 = GetBytes(e.AppVersion2, 4);
+							AppVersion3 = GetBytes(e.AppVersion3, 4);
+							CountryCode = e.CountryCode;
+							Currency = e.Currency;
+							CurrencyExponent = e.CurrencyExponent;
+							MerchantId = GetHexBytes("", 15);
+							Mcc = e.Mcc;
+							TerminalId = GetBytes(e.TerminalId, 8);
+
+							TerminalCapabilities = GetBytes(e.TerminalCapabilities, 6);
+							AdditionalTerminalCapabilities = GetBytes(e.AdditionalTerminalCapabilities, 10);
+							TerminalType = e.TerminalType;
+							DefaultTac = GetBytes(e.DefaultTac, 10);
+							DenialTac = GetBytes(e.DenialTac, 10);
+							OnlineTac = GetBytes(e.OnlineTac, 10);
+							FloorLimit = e.FloorLimit;
+							Tcc = Convert.ToByte(e.Tcc[0]);
+
+							CtlsZeroAm = e.CtlsZeroAm;
+							CtlsMode = e.CtlsMode;
+							CtlsTransactionLimit = e.CtlsTransactionLimit;
+							CtlsFloorLimit = e.CtlsFloorLimit;
+							CtlsCvmLimit = e.CtlsCvmLimit;
+							CtlsApplicationVersion = GetBytes(e.CtlsApplicationVersion, 4);
+
+							Tdol = GetBytes(e.Tdol, 40, out TdolLength, '0');
+							Ddol = GetBytes(e.Ddol, 40, out DdolLength, '0');
+						}
+					}
+
 				public static byte[] GetBytes(string data, int length, out int newSize, char? fill = null, bool padLeft = true)
 				{
 					newSize = Encoding.UTF8.GetByteCount(data);
@@ -699,6 +909,9 @@ namespace PagarMe.Mpos
 					public delegate Error MposExtractKeysCallbackDelegate(IntPtr mpos, int error, int keysLength, IntPtr keys);
 
 				[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+					public delegate Error MposGetTableVersionCallbackDelegate(IntPtr mpos, int error, IntPtr version);
+
+				[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 					public delegate Error MposClosedCallbackDelegate(IntPtr mpos, int error);
 
 				[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -721,6 +934,9 @@ namespace PagarMe.Mpos
 
 				[DllImport("mpos", EntryPoint = "mpos_extract_keys", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
 					public static extern Error ExtractKeys(IntPtr mpos, MposExtractKeysCallbackDelegate callback);
+
+				[DllImport("mpos", EntryPoint = "mpos_get_table_version", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+					public static extern Error GetTableVersion(IntPtr mpos, MposGetTableVersionCallbackDelegate callback);
 
 				[DllImport("mpos", EntryPoint = "mpos_display", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
 					public static extern Error Display(IntPtr mpos, string text);
