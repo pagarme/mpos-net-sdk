@@ -200,10 +200,11 @@ namespace PagarMe.Mpos
 				}
 				
 				ApiHelper.GetTerminalTables(this.ApiKey, !forceUpdate ? this.TMSStorage.GetGlobalVersion() : "", cleanKeys).ContinueWith(t => {
-					if (t.IsFaulted) {
-						throw new Exception("Connection error");
+					if (t.Status == TaskStatus.Faulted) {
+						source.SetException(t.Exception);
+						return;
 					}
-
+					
 					if (t.Result.Length > 0) {
 						Native.Error error = Native.TmsGetTables(t.Result, t.Result.Length, tmsCallback);
 						if (error != Native.Error.Ok) {
@@ -354,8 +355,10 @@ namespace PagarMe.Mpos
 			};
 			versionPin = GCHandle.Alloc(versionCallback);
 
-			Native.GetTableVersion(_nativeMpos, versionCallback);
-			
+			Native.Error error = Native.GetTableVersion(_nativeMpos, versionCallback);
+			if (error != Native.Error.Ok)
+				throw new MposException(error);
+
 			return source.Task;
 		}
 
@@ -385,7 +388,6 @@ namespace PagarMe.Mpos
 					status = Native.TransactionStatus.Error;
 				}
 			}
-
 
 			Native.MposFinishTransactionCallbackDelegate callback = (mpos, err) =>
 			{
@@ -561,7 +563,8 @@ namespace PagarMe.Mpos
 			{
 				internal enum Error
 				{
-					Ok,
+					ConnError = -1,
+					Ok = 0,
 					Error
 				}
 

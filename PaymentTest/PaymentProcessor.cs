@@ -38,7 +38,7 @@ namespace PaymentTest
             await _mpos.Initialize();
 
 			Console.WriteLine ("Asking for tables to be synchronized...");
-			//await _mpos.SynchronizeTables(true);
+			await _mpos.SynchronizeTables(true);
 			//Console.WriteLine ("SynchronizeTables called.");
 			//_mpos.Display("Hello, world!");
         }
