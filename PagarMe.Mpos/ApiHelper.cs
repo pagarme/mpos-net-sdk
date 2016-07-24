@@ -104,7 +104,7 @@ namespace PagarMe.Mpos
 				return new StreamReader(response.GetResponseStream(), Encoding.UTF8).ReadToEnd();
 			}
 			catch (WebException ex) {
-				if (((HttpWebResponse)ex.Response).StatusCode == HttpStatusCode.NotModified)
+				if (ex.Status == WebExceptionStatus.ProtocolError && ((HttpWebResponse)ex.Response).StatusCode == HttpStatusCode.NotModified)
 					return "";
 
 				throw;

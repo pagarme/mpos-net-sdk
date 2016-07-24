@@ -159,7 +159,7 @@ namespace PagarMe.Mpos
 				AcquirerNumber = acqNumber,
 				RecordIndex = recNumber,
 				
-				Aid = Encoding.ASCII.GetString(aid, 0, aidLen),
+				Aid = Encoding.ASCII.GetString(aid, 0, aidLen * 2),
 				ApplicationType = appType,
 				ApplicationName = Encoding.ASCII.GetString(appName, 0, appNameLength),
 				AppVersion1 = Encoding.ASCII.GetString(appVer1, 0, 4),
@@ -189,8 +189,8 @@ namespace PagarMe.Mpos
 				CtlsCvmLimit = ctlsCvmLimit,
 				CtlsApplicationVersion = Encoding.ASCII.GetString(ctlsAppVer, 0, 4),
 
-				Tdol = Encoding.ASCII.GetString(tacDefault, 0, 10),
-				Ddol = Encoding.ASCII.GetString(tacDefault, 0, 10)		
+				Tdol = Encoding.ASCII.GetString(tdol, 0, tdolLen),
+				Ddol = Encoding.ASCII.GetString(ddol, 0, ddolLen)		
 			};
 			db.Insert(entry);
 		}
@@ -202,8 +202,8 @@ namespace PagarMe.Mpos
 
 				Rid = Encoding.ASCII.GetString(rid, 0, 10),
 				PublicKeyId = capkIndex,
-				Exponent = Encoding.ASCII.GetString(exp, 0, expLen),
-				Modulus = Encoding.ASCII.GetString(mod, 0, modLen),
+				Exponent = Encoding.ASCII.GetString(exp, 0, expLen * 2),
+				Modulus = Encoding.ASCII.GetString(mod, 0, modLen * 2),
 				Checksum = hasChecksum ? Encoding.ASCII.GetString(checksum, 0, 40) : null
 			};
 			db.Insert(entry);

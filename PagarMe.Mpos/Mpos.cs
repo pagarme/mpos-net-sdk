@@ -123,7 +123,6 @@ namespace PagarMe.Mpos
 				GCHandle pin = default(GCHandle);
 
 				Native.TmsStoreCallbackDelegate tmsCallback = (version, tableLen, tables, appLen, applications, riskProfiles, acqLen, acquirers) => {
-					Console.WriteLine("Callback called!");
 					pin.Free();
 
 					GCHandle tablePin = default(GCHandle);
@@ -200,7 +199,11 @@ namespace PagarMe.Mpos
 					cleanKeys[i] = (int)Marshal.PtrToStructure(pointer, typeof(int));
 				}
 				
-				ApiHelper.GetTerminalTables(this.ApiKey, this.TMSStorage.GetGlobalVersion(), cleanKeys).ContinueWith(t => {
+				ApiHelper.GetTerminalTables(this.ApiKey, !forceUpdate ? this.TMSStorage.GetGlobalVersion() : "", cleanKeys).ContinueWith(t => {
+					if (t.IsFaulted) {
+						throw new Exception("Connection error");
+					}
+
 					if (t.Result.Length > 0) {
 						Native.Error error = Native.TmsGetTables(t.Result, t.Result.Length, tmsCallback);
 						if (error != Native.Error.Ok) {
@@ -310,30 +313,36 @@ namespace PagarMe.Mpos
 					AidEntry[] aidEntries = this.TMSStorage.GetAidRows();
 					CapkEntry[] capkEntries = this.TMSStorage.GetCapkRows();
 					
-					IntPtr tablePointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(IntPtr)) * (aidEntries.Length + capkEntries.Length));
+					IntPtr tablePointer = Marshal.AllocHGlobal(IntPtr.Size * (aidEntries.Length + capkEntries.Length));
+					int offset = 0;
+					
 					for (int i = 0; i < aidEntries.Length; i++) {
 						Native.Aid nativeAid = new Native.Aid(aidEntries[i]);
 						IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(Native.Aid)));
 						Marshal.StructureToPtr(nativeAid, ptr, false);
 
-						Marshal.StructureToPtr(ptr, IntPtr.Add(tablePointer, i * Marshal.SizeOf(typeof(IntPtr))), false);
+						Marshal.StructureToPtr(ptr, IntPtr.Add(tablePointer, offset * Marshal.SizeOf(typeof(IntPtr))), false);
+						offset++;
 					}
 					for (int i = 0; i < capkEntries.Length; i++) {
 						Native.Capk nativeCapk = new Native.Capk(capkEntries[i]);
 						IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(Native.Capk)));
 						Marshal.StructureToPtr(nativeCapk, ptr, false);
 
-						Marshal.StructureToPtr(ptr, IntPtr.Add(tablePointer, i * Marshal.SizeOf(typeof(IntPtr))), false);						
+						Marshal.StructureToPtr(ptr, IntPtr.Add(tablePointer, offset * Marshal.SizeOf(typeof(IntPtr))), false);						
+						offset++;
 					}
 					
-					Native.Error updateError = Native.UpdateTables(mpos, tablePointer, aidEntries.Length + capkEntries.Length, this.TMSStorage.GetGlobalVersion(), false, tableCallback);
+					Native.Error updateError = Native.UpdateTables(mpos, tablePointer, aidEntries.Length + capkEntries.Length, this.TMSStorage.GetGlobalVersion(), true, tableCallback);
 					if (updateError != Native.Error.Ok) {
 						throw new MposException(updateError);
 					}					
 
-					Console.WriteLine("FREEEEEE");
 					for (int i = 0; i < (aidEntries.Length + capkEntries.Length); i++) {
-						Marshal.FreeHGlobal(IntPtr.Add(tablePointer, i * Marshal.SizeOf(typeof(IntPtr))));
+						IntPtr pointer = IntPtr.Add(tablePointer, i * Marshal.SizeOf(typeof(IntPtr)));
+						IntPtr deref = (IntPtr)Marshal.PtrToStructure(pointer, typeof(IntPtr));						
+						
+						Marshal.FreeHGlobal(deref);
 					}
 					Marshal.FreeHGlobal(tablePointer);
 				}
@@ -728,8 +737,10 @@ namespace PagarMe.Mpos
 
 							Rid = GetBytes(e.Rid, 10);
 							CapkIndex = e.PublicKeyId;
-							Exponent = GetBytes(e.Exponent, 6, out ExponentLength, '0');
-							Modulus = GetBytes(e.Modulus, 496, out ModulusLength, '0');
+							Exponent = GetBytes(e.Exponent, 6, out ExponentLength);
+							ExponentLength /= 2;
+							Modulus = GetBytes(e.Modulus, 496, out ModulusLength);
+							ModulusLength /= 2;
 							HasChecksum = e.Checksum != null;
 
 							if (HasChecksum)
@@ -805,7 +816,8 @@ namespace PagarMe.Mpos
 							AcquirerNumber = e.AcquirerNumber;
 							RecordIndex = e.RecordIndex;
 
-							AidNumber = GetBytes(e.Aid, 32, out AidLength, '0');
+							AidNumber = GetBytes(e.Aid, 32, out AidLength);
+							AidLength /= 2;
 							ApplicationType = e.ApplicationType;
 							ApplicationName = GetBytes(e.ApplicationName, 16, out ApplicationNameLength);
 							AppVersion1 = GetBytes(e.AppVersion1, 4);
@@ -834,8 +846,8 @@ namespace PagarMe.Mpos
 							CtlsCvmLimit = e.CtlsCvmLimit;
 							CtlsApplicationVersion = GetBytes(e.CtlsApplicationVersion, 4);
 
-							Tdol = GetBytes(e.Tdol, 40, out TdolLength, '0');
-							Ddol = GetBytes(e.Ddol, 40, out DdolLength, '0');
+							Tdol = GetBytes(e.Tdol, 40, out TdolLength);
+							Ddol = GetBytes(e.Ddol, 40, out DdolLength);
 						}
 					}
 
