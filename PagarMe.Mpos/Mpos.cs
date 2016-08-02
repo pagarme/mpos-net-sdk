@@ -37,7 +37,6 @@ namespace PagarMe.Mpos
 		private AbecsStream _stream;
 		private IntPtr _nativeMpos;
 		private TMSStorage _tmsStorage;
-		private readonly string _apiKey;
 		private readonly string _encryptionKey;
 		private readonly string _storagePath;
 
@@ -54,23 +53,21 @@ namespace PagarMe.Mpos
 		public event EventHandler OperationCompleted;
 
 		public Stream BaseStream { get { return _stream.BaseStream; } }
-		public string ApiKey { get { return _apiKey; } }
 		public string EncryptionKey { get { return _encryptionKey; } }
 		public string StoragePath { get { return _storagePath; } }
 		public TMSStorage TMSStorage { get { return _tmsStorage; } }
 
-		public Mpos(Stream stream, string apiKey, string encryptionKey, string storagePath)
-			: this(new AbecsStream(stream), apiKey, encryptionKey, storagePath)
+		public Mpos(Stream stream, string encryptionKey, string storagePath)
+			: this(new AbecsStream(stream), encryptionKey, storagePath)
 		{
 		}
 
-		private unsafe Mpos(AbecsStream stream, string apiKey, string encryptionKey, string storagePath)
+		private unsafe Mpos(AbecsStream stream, string encryptionKey, string storagePath)
 		{
 			NotificationPin = HandleNotificationCallback;
 			OperationPin = HandleOperationCompletedCallback;
 
 			_stream = stream;
-			_apiKey = apiKey;
 			_encryptionKey = encryptionKey;
 			_storagePath = storagePath;
 			_nativeMpos = Native.Create((IntPtr)stream.NativeStream, NotificationPin, OperationPin);
@@ -199,7 +196,7 @@ namespace PagarMe.Mpos
 					cleanKeys[i] = (int)Marshal.PtrToStructure(pointer, typeof(int));
 				}
 				
-				ApiHelper.GetTerminalTables(this.ApiKey, !forceUpdate ? this.TMSStorage.GetGlobalVersion() : "", cleanKeys).ContinueWith(t => {
+				ApiHelper.GetTerminalTables(this.EncryptionKey, !forceUpdate ? this.TMSStorage.GetGlobalVersion() : "", cleanKeys).ContinueWith(t => {
 					if (t.Status == TaskStatus.Faulted) {
 						source.SetException(t.Exception);
 						return;
@@ -355,9 +352,9 @@ namespace PagarMe.Mpos
 			};
 			versionPin = GCHandle.Alloc(versionCallback);
 
-			Native.Error error = Native.GetTableVersion(_nativeMpos, versionCallback);
-			if (error != Native.Error.Ok)
-				throw new MposException(error);
+			Native.Error tableVersionError = Native.GetTableVersion(_nativeMpos, versionCallback);
+			if (tableVersionError != Native.Error.Ok)
+				throw new MposException(tableVersionError);
 
 			return source.Task;
 		}

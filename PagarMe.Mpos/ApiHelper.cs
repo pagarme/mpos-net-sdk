@@ -19,8 +19,8 @@ namespace PagarMe.Mpos
 
         static ApiHelper()
         {
-            //ApiEndpoint = "https://api.pagar.me/1";
-			ApiEndpoint = "http://192.168.64.2:3000";
+            ApiEndpoint = "https://api.pagar.me/1";
+			//ApiEndpoint = "http://192.168.64.2:3000";
         }
 
         static HttpWebRequest CreateRequest(string method, string path, string auth)
@@ -96,9 +96,9 @@ namespace PagarMe.Mpos
             return EncryptWith(hashParameters.Item1, hashParameters.Item2, data);
         }
 
-        public static async Task<string> GetTerminalTables(string apiKey, string checksum, int[] dukptKeys)
+        public static async Task<string> GetTerminalTables(string encryptionKey, string checksum, int[] dukptKeys)
         {
-			var request = CreateRequest("GET", "/terminal/updates?checksum=" + WebUtility.UrlEncode(checksum) + "&dukpt_keys=[" + String.Join(",", dukptKeys) + "]", apiKey);
+			var request = CreateRequest("GET", "/terminal/updates?checksum=" + WebUtility.UrlEncode(checksum) + "&dukpt_keys=[" + String.Join(",", dukptKeys) + "]", encryptionKey);
 			try {
 				var response = (HttpWebResponse)(await request.GetResponseAsync());
 				return new StreamReader(response.GetResponseStream(), Encoding.UTF8).ReadToEnd();
