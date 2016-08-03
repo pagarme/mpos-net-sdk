@@ -38,6 +38,21 @@
       <HintPath>..\packages\BouncyCastle.1.7.0\lib\Net40-Client\BouncyCastle.Crypto.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="EntityFramework">
+      <HintPath>..\packages\EntityFramework.6.0.0\lib\net45\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer">
+      <HintPath>..\packages\EntityFramework.6.0.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Transactions" />
+    <Reference Include="SQLite.Net">
+      <HintPath>..\..\..\test\SQLite.Net-PCL\src\SQLite.Net.Platform.OSX\bin\Debug\SQLite.Net.dll</HintPath>
+    </Reference>
+    <Reference Include="SQLite.Net.Platform.OSX">
+      <HintPath>..\..\..\test\SQLite.Net-PCL\src\SQLite.Net.Platform.OSX\bin\Debug\SQLite.Net.Platform.OSX.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -49,15 +64,16 @@
     <Compile Include="MposException.cs" />
     <Compile Include="PaymentMethod.cs" />
     <Compile Include="ApiHelper.cs" />
-    <Compile Include="AidEntry.cs" />
-    <Compile Include="CapkEntry.cs" />
     <Compile Include="ByteArrayConverter.cs" />
-    <Compile Include="TerminalData.cs" />
     <Compile Include="CaptureMethod.cs" />
     <Compile Include="EmvApplication.cs" />
+    <Compile Include="TMSStorage.cs" />
+    <Compile Include="SQLite.cs" />
+    <Compile Include="SQLiteAsync.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="app.config" />
   </ItemGroup>
 </Project>

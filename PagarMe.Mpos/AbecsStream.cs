@@ -42,7 +42,7 @@ namespace PagarMe.Mpos
 
         public unsafe Error Open(Native *stream)
         {
-            if (_open)
+			if (_open)
                 return Error.OkError;
 
             BeginRead();
