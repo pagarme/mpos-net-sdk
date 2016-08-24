@@ -39,7 +39,7 @@ namespace PagarMe.Mpos
 				parameters.Add(new Tuple<string, string> ("card_emv_data", emv));
 			}
 				
-            if (requiredPin && isOnlinePin)
+            if (requiredPin)
             {
 				parameters.Add(new Tuple<string, string> ("card_pin_mode", isOnlinePin ? "online" : "offline"));
 

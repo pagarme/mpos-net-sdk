@@ -116,10 +116,10 @@ namespace PagarMe.Mpos
 			var source = new TaskCompletionSource<bool>();
 			GCHandle keysPin = default(GCHandle);
 
-			Native.MposExtractKeysCallbackDelegate keysCallback = (mpos, err, keyLength, keys) => {
+			Native.MposExtractKeysCallbackDelegate keysCallback = (mpos, err, keys, keyLength) => {
 				GCHandle pin = default(GCHandle);
 
-				Native.TmsStoreCallbackDelegate tmsCallback = (version, tableLen, tables, appLen, applications, riskProfiles, acqLen, acquirers) => {
+				Native.TmsStoreCallbackDelegate tmsCallback = (version, tables, tableLen, applications, appLen, riskProfiles, riskLen, acquirers, acqLen, userData) => {
 					pin.Free();
 
 					GCHandle tablePin = default(GCHandle);
@@ -203,7 +203,7 @@ namespace PagarMe.Mpos
 					}
 					
 					if (t.Result.Length > 0) {
-						Native.Error error = Native.TmsGetTables(t.Result, t.Result.Length, tmsCallback);
+						Native.Error error = Native.TmsGetTables(t.Result, t.Result.Length, tmsCallback, IntPtr.Zero);
 						if (error != Native.Error.Ok) {
 							throw new MposException(error);					
 						}
@@ -287,7 +287,7 @@ namespace PagarMe.Mpos
 					riskProfiles.Add(new Native.RiskManagement(entry));
 				}
 
-				Native.Error error = Native.ProcessPayment(_nativeMpos, amount, rawApplications.Count, rawApplications.ToArray(), acquirers.Count, acquirers.ToArray(), riskProfiles.Count, riskProfiles.ToArray(), (int)magstripePaymentMethod, callback);
+				Native.Error error = Native.ProcessPayment(_nativeMpos, amount, rawApplications.ToArray(), rawApplications.Count, acquirers.ToArray(), acquirers.Count, riskProfiles.ToArray(), riskProfiles.Count, (int)magstripePaymentMethod, callback);
 
 				if (error != Native.Error.Ok)
 					throw new MposException(error);
@@ -398,7 +398,7 @@ namespace PagarMe.Mpos
 
 			pin = GCHandle.Alloc(callback);
 
-			Native.Error error = Native.FinishTransaction(_nativeMpos, status, responseCode, length, emvData, callback);
+			Native.Error error = Native.FinishTransaction(_nativeMpos, status, responseCode, emvData, length, callback);
 
 			if (error != Native.Error.Ok)
 				throw new MposException(error);
@@ -918,7 +918,7 @@ namespace PagarMe.Mpos
 					public delegate Error MposFinishTransactionCallbackDelegate(IntPtr mpos, int error);
 
 				[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-					public delegate Error MposExtractKeysCallbackDelegate(IntPtr mpos, int error, int keysLength, IntPtr keys);
+					public delegate Error MposExtractKeysCallbackDelegate(IntPtr mpos, int error, IntPtr keys, int keysLength);
 
 				[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 					public delegate Error MposGetTableVersionCallbackDelegate(IntPtr mpos, int error, IntPtr version);
@@ -927,7 +927,7 @@ namespace PagarMe.Mpos
 					public delegate Error MposClosedCallbackDelegate(IntPtr mpos, int error);
 
 				[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-					public delegate Error TmsStoreCallbackDelegate(string version, int tableLen, IntPtr tables, int appLen, IntPtr applications, IntPtr riskManagement, int acqLen, IntPtr acquirers);
+					public delegate Error TmsStoreCallbackDelegate(string version, IntPtr tables, int tableLen, IntPtr applications, int appLen, IntPtr riskManagement, int riskmanLen, IntPtr acquirers, int acqLen, IntPtr userData);
 
 				[DllImport("mpos", EntryPoint = "mpos_new", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
 					public static extern IntPtr Create(IntPtr stream, MposNotificationCallbackDelegate notificationCallback, MposOperationCompletedCallbackDelegate operationCompletedCallback);
@@ -936,13 +936,13 @@ namespace PagarMe.Mpos
 					public static extern Error Initialize(IntPtr mpos, IntPtr streamData, MposInitializedCallbackDelegate initializedCallback);
 
 				[DllImport("mpos", EntryPoint = "mpos_process_payment", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-					public static extern Error ProcessPayment(IntPtr mpos, int amount, int applicationListLength, Native.Application[] applicationList, int acquirerListLength, Native.Acquirer[] acquirers, int riskManagementListLength, Native.RiskManagement[] riskManagementList, int magstripePaymentMethod, MposPaymentCallbackDelegate paymentCallback);
+					public static extern Error ProcessPayment(IntPtr mpos, int amount, Native.Application[] applicationList, int applicationListLength, Native.Acquirer[] acquirers, int acquirerListLength,Native.RiskManagement[] riskManagementList, int riskManagementListLength, int magstripePaymentMethod, MposPaymentCallbackDelegate paymentCallback);
 
 				[DllImport("mpos", EntryPoint = "mpos_update_tables", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
 					public static extern Error UpdateTables(IntPtr mpos, IntPtr data, int count, string version, bool force_update, MposTablesLoadedCallbackDelegate callback);
 
 				[DllImport("mpos", EntryPoint = "mpos_finish_transaction", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-					public static extern Error FinishTransaction(IntPtr mpos, TransactionStatus status, int arc, int emvLen, string emv, MposFinishTransactionCallbackDelegate callback);
+					public static extern Error FinishTransaction(IntPtr mpos, TransactionStatus status, int arc, string emv, int emvLen, MposFinishTransactionCallbackDelegate callback);
 
 				[DllImport("mpos", EntryPoint = "mpos_extract_keys", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
 					public static extern Error ExtractKeys(IntPtr mpos, MposExtractKeysCallbackDelegate callback);
@@ -960,7 +960,7 @@ namespace PagarMe.Mpos
 					public static extern Error Free(IntPtr mpos);
 				
 				[DllImport("tms", EntryPoint = "tms_get_tables", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-					public static extern Error TmsGetTables(string payload, int length, TmsStoreCallbackDelegate callback);
+					public static extern Error TmsGetTables(string payload, int length, TmsStoreCallbackDelegate callback, IntPtr userData);
 			}
 	}
 }
