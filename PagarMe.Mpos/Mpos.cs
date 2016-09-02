@@ -650,8 +650,12 @@ namespace PagarMe.Mpos
 							AcquirerNumber = e.AcquirerNumber;
 							RecordNumber = e.RecordNumber;
 
-							EmvTags = e.EmvTags.Split(',').Select(int.Parse).ToArray();
-							EmvTagsLength = EmvTags.Length;
+							EmvTags = new int[256];
+							int[] tags = e.EmvTags.Split(',').Select(int.Parse).ToArray();
+							for (int i = 0; i < tags.Length; i++) {
+								EmvTags[i] = tags[i];
+							}
+							EmvTagsLength = tags.Length;
 						}
 					}
 				
@@ -936,7 +940,7 @@ namespace PagarMe.Mpos
 					public static extern Error Initialize(IntPtr mpos, IntPtr streamData, MposInitializedCallbackDelegate initializedCallback);
 
 				[DllImport("mpos", EntryPoint = "mpos_process_payment", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-					public static extern Error ProcessPayment(IntPtr mpos, int amount, Native.Application[] applicationList, int applicationListLength, Native.Acquirer[] acquirers, int acquirerListLength,Native.RiskManagement[] riskManagementList, int riskManagementListLength, int magstripePaymentMethod, MposPaymentCallbackDelegate paymentCallback);
+					public static extern Error ProcessPayment(IntPtr mpos, int amount, Native.Application[] applicationList, int applicationListLength, Native.Acquirer[] acquirers, int acquirerListLength, Native.RiskManagement[] riskManagementList, int riskManagementListLength, int magstripePaymentMethod, MposPaymentCallbackDelegate paymentCallback);
 
 				[DllImport("mpos", EntryPoint = "mpos_update_tables", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
 					public static extern Error UpdateTables(IntPtr mpos, IntPtr data, int count, string version, bool force_update, MposTablesLoadedCallbackDelegate callback);
