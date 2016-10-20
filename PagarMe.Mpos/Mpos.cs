@@ -515,6 +515,7 @@ namespace PagarMe.Mpos
 				string pan = GetString(info.Pan, info.PanLength);
 				string expirationDate = GetString(info.ExpirationDate);
 				string holderName = info.HolderNameLength.ToInt32() > 0 ?  GetString(info.HolderName, info.HolderNameLength) : null;
+				int panSequenceNumber = info.PanSequenceNumber;
 				string pin = null, pinKek = null;
 				bool isOnlinePin = info.IsOnlinePin != 0;
 				bool requiredPin = info.PinRequired != 0;
@@ -533,7 +534,7 @@ namespace PagarMe.Mpos
 					pinKek = GetString(info.PinKek);
 				}
 
-				await result.BuildAccepted(this.EncryptionKey, status, captureMethod, paymentMethod, pan, holderName, expirationDate, track1, track2, track3, emv, isOnlinePin, requiredPin, pin, pinKek);
+				await result.BuildAccepted(this.EncryptionKey, status, captureMethod, paymentMethod, pan, holderName, expirationDate, panSequenceNumber, track1, track2, track3, emv, isOnlinePin, requiredPin, pin, pinKek);
 			}
 			else
 			{
@@ -672,6 +673,7 @@ namespace PagarMe.Mpos
 						public int AcquirerIndex;
 						public int RecordNumber;
 						public int ApplicationType;
+						public int PanSequenceNumber;
 
 						[MarshalAs(UnmanagedType.ByValArray, SizeConst = 6)]
 							public byte[] ExpirationDate;
