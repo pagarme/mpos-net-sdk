@@ -11,6 +11,7 @@ namespace PagarMe.Mpos
         public PaymentStatus Status { get; private set; }
         public PaymentMethod PaymentMethod { get; private set; }
         public string CardHolderName { get; private set; }
+        public bool IsOnlinePin { get; private set; }
 
         internal void BuildErrored()
         {
@@ -57,6 +58,7 @@ namespace PagarMe.Mpos
             PaymentMethod = method;
             CardHolderName = holderName;
             CardHash = await ApiHelper.CreateCardHash(encryptionKey, urlEncoded);
+            IsOnlinePin = isOnlinePin;
         }
     }
 }
