@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace PagarMe.Mpos
+﻿namespace PagarMe.Mpos
 {
     public enum PaymentMethod
     {
@@ -8,4 +6,3 @@ namespace PagarMe.Mpos
         Debit
     }
 }
-

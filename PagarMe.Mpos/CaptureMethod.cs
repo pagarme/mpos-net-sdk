@@ -1,11 +1,8 @@
-﻿using System;
-
-namespace PagarMe.Mpos
+﻿namespace PagarMe.Mpos
 {
-	public enum CaptureMethod
-	{
-		Magstripe = 0,
-		EMV = 3
-	}
+    public enum CaptureMethod
+    {
+        Magstripe = 0,
+        EMV = 3
+    }
 }
-

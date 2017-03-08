@@ -7,8 +7,6 @@ namespace PagarMe.Mpos
         internal MposException(Mpos.Native.Error error)
             : base("An error ocurred: " + error)
         {
-            
         }
     }
 }
-

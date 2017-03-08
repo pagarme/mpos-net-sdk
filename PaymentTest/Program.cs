@@ -3,20 +3,18 @@ using System.Threading.Tasks;
 
 namespace PaymentTest
 {
-    class MainClass
+    internal class MainClass
     {
         public static void Main(string[] args)
         {
-
-
-			Process ().Wait ();
+            Process().Wait();
 
             Console.ReadLine();
         }
 
         public static async Task Process()
         {
-			var processor = new PaymentProcessor("/dev/tty.PAX-77000117-SerialPort");
+            var processor = new PaymentProcessor("/dev/tty.PAX-77000150-SerialPort");
 
             Console.WriteLine("Welcome to Pagador 9000");
             Console.WriteLine("Initializing...");
@@ -24,14 +22,14 @@ namespace PaymentTest
 
             await processor.Initialize();
 
-			//System.Threading.Thread.Sleep (3000);
-			Console.Write("Amount: ");
-			//String x = Console.ReadLine ();
-			//Console.WriteLine ("read line " + x);
-			//Int32 integer = Int32.Parse (x);
-			await processor.Pay(100);
+            //System.Threading.Thread.Sleep (3000);
+            Console.Write("Amount: ");
+            //String x = Console.ReadLine ();
+            //Console.WriteLine ("read line " + x);
+            //Int32 integer = Int32.Parse (x);
+            await processor.Pay(100);
 
-           // Console.WriteLine("Created transaction {0}.", transaction.Id);
+            // Console.WriteLine("Created transaction {0}.", transaction.Id);
         }
     }
 }

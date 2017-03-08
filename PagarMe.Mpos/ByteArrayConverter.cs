@@ -1,10 +1,10 @@
 ﻿using System;
-using Newtonsoft.Json;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace PagarMe.Mpos
 {
-    public class ByteArrayConverter : JsonConverter
+    internal class ByteArrayConverter : JsonConverter
     {
         public override void WriteJson(
             JsonWriter writer,
@@ -17,15 +17,13 @@ namespace PagarMe.Mpos
                 return;
             }
 
-            byte[] data = (byte[])value;
+            var data = (byte[]) value;
 
             // Compose an array.
             writer.WriteStartArray();
 
             for (var i = 0; i < data.Length; i++)
-            {
                 writer.WriteValue(data[i]);
-            }
 
             writer.WriteEndArray();
         }
@@ -41,7 +39,6 @@ namespace PagarMe.Mpos
                 var byteList = new List<byte>();
 
                 while (reader.Read())
-                {
                     switch (reader.TokenType)
                     {
                         case JsonToken.Integer:
@@ -58,18 +55,14 @@ namespace PagarMe.Mpos
                                     "Unexpected token when reading bytes: {0}",
                                     reader.TokenType));
                     }
-                }
 
                 throw new Exception("Unexpected end when reading bytes.");
             }
-            else
-            {
-                throw new Exception(
-                    string.Format(
-                        "Unexpected token parsing binary. "
-                        + "Expected StartArray, got {0}.",
-                        reader.TokenType));
-            }
+            throw new Exception(
+                string.Format(
+                    "Unexpected token parsing binary. "
+                    + "Expected StartArray, got {0}.",
+                    reader.TokenType));
         }
 
         public override bool CanConvert(Type objectType)
@@ -78,4 +71,3 @@ namespace PagarMe.Mpos
         }
     }
 }
-
