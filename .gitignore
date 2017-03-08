@@ -5,3 +5,8 @@ packages
 .vs 
 *.suo
 *.nupkg
+*.exe
+*.msi
+*.dylib
+*.dll
+
