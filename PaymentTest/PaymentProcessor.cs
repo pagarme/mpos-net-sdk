@@ -17,7 +17,7 @@ namespace PaymentTest
             _port = new SerialPort(device, Config.BaudRate, Parity.None, 8, StopBits.One);
             _port.Open();
 
-            _mpos = new Mpos(_port.BaseStream, "ek_test_f9cws0bU9700VqWE4UDuBlKLbvX4IO", "/tmp/");
+            _mpos = new Mpos(_port.BaseStream, "ek_test_f9cws0bU9700VqWE4UDuBlKLbvX4IO", Config.SqlitePath);
             //_mpos = new Mpos(_port.BaseStream, "ek_test_UT6AN4fDN3BCUgo6kxUiOq6S20dbKc");
             _mpos.NotificationReceived += (sender, e) => Console.WriteLine("Status: {0}", e);
             _mpos.TableUpdated += (sender, e) => Console.WriteLine("LOADED: {0}", e);
