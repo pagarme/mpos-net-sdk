@@ -10,3 +10,4 @@ packages
 *.dylib
 *.dll
 
+PaymentTest/App.config

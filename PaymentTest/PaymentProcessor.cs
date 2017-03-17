@@ -14,7 +14,7 @@ namespace PaymentTest
 
         public PaymentProcessor(string device)
         {
-            _port = new SerialPort(device, 140000, Parity.None, 8, StopBits.One);
+            _port = new SerialPort(device, Config.BaudRate, Parity.None, 8, StopBits.One);
             _port.Open();
 
             _mpos = new Mpos(_port.BaseStream, "ek_test_f9cws0bU9700VqWE4UDuBlKLbvX4IO", "/tmp/");
