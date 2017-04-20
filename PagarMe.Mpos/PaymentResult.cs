@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using static PagarMe.Mpos.Mpos;
 
 namespace PagarMe.Mpos
 {
@@ -13,22 +14,69 @@ namespace PagarMe.Mpos
         public string CardHolderName { get; private set; }
         public bool IsOnlinePin { get; private set; }
 
+        private PaymentStatus status;
+        private CaptureMethod captureMethod;
+        private PaymentMethod paymentMethod;
+        private string pan;
+        private string holderName;
+        private string expirationDate;
+        private int panSequenceNumber;
+        private string track1;
+        private string track2;
+        private string track3;
+        private string emv;
+        private bool isOnlinePin;
+        private bool requiredPin;
+        private string pin;
+        private string pinKek;
+
+        internal void Fill(Native.PaymentInfo info)
+        {
+            captureMethod = info.CaptureMethod == Native.CaptureMethod.EMV
+                                ? CaptureMethod.EMV
+                                : CaptureMethod.Magstripe;
+            status = info.Decision == Native.Decision.Refused ? PaymentStatus.Rejected : PaymentStatus.Accepted;
+            paymentMethod = (PaymentMethod)info.ApplicationType;
+            emv = captureMethod == CaptureMethod.EMV ? GetString(info.EmvData, info.EmvDataLength) : null;
+            pan = GetString(info.Pan, info.PanLength);
+            expirationDate = GetString(info.ExpirationDate);
+            holderName = info.HolderNameLength.ToInt32() > 0
+                ? GetString(info.HolderName, info.HolderNameLength)
+                : null;
+            panSequenceNumber = info.PanSequenceNumber;
+            pin = null;
+            pinKek = null;
+            isOnlinePin = info.IsOnlinePin != 0;
+            requiredPin = info.PinRequired != 0;
+
+            track1 = info.Track1Length.ToInt32() > 0 ? GetString(info.Track1, info.Track1Length) : null;
+            track2 = GetString(info.Track2, info.Track2Length);
+            track3 = info.Track3Length.ToInt32() > 0 ? GetString(info.Track3, info.Track3Length) : null;
+
+            expirationDate = expirationDate.Substring(2, 2) + expirationDate.Substring(0, 2);
+            if (holderName != null)
+                holderName = holderName.Trim().Split('/').Reverse().Aggregate((a, b) => a + ' ' + b);
+
+            if (requiredPin && isOnlinePin)
+            {
+                pin = GetString(info.Pin);
+                pinKek = GetString(info.PinKek);
+            }
+        }
+
         internal void BuildErrored()
         {
             Status = PaymentStatus.Errored;
         }
 
-        internal async Task BuildAccepted(string encryptionKey, PaymentStatus status, CaptureMethod captureMethod,
-            PaymentMethod method, string pan, string holderName, string expirationDate, int panSequenceNumber,
-            string track1, string track2, string track3, string emv, bool isOnlinePin, bool requiredPin, string pin,
-            string pinKek)
+        internal async Task BuildAccepted(string encryptionKey)
         {
             var parameters = new List<Tuple<string, string>>();
 
             parameters.Add(new Tuple<string, string>("capture_method",
                 captureMethod == CaptureMethod.EMV ? "emv" : "magstripe"));
             parameters.Add(new Tuple<string, string>("payment_method",
-                method == PaymentMethod.Credit ? "credit_card" : "debit_card"));
+                paymentMethod == PaymentMethod.Credit ? "credit_card" : "debit_card"));
             parameters.Add(new Tuple<string, string>("card_number", pan));
             parameters.Add(new Tuple<string, string>("card_expiration_date", expirationDate));
             parameters.Add(new Tuple<string, string>("card_sequence_number", panSequenceNumber.ToString()));
@@ -62,7 +110,7 @@ namespace PagarMe.Mpos
                     .Aggregate((a, b) => a + "&" + b);
 
             Status = status;
-            PaymentMethod = method;
+            PaymentMethod = paymentMethod;
             CardHolderName = holderName;
             CardHash = await ApiHelper.CreateCardHash(encryptionKey, urlEncoded);
             IsOnlinePin = isOnlinePin;
