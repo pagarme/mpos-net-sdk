@@ -1,4 +1,7 @@
-﻿using System;
+﻿using PagarMe.Mpos.Abecs;
+using PagarMe.Mpos.Helpers;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -332,8 +335,9 @@ namespace PagarMe.Mpos
             public delegate Error MposInitializedCallbackDelegate(IntPtr mpos, int error);
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate Error MposPaymentCallbackDelegate(IntPtr mpos, int error, IntPtr info);
-
+            public delegate Error MposPaymentCallbackDelegateInterop(IntPtr mpos, int error, IntPtr info);
+            public delegate Error MposPaymentCallbackDelegate(IntPtr mpos, int error, PaymentInfo info);
+            
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate Error MposTablesLoadedCallbackDelegate(IntPtr mpos, int error, bool loaded);
 
@@ -341,74 +345,96 @@ namespace PagarMe.Mpos
             public delegate Error MposFinishTransactionCallbackDelegate(IntPtr mpos, int error);
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate Error MposExtractKeysCallbackDelegate(IntPtr mpos, int error, IntPtr keys, int keysLength);
+            public delegate Error MposExtractKeysCallbackDelegateInterop(IntPtr mpos, int error, IntPtr keys, int keysLength);
+            public delegate Error MposExtractKeysCallbackDelegate(IntPtr mpos, int error, int[] keyList);
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate Error MposGetTableVersionCallbackDelegate(IntPtr mpos, int error, IntPtr version);
+            public delegate Error MposGetTableVersionCallbackDelegateInterop(IntPtr mpos, int error, IntPtr version);
+            public delegate Error MposGetTableVersionCallbackDelegate(IntPtr mpos, int error, String version);
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
             public delegate Error MposClosedCallbackDelegate(IntPtr mpos, int error);
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate Error TmsStoreCallbackDelegate(
+            public delegate Error TmsStoreCallbackDelegateInterop(
                 string version, IntPtr tables, int tableLen, IntPtr applications, int appLen, IntPtr riskManagement,
                 int riskmanLen, IntPtr acquirers, int acqLen, IntPtr userData);
+            public delegate Error TmsStoreCallbackDelegate(
+                string version, IList<Capk> capkList, IList<Aid> aidList, IList<Application> appList,
+                IList<RiskManagement> riskProfileList, IList<Acquirer> acquirerList, IntPtr userData);
 
-            [DllImport("mpos", EntryPoint = "mpos_new", CharSet = CharSet.Ansi,
-                CallingConvention = CallingConvention.Cdecl)]
-            public static extern IntPtr Create(IntPtr stream, MposNotificationCallbackDelegate notificationCallback,
-                MposOperationCompletedCallbackDelegate operationCompletedCallback);
 
-            [DllImport("mpos", EntryPoint = "mpos_initialize", CharSet = CharSet.Ansi,
-                CallingConvention = CallingConvention.Cdecl)]
-            public static extern Error Initialize(IntPtr mpos, IntPtr streamData,
-                MposInitializedCallbackDelegate initializedCallback);
+            private readonly static INativeImport Dll = Environment.Is64BitProcess ? NativeBit64.Dll : NativeBit32.Dll;
 
-            [DllImport("mpos", EntryPoint = "mpos_process_payment", CharSet = CharSet.Ansi,
-                CallingConvention = CallingConvention.Cdecl)]
-            public static extern Error ProcessPayment(IntPtr mpos, int amount, Application[] applicationList,
-                int applicationListLength, Acquirer[] acquirers, int acquirerListLength,
-                RiskManagement[] riskManagementList, int riskManagementListLength, int magstripePaymentMethod,
-                MposPaymentCallbackDelegate paymentCallback);
+            public static IntPtr Create(AbecsStream stream, MposNotificationCallbackDelegate notificationCallback, MposOperationCompletedCallbackDelegate operationCompletedCallback)
+            {
+                return Dll.Create(stream, notificationCallback, operationCompletedCallback);
+            }
 
-            [DllImport("mpos", EntryPoint = "mpos_update_tables", CharSet = CharSet.Ansi,
-                CallingConvention = CallingConvention.Cdecl)]
-            public static extern Error UpdateTables(IntPtr mpos, IntPtr data, int count, string version,
-                bool force_update, MposTablesLoadedCallbackDelegate callback);
+            public static Error Initialize(IntPtr mpos, MposInitializedCallbackDelegate initializedCallback)
+            {
+                return Dll.Initialize(mpos, initializedCallback);
+            }
 
-            [DllImport("mpos", EntryPoint = "mpos_finish_transaction", CharSet = CharSet.Ansi,
-                CallingConvention = CallingConvention.Cdecl)]
-            public static extern Error FinishTransaction(IntPtr mpos, TransactionStatus status, int arc, string emv,
-                int emvLen, MposFinishTransactionCallbackDelegate callback);
 
-            [DllImport("mpos", EntryPoint = "mpos_extract_keys", CharSet = CharSet.Ansi,
-                CallingConvention = CallingConvention.Cdecl)]
-            public static extern Error ExtractKeys(IntPtr mpos, MposExtractKeysCallbackDelegate callback);
 
-            [DllImport("mpos", EntryPoint = "mpos_get_table_version", CharSet = CharSet.Ansi,
-                CallingConvention = CallingConvention.Cdecl)]
-            public static extern Error GetTableVersion(IntPtr mpos, MposGetTableVersionCallbackDelegate callback);
 
-            [DllImport("mpos", EntryPoint = "mpos_display", CharSet = CharSet.Ansi,
-                CallingConvention = CallingConvention.Cdecl)]
-            public static extern Error Display(IntPtr mpos, string text);
+            public static Error ProcessPayment(IntPtr mpos, int amount, Application[] applicationList, int applicationListLength, Acquirer[] acquirers, int acquirerListLength, RiskManagement[] riskManagementList, int riskManagementListLength, int magstripePaymentMethod, MposPaymentCallbackDelegate paymentCallback)
+            {
+                return Dll.ProcessPayment(mpos, amount, applicationList, applicationListLength, acquirers, acquirerListLength, riskManagementList, riskManagementListLength, magstripePaymentMethod, paymentCallback);
+            }
 
-            [DllImport("mpos", EntryPoint = "mpos_close", CharSet = CharSet.Ansi,
-                CallingConvention = CallingConvention.Cdecl)]
-            public static extern Error Close(IntPtr mpos, string text, MposClosedCallbackDelegate callback);
 
-            [DllImport("mpos", EntryPoint = "mpos_free", CharSet = CharSet.Ansi,
-                CallingConvention = CallingConvention.Cdecl)]
-            public static extern Error Free(IntPtr mpos);
 
-            [DllImport("mpos", EntryPoint = "mpos_cancel", CharSet = CharSet.Ansi,
-                CallingConvention = CallingConvention.Cdecl)]
-            public static extern Error Cancel(IntPtr mpos);
+            public static Error UpdateTables(Mpos mpos, MposTablesLoadedCallbackDelegate tableCallback, Aid[] aidList, Capk[] capkList)
+            {
+                return Dll.UpdateTables(
+                    mpos._nativeMpos, mpos.TMSStorage.GetGlobalVersion(), true, 
+                    tableCallback, aidList, capkList
+                );
+            }
 
-            [DllImport("tms", EntryPoint = "tms_get_tables", CharSet = CharSet.Ansi,
-                CallingConvention = CallingConvention.Cdecl)]
-            public static extern Error TmsGetTables(string payload, int length, TmsStoreCallbackDelegate callback,
-                IntPtr userData);
+            public static Error FinishTransaction(IntPtr mpos, TransactionStatus status, int arc, string emv, int emvLen, MposFinishTransactionCallbackDelegate callback)
+            {
+                return Dll.FinishTransaction(mpos, status, arc, emv, emvLen, callback);
+            }
+
+            public static Error ExtractKeys(IntPtr mpos, MposExtractKeysCallbackDelegate callback)
+            {
+                return Dll.ExtractKeys(mpos, callback);
+            }
+
+            public static Error GetTableVersion(IntPtr mpos, MposGetTableVersionCallbackDelegate callback)
+            {
+                return Dll.GetTableVersion(mpos, callback);
+            }
+
+            public static Error Display(IntPtr mpos, string text)
+            {
+                return Dll.Display(mpos, text);
+            }
+
+            public static Error Close(IntPtr mpos, string text, MposClosedCallbackDelegate callback)
+            {
+                return Dll.Close(mpos, text, callback);
+            }
+
+            public static Error Free(IntPtr mpos)
+            {
+                return Dll.Free(mpos);
+            }
+
+            public static Error Cancel(IntPtr mpos)
+            {
+                return Dll.Cancel(mpos);
+            }
+
+            public static Error TmsGetTables(string payload, int length, TmsStoreCallbackDelegate callback, IntPtr userData)
+            {
+                return Dll.TmsGetTables(payload, length, callback, userData);
+            }
+
+            
         }
     }
 }

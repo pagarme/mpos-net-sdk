@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using PagarMe.Mpos.Abecs;
+using PagarMe.Mpos.Callbacks;
 
 namespace PagarMe.Mpos
 {
     public partial class Mpos : IDisposable
     {
-        private readonly IntPtr _nativeMpos;
+        protected internal readonly IntPtr _nativeMpos;
 
         private AbecsStream _stream;
 
@@ -29,7 +28,7 @@ namespace PagarMe.Mpos
             _stream = stream;
             EncryptionKey = encryptionKey;
             StoragePath = storagePath;
-            _nativeMpos = Native.Create((IntPtr) stream.NativeStream, NotificationPin, OperationPin);
+            _nativeMpos = Native.Create(stream, NotificationPin, OperationPin);
             TMSStorage = new TMSStorage(storagePath, encryptionKey);
         }
 
