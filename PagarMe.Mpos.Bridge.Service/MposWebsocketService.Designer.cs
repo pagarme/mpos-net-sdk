@@ -1,4 +1,4 @@
-﻿namespace PagarMe.Mpos.Bridge.Service
+namespace PagarMe.Mpos.Bridge.Service
 {
     partial class MposWebsocketService
     {

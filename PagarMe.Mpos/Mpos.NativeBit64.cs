@@ -1,4 +1,4 @@
-﻿using PagarMe.Mpos.Abecs;
+using PagarMe.Mpos.Abecs;
 using System;
 using System.Collections;
 using System.Runtime.InteropServices;
