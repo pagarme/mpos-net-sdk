@@ -2,7 +2,7 @@ bin
 obj
 *.userprefs
 packages
-.vs 
+.vs
 *.suo
 *.nupkg
 *.exe
@@ -10,3 +10,10 @@ packages
 *.dylib
 *.dll
 
+PaymentTest/App.config
+*.csproj.user
+PagarMe.AutomatedTests/App.config
+
+# OSX
+.DS_Store
+*.orig
