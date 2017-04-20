@@ -1,4 +1,4 @@
-﻿namespace PagarMe.Mpos
+namespace PagarMe.Mpos
 {
     public enum PaymentStatus
     {
