@@ -14,7 +14,7 @@ namespace PaymentTest
 
         public static async Task Process()
         {
-            var processor = new PaymentProcessor("/dev/tty.PAX-77000150-SerialPort");
+            var processor = new PaymentProcessor(Config.Port);
 
             Console.WriteLine("Welcome to Pagador 9000");
             Console.WriteLine("Initializing...");
