@@ -1,4 +1,4 @@
-﻿namespace PagarMe.Mpos.Devices
+namespace PagarMe.Mpos.Devices
 {
     public enum DeviceKind
     {

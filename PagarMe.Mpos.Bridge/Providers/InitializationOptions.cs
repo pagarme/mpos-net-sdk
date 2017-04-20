@@ -1,4 +1,4 @@
-﻿using PagarMe.Mpos.Devices;
+using PagarMe.Mpos.Devices;
 
 namespace PagarMe.Mpos.Bridge.Providers
 {

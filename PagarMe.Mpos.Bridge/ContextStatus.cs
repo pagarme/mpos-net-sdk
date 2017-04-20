@@ -1,4 +1,4 @@
-﻿namespace PagarMe.Mpos.Bridge
+namespace PagarMe.Mpos.Bridge
 {
     public enum ContextStatus
     {

@@ -1,4 +1,4 @@
-﻿namespace PagarMe.Mpos.Bridge.Commands
+namespace PagarMe.Mpos.Bridge.Commands
 {
     public class InitializeRequest
     {
