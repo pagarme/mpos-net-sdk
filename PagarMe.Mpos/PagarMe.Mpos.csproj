@@ -49,6 +49,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Helpers\GCHelper.cs" />
+    <Compile Include="Helpers\PtrHelper.cs" />
     <Compile Include="INativeImport.cs" />
     <Compile Include="Mpos.NativeBit32.cs" />
     <Compile Include="Mpos.NativeBit64.cs" />
