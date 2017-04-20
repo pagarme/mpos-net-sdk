@@ -19,9 +19,7 @@ namespace PagarMe.Mpos
         private readonly Native.MposOperationCompletedCallbackDelegate OperationPin;
 
         public Mpos(Stream stream, string encryptionKey, string storagePath)
-            : this(new AbecsStream(stream), encryptionKey, storagePath)
-        {
-        }
+            : this(new AbecsStream(stream), encryptionKey, storagePath) { }
 
         private unsafe Mpos(AbecsStream stream, string encryptionKey, string storagePath)
         {
@@ -584,6 +582,7 @@ namespace PagarMe.Mpos
 
             return result;
         }
+
 
         private void HandleNotificationCallback(IntPtr mpos, string notification)
         {

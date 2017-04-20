@@ -64,6 +64,9 @@
     <Compile Include="Devices\DeviceManager.cs" />
     <Compile Include="Devices\IDevice.cs" />
     <Compile Include="Devices\SerialDevice.cs" />
+    <Compile Include="Tms\Bit32.cs" />
+    <Compile Include="Tms\Bit64.cs" />
+    <Compile Include="Tms\ISqliteImport.cs" />
     <Compile Include="Tms\TMSStorage.cs" />
     <Compile Include="Tms\SQLite.cs" />
     <Compile Include="Tms\SQLiteAsync.cs" />
