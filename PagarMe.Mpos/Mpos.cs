@@ -237,39 +237,8 @@ namespace PagarMe.Mpos
 
             if (error == 0)
             {
-                var captureMethod = info.CaptureMethod == Native.CaptureMethod.EMV
-                    ? CaptureMethod.EMV
-                    : CaptureMethod.Magstripe;
-                var status = info.Decision == Native.Decision.Refused ? PaymentStatus.Rejected : PaymentStatus.Accepted;
-                var paymentMethod = (PaymentMethod) info.ApplicationType;
-                var emv = captureMethod == CaptureMethod.EMV ? GetString(info.EmvData, info.EmvDataLength) : null;
-                var pan = GetString(info.Pan, info.PanLength);
-                var expirationDate = GetString(info.ExpirationDate);
-                var holderName = info.HolderNameLength.ToInt32() > 0
-                    ? GetString(info.HolderName, info.HolderNameLength)
-                    : null;
-                var panSequenceNumber = info.PanSequenceNumber;
-                string pin = null, pinKek = null;
-                var isOnlinePin = info.IsOnlinePin != 0;
-                var requiredPin = info.PinRequired != 0;
-
-                var track1 = info.Track1Length.ToInt32() > 0 ? GetString(info.Track1, info.Track1Length) : null;
-                var track2 = GetString(info.Track2, info.Track2Length);
-                var track3 = info.Track3Length.ToInt32() > 0 ? GetString(info.Track3, info.Track3Length) : null;
-
-                expirationDate = expirationDate.Substring(2, 2) + expirationDate.Substring(0, 2);
-                if (holderName != null)
-                    holderName = holderName.Trim().Split('/').Reverse().Aggregate((a, b) => a + ' ' + b);
-
-                if (requiredPin && isOnlinePin)
-                {
-                    pin = GetString(info.Pin);
-                    pinKek = GetString(info.PinKek);
-                }
-
-                await result.BuildAccepted(EncryptionKey, status, captureMethod, paymentMethod, pan, holderName,
-                    expirationDate, panSequenceNumber, track1, track2, track3, emv, isOnlinePin, requiredPin, pin,
-                    pinKek);
+                result.Fill(info);
+                await result.BuildAccepted(EncryptionKey);
             }
             else
             {
