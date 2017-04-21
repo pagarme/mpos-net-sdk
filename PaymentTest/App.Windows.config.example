@@ -4,6 +4,8 @@
      <add key="BaudRate" value="115200"/>
      <add key="Port" value="COM3"/>
      <add key="SqlitePath" value=""/>
+	 <add key="EncryptionKey" value="ek_test_f9cws0bU9700VqWE4UDuBlKLbvX4IO" />
+	 <add key="ApiKey" value="ak_test_NQEfPH4ktp7c9Zb0bpi1u1XkjpFCTH" />
    </appSettings>
   <runtime>
     <assemblyBinding xmlns="urn:schemas-microsoft-com:asm.v1">
