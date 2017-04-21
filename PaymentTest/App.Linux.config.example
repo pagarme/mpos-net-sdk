@@ -4,6 +4,8 @@
      <add key="BaudRate" value="140000"/>
      <add key="Port" value="/dev/tty.PAX-77000150-SerialPort"/>
      <add key="SqlitePath" value="/tmp/"/>
+	 <add key="EncryptionKey" value="ek_test_f9cws0bU9700VqWE4UDuBlKLbvX4IO" />
+	 <add key="ApiKey" value="ak_test_NQEfPH4ktp7c9Zb0bpi1u1XkjpFCTH" />
    </appSettings>
   <runtime>
     <assemblyBinding xmlns="urn:schemas-microsoft-com:asm.v1">
