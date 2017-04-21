@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using PagarMe;
 using PagarMe.Mpos;
 using PaymentMethod = PagarMe.Mpos.PaymentMethod;
+using PagarMe.Generic;
 
 namespace PaymentTest
 {
