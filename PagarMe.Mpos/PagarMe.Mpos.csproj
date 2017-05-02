@@ -49,21 +49,26 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Callbacks\GCEnvelop.cs" />
     <Compile Include="Callbacks\MposClosedCallback.cs" />
     <Compile Include="Callbacks\MposExtractKeysCallback.cs" />
+    <Compile Include="Callbacks\MposExtractKeysToInterop.cs" />
     <Compile Include="Callbacks\MposFinishTransactionCallback.cs" />
     <Compile Include="Callbacks\MposGetTableVersionCallback.cs" />
+    <Compile Include="Callbacks\MposGetTableVersionToInterop.cs" />
     <Compile Include="Callbacks\MposInitializedCallback.cs" />
+    <Compile Include="Callbacks\MposPaymentToInterop.cs" />
     <Compile Include="Callbacks\MposTablesLoadedPaymentCallback.cs" />
     <Compile Include="Callbacks\MposTablesLoadedSynchronizeTablesCallback.cs" />
     <Compile Include="Callbacks\TmsStoreCallback.cs" />
+    <Compile Include="Callbacks\TmsStoreToInterop.cs" />
     <Compile Include="Helpers\GCHelper.cs" />
     <Compile Include="Helpers\PtrHelper.cs" />
     <Compile Include="INativeImport.cs" />
     <Compile Include="Mpos.NativeBit32.cs" />
     <Compile Include="Mpos.NativeBit64.cs" />
     <Compile Include="Callbacks\MposPaymentCallback.cs" />
-    <Compile Include="Mpos.NativeBit.cs" />
+    <Compile Include="Mpos.NativeConverter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Mpos.cs" />
     <Compile Include="PaymentFlags.cs" />

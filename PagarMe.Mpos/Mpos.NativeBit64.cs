@@ -8,7 +8,7 @@ namespace PagarMe.Mpos
 {
     public partial class Mpos
     {
-        class NativeBit64 : NativeBit, INativeImport
+        class NativeBit64 : NativeConverter, INativeImport
         {
             const String mpos = "mpos64";
             const String tms = "tms64";
