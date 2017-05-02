@@ -45,9 +45,6 @@ namespace PagarMe.Mpos.Bridge
 
             try
             {
-                if (_status != ContextStatus.Uninitialized)
-                    terminate();
-
                 var device = _bridge.DeviceManager.GetById(request.DeviceId);
                 var dataPath = ensureDataPath(device, request.EncryptionKey);
 
@@ -157,24 +154,24 @@ namespace PagarMe.Mpos.Bridge
             return path;
         }
 
-        private void terminate()
+        public async Task Close()
         {
             try
             {
-                _provider.Close();
+                await _provider.Close();
             }
             catch
             {
                 // Doesn't matter, we're resetting anyway
             }
 
-            _provider = null;
             _status = ContextStatus.Uninitialized;
         }
 
         public void Dispose()
         {
             _provider.Dispose();
+            _provider = null;
         }
     }
 }

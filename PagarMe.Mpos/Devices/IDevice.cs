@@ -14,5 +14,9 @@ namespace PagarMe.Mpos.Devices
         DeviceKind Kind { get; }
 
         Stream Open();
+
+        void Close();
+
+        void Dispose();
     }
 }

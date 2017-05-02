@@ -28,7 +28,8 @@ namespace PagarMe.Mpos.Abecs
 
         private readonly Native.StreamOpenDelegate OpenPin;
         private readonly Native.StreamWriteDelegate WritePin;
-        private bool _open;
+        private Boolean _open;
+        private Boolean _available;
 
         public AbecsStream(Stream baseStream)
         {
@@ -42,6 +43,8 @@ namespace PagarMe.Mpos.Abecs
             NativeStream->Open = OpenPin;
             NativeStream->Write = WritePin;
             NativeStream->Close = ClosePin;
+
+            _available = true;
         }
 
         public Stream BaseStream { get; }
@@ -97,17 +100,22 @@ namespace PagarMe.Mpos.Abecs
                 Native.Free(NativeStream);
                 NativeStream = null;
             }
+
+            _available = false;
         }
 
         private void BeginRead()
         {
+            if (!_available)
+                return;
+
             var buffer = new byte[2048];
 
             BaseStream.ReadAsync(buffer, 0, buffer.Length).ContinueWith(t =>
             {
                 NativeStream->DataReceived(NativeStream, buffer, t.Result);
-
                 BeginRead();
+
             }, _cancellationToken.Token);
         }
 
