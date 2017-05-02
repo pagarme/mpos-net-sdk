@@ -25,7 +25,7 @@ namespace PagarMe.Mpos.Bridge
         {
             _options = options;
             _contexts = new Dictionary<string, Context>();
-            _deviceManager = new DeviceManager();
+            _deviceManager = new DeviceManager(options.BaudRate);
         }
 
 
