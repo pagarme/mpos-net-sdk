@@ -1,0 +1,17 @@
+﻿<html>
+<head>
+    <meta charset="utf-8" />
+    <script type="text/javascript" src="websocket.js"></script>
+	<link rel="stylesheet" href="websocket.css" />
+</head>
+<body>
+	<div class="body">
+		<input type="text" name="amount" id="amount" class="block" placeholder="amount"/>
+		<br />
+		<input type="radio" name="paymentMethod" id="Credit" value="Credit"/><label for="Credit">Credit</label>
+		<input type="radio" name="paymentMethod" id="Debit" value="Debit"/><label for="Debit">Debit</label>
+		<br />
+		<button onclick="webSocket.call()" id="sender" class="block">SEND!</button>
+	</div>
+</body>
+</html>
