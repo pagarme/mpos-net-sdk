@@ -41,8 +41,15 @@ namespace PagarMe.Mpos.Callbacks
 
                     if (t.Result.Length > 0)
                     {
-                        var error = Native.TmsGetTables(t.Result, t.Result.Length, tmsCallback, IntPtr.Zero);
-                        if (error != Native.Error.Ok) throw new MposException(error);
+                        try
+                        {
+                            var error = Native.TmsGetTables(t.Result, t.Result.Length, tmsCallback, IntPtr.Zero);
+                            if (error != Native.Error.Ok) throw new MposException(error);
+                        }
+                        catch(Exception e)
+                        {
+                            source.SetException(e);
+                        }
                     }
 
                     else
