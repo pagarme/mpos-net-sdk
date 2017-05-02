@@ -17,6 +17,8 @@ namespace PagarMe.Mpos.Bridge
         private readonly DeviceManager _deviceManager;
         private readonly Options _options;
 
+        private WebSocketServer _server;
+
         public Options Options { get { return _options; } }
 
         public DeviceManager DeviceManager { get { return _deviceManager; } }
@@ -31,10 +33,15 @@ namespace PagarMe.Mpos.Bridge
 
         public void Start()
         {
+            var addresses = Dns.GetHostAddresses(Options.BindAddress);
+            _server = new WebSocketServer(addresses[0], _options.BindPort);
+            _server.AddWebSocketService("/mpos", () => new MposWebSocketBehavior(this));
+            _server.Start();
         }
 
         public void Stop()
         {
+            _server.Stop();
         }
 
         public void Dispose()

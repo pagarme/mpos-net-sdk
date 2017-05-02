@@ -40,5 +40,15 @@ namespace PagarMe.Mpos.Devices
 
             return _port.BaseStream;
         }
+
+        public void Close()
+        {
+            _port.Close();
+        }
+
+        public void Dispose()
+        {
+            _port.Dispose();
+        }
     }
 }

@@ -1,16 +1,19 @@
 using System;
 using System.Threading.Tasks;
 using PagarMe.Mpos.Bridge.Commands;
+using PagarMe.Mpos.Devices;
 
 namespace PagarMe.Mpos.Bridge.Providers
 {
     public class MposProvider : IProvider
     {
         private Mpos _mpos;
+        private IDevice device; 
 
         public Task Open(InitializationOptions options)
         {
-            var stream = options.Device.Open();
+            device = options.Device;
+            var stream = device.Open();
 
             _mpos = new Mpos(stream, options.EncryptionKey, options.StoragePath);
 
@@ -58,13 +61,14 @@ namespace PagarMe.Mpos.Bridge.Providers
         public async Task Close()
         {
             await _mpos.Close();
-
-            _mpos = null;
         }
 
         public void Dispose()
         {
             _mpos.Dispose();
+            _mpos = null;
+
+            device.Close();
         }
     }
 }
