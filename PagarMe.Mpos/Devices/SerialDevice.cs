@@ -37,9 +37,22 @@ namespace PagarMe.Mpos.Devices
         
         public Stream Open()
         {
+            if (_port.IsOpen)
+                _port.Close();
+
             _port.Open();
 
             return _port.BaseStream;
+        }
+
+        public void Close()
+        {
+            _port.Close();
+        }
+
+        public void Dispose()
+        {
+            _port.Dispose();
         }
     }
 }
