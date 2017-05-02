@@ -12,7 +12,11 @@ namespace QuickTest
         {
             Task.Run(async () =>
             {
-                var options = new Options();
+				var options = new Options
+				{
+					BaudRate = Config.BaudRate,
+					EncryptionKey = Config.EncryptionKey
+				};
 
                 options.EnsureDefaults();
 
