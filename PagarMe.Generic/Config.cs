@@ -23,6 +23,5 @@ namespace PagarMe.Generic
         public readonly static String ApiKey;
 
         public readonly static String SqlitePath;
-
     }
 }

@@ -56,10 +56,10 @@ namespace PagarMe.Mpos.Devices
 
             lock (_devices)
             {
-                var devices = serialPorts.Select(getBySerialPort);
-                var toRemove = _devices.Keys.Except(devices.Select(x => x.Id)).ToArray();
+                var allDevices = serialPorts.Select(getBySerialPort).ToList();
+                var toRemove = _devices.Keys.Except(allDevices.Select(x => x.Id)).ToArray();
 
-                foreach (var device in devices)
+                foreach (var device in allDevices)
                     _devices[device.Id] = device;
 
                 foreach (var id in toRemove)
