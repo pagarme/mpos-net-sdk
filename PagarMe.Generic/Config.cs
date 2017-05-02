@@ -1,7 +1,7 @@
-using System;
+﻿using System;
 using System.Configuration;
 
-namespace PaymentTest
+namespace PagarMe.Generic
 {
     public static class Config
     {
@@ -23,5 +23,6 @@ namespace PaymentTest
         public readonly static String ApiKey;
 
         public readonly static String SqlitePath;
+
     }
 }

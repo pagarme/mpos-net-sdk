@@ -1,3 +1,4 @@
+using PagarMe.Generic;
 using System;
 using System.Threading.Tasks;
 
