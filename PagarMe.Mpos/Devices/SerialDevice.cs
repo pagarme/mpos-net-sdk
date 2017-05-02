@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.IO.Ports;
-using System.Threading.Tasks;
 
 namespace PagarMe.Mpos.Devices
 {
@@ -25,9 +24,9 @@ namespace PagarMe.Mpos.Devices
             }
         }
 
-        public SerialDevice(string port)
+        public SerialDevice(string port, int baudRate)
         {
-            _port = new SerialPort(port, 140000, Parity.None, 8, StopBits.One);
+            _port = new SerialPort(port, baudRate, Parity.None, 8, StopBits.One);
 
             Id = Guid.NewGuid().ToString();
             Port = port;
