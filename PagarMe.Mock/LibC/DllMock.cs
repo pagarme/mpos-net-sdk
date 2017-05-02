@@ -10,12 +10,8 @@ namespace PagarMe.Mock.LibC
 {
     partial class DllMock : INativeImport
     {
-        AbecsStream stream;
-
         public IntPtr Create(AbecsStream stream, MposNotificationCallbackDelegate notificationCallback, MposOperationCompletedCallbackDelegate operationCompletedCallback)
         {
-            this.stream = stream;
-
             mpos = PtrHelper.Ref(pointer);
 
             notificationCallback(mpos, notification);
@@ -49,8 +45,6 @@ namespace PagarMe.Mock.LibC
 
         public Error ExtractKeys(IntPtr mpos, MposExtractKeysCallbackDelegate callback)
         {
-            write("ExtractKeys");
-
             ReceivedMpos = mpos;
 
             callback(mpos, error, keyList);
@@ -76,8 +70,6 @@ namespace PagarMe.Mock.LibC
 
         public Error GetTableVersion(IntPtr mpos, MposGetTableVersionCallbackDelegate callback)
         {
-            write("GetTableVersion");
-
             ReceivedMpos = mpos;
 
             callback(mpos, error, version);
@@ -90,28 +82,15 @@ namespace PagarMe.Mock.LibC
             if (resultInit != Error.Ok)
                 return resultInit;
 
-            unsafe { stream.Open(stream.NativeStream); }
-            write("Initialize");
-
             ReceivedMpos = mpos;
+
             initializedCallback(mpos, error);
 
             return resultInit;
         }
 
-        private void write(string text)
-        {
-            unsafe
-            {
-                var ptr = PtrHelper.Ref(text);
-                stream.Write(stream.NativeStream, ptr, text.Length);
-            }
-        }
-
         public Error ProcessPayment(IntPtr mpos, int amount, Application[] applicationList, int applicationListLength, Acquirer[] acquirers, int acquirerListLength, RiskManagement[] riskManagementList, int riskManagementListLength, int magstripePaymentMethod, MposPaymentCallbackDelegate paymentCallback)
         {
-            write("ProcessPayment");
-
             ReceivedMpos = mpos;
 
             paymentCallback(mpos, error, info);
@@ -121,8 +100,6 @@ namespace PagarMe.Mock.LibC
 
         public Error TmsGetTables(string payload, int length, TmsStoreCallbackDelegate callback, IntPtr userData)
         {
-            write("TmsGetTables");
-
             ReceivedMpos = mpos;
 
             callback(version, capkList, aidList, appList, riskProfileList, acquirerList, userData);
@@ -134,8 +111,6 @@ namespace PagarMe.Mock.LibC
         {
             if (resultTableUpdate != Error.Ok)
                 return resultTableUpdate;
-
-            write("UpdateTables");
 
             ReceivedMpos = mpos;
 
