@@ -17,4 +17,5 @@ PagarMe.AutomatedTests/App.config
 # OSX
 .DS_Store
 *.orig
+BridgeExample/web.config
 QuickTest/App.config
