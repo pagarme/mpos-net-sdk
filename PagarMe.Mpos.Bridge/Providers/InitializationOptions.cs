@@ -9,5 +9,6 @@ namespace PagarMe.Mpos.Bridge.Providers
         public String EncryptionKey { get; set; }
         public String StoragePath { get; set; }
         public Int32 BaudRate { get; set; }
+        public Action<Int32> OnError { get; set; }
     }
 }

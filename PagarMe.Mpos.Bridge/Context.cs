@@ -35,7 +35,7 @@ namespace PagarMe.Mpos.Bridge
 
         private Boolean initialized = false;
 
-        public async Task Initialize(InitializeRequest request)
+        public async Task Initialize(InitializeRequest request, Action<Int32> onError)
         {
             lock (this)
             {
@@ -57,7 +57,8 @@ namespace PagarMe.Mpos.Bridge
                     Device = device,
                     EncryptionKey = request.EncryptionKey,
                     StoragePath = dataPath,
-                    BaudRate = request.BaudRate
+                    BaudRate = request.BaudRate,
+                    OnError = onError
                 });
 
                 await _provider.SynchronizeTables(false);
