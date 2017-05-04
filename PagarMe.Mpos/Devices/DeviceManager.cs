@@ -10,12 +10,10 @@ namespace PagarMe.Mpos.Devices
     {
         private bool _disposed;
         private Dictionary<string, IDevice> _devices;
-        private int _baudRate;
 
-        public DeviceManager(int baudRate)
+        public DeviceManager()
         {
             _devices = new Dictionary<string, IDevice>();
-            _baudRate = baudRate;
 
             update();
             updateTask();
@@ -54,15 +52,14 @@ namespace PagarMe.Mpos.Devices
 
         private void update()
         {
-            var serialPorts = SerialPort.GetPortNames();
-            
+            var serialPorts = SerialPort.GetPortNames();            
 
             lock (_devices)
             {
-                var devices = serialPorts.Select(getBySerialPort).ToList();
-                var toRemove = _devices.Keys.Except(devices.Select(x => x.Id)).ToArray();
+                var allDevices = serialPorts.Select(getBySerialPort).ToList();
+                var toRemove = _devices.Keys.Except(allDevices.Select(x => x.Id)).ToArray();
 
-                foreach (var device in devices)
+                foreach (var device in allDevices)
                     _devices[device.Id] = device;
 
                 foreach (var id in toRemove)
@@ -79,7 +76,7 @@ namespace PagarMe.Mpos.Devices
                     return device;
             }
 
-            return new SerialDevice(port, _baudRate);
+            return new SerialDevice(port);
         }
     }
 }

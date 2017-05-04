@@ -1,17 +1,26 @@
-﻿namespace PagarMe.Mpos.Bridge.Commands
+﻿using System;
+
+namespace PagarMe.Mpos.Bridge.Commands
 {
-    public class PaymentRequest
+    internal class PaymentRequest
     {
         public ProcessPaymentRequest Process { get; set; }
         public FinishPaymentRequest Finish { get; set; }
+        public InitializeRequest Initialize { get; set; }
+        public DisplayMessageRequest DisplayMessage { get; internal set; }
 
+        public String ContextId { get; set; }
         public Type RequestType { get; set; }
 
         public enum Type
         {
             UnknownCommand = 0,
-            Process = 1,
-            Finish = 2,
+            ListDevices = 1,
+            Initialize = 2,
+            Process = 3,
+            Finish = 4,
+            DisplayMessage = 5,
+            Close = 6,
         }
     }
 }
