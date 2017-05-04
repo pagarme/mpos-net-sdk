@@ -13,11 +13,15 @@ namespace PagarMe.Mpos.Bridge
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-        private readonly Dictionary<string, Context> _contexts;
+        private static readonly Dictionary<string, Context> _contexts
+            = new Dictionary<string, Context>();
+
         private readonly DeviceManager _deviceManager;
         private readonly Options _options;
 
         private WebSocketServer _server;
+
+        private const Int32 serviceLimit = 1;
 
         public Options Options { get { return _options; } }
 
@@ -26,7 +30,6 @@ namespace PagarMe.Mpos.Bridge
         public MposBridge(Options options)
         {
             _options = options;
-            _contexts = new Dictionary<string, Context>();
             _deviceManager = new DeviceManager(options.BaudRate);
         }
 
@@ -51,13 +54,17 @@ namespace PagarMe.Mpos.Bridge
 
         public Context GetContext(string name)
         {
-            Context context;
+            name = normalize(name);
 
-            if (name == null || name == "")
-                name = "<default>";
+            Context context;
 
             lock (_contexts)
             {
+                if (_contexts.Count >= serviceLimit)
+                {
+                    return null;
+                }
+
                 if (!_contexts.TryGetValue(name, out context))
                 {
                     var provider = new MposProvider();
@@ -68,6 +75,24 @@ namespace PagarMe.Mpos.Bridge
             }
 
             return context;
+        }
+
+        public void KillContext(string name)
+        {
+            name = normalize(name);
+
+            lock (_contexts)
+            {
+                if (_contexts.ContainsKey(name))
+                {
+                    _contexts.Remove(name);
+                }
+            }
+        }
+
+        private string normalize(string name)
+        {
+            return name == null || name == "" ? "<default>" : name;
         }
     }
 }
