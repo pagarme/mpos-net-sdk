@@ -1,20 +1,34 @@
-var callWS = function() {
-	var instance = new webSocket();
+var callWS = function(contextId, devicePort, encryptionKey, baudRate) {
+	var instance = new webSocket(contextId, devicePort, encryptionKey, baudRate);
 	instance.call();
 }
 
-var webSocket = function () {
+var webSocket = function (contextId, devicePort, encryptionKey, baudRate) {
+	
+	this.contextId = contextId;
+	this.devicePort = devicePort;
+	this.encryptionKey = encryptionKey;
+	this.baudRate = baudRate;
 
 	this.response = {
 		unknownCommand: 0,
-		processed: 1,
-		finished: 2,
-		error: 3
+		devicesListed: 1,
+		initialized: 2,
+		alreadyInitialized: 3,
+		processed: 4,
+		finished: 5,
+		messageDisplayed: 6,
+		closed: 7,
+		error: 8,
 	};
 	
 	this.request = {
-		process: 1,
-		finish: 2
+		listDevices: 1,
+		initialize: 2,
+		process: 3,
+		finish: 4,
+		displayMessage: 5,
+		close: 6,
 	};
 	
 	this.amount = 0;
@@ -80,32 +94,48 @@ var webSocket = function () {
 	
 	this.open = function(a,b,c,d) {
 		//document.getElementById("sender").disabled = true;
-		this.parent.callProcess();
+		this.parent.listDevices();
 	};
 	
 	this.handleResponse = function (response) {
-		var info = JSON.parse(response.data);
+		var responseContent = JSON.parse(response.data);
 		
-		if (info.ResponseType == this.parent.response.processed)
+		switch(responseContent.ResponseType)
 		{
-			this.parent.callFinish();
+			case (this.parent.response.devicesListed):
+				this.parent.initialize(responseContent);
+				break;
+
+			case (this.parent.response.initialized):
+			case (this.parent.response.alreadyInitialized):
+				
+				this.parent.process();
+				break;
+
+			case (this.parent.response.processed):
+				this.parent.finish(responseContent);
+				break;
+
+			default:
+				this.close();
+
+				var message = this.parent.getEndingMessage(responseContent);
+				if (message) alert(message);
+
+				break;
 		}
-		else
-		{
-			this.close();
-			alert(this.parent.getEndingMessage(info));
-		}
+		
 	};
 	
-	this.getEndingMessage = function (info, that)
+	this.getEndingMessage = function (response)
 	{
-		switch(info.ResponseType)
+		switch(response.ResponseType)
 		{
 			case this.response.finished:
 				return "Payment Succeded";
 				
 			case this.response.error:
-				return info.Error;
+				return response.Error;
 				
 			case this.response.unknownCommand:
 				return "Unknown Request";
@@ -124,23 +154,61 @@ var webSocket = function () {
 		this.close();
 	};
 	
-	this.callProcess = function() {
+	this.listDevices = function() {
 
-		var requestInit = {
+		var request = {
+			RequestType: this.request.listDevices,
+			ContextId: this.contextId,
+		};
+	
+		this.sendMessage(request);
+	};
+	
+	this.initialize = function(response) {
+
+		var devices = response.DeviceList;
+		var deviceId = null;
+	
+		for(var d = 0; d < devices.length; d++)
+		{
+			if (devices[d].Port == this.devicePort)
+			{
+				deviceId = devices[d].Id;
+			}
+		}
+	
+		var request = {
+			RequestType: this.request.initialize,
+			ContextId: this.contextId,
+			Initialize: {
+				DeviceId: deviceId,
+				EncryptionKey: this.encryptionKey,
+				BaudRate: this.baudRate
+			}
+		};
+	
+		this.sendMessage(request);
+	};
+	
+	this.process = function() {
+
+		var request = {
 			RequestType: this.request.process,
+			ContextId: this.contextId,
 			Process: {
 				Amount: this.amount * 100,
 				MagstripePaymentMethod: this.method
 			}
 		};
 	
-		this.ws.send(JSON.stringify(requestInit));
+		this.sendMessage(request);
 	};
 	
-	this.callFinish = function() {
+	this.finish = function(response) {
 
-		var requestFinish = {
+		var request = {
 			RequestType: this.request.finish,
+			ContextId: this.contextId,
 			Finish: {
 				Success: true,
 				ResponseCode: "0000",
@@ -148,7 +216,12 @@ var webSocket = function () {
 			}
 		};
 	
-		this.ws.send(JSON.stringify(requestFinish));
+		this.sendMessage(request);
 	};
 
+	this.sendMessage = function(request) {
+		this.ws.send(JSON.stringify(request));
+	}
+
+	
 };
