@@ -63,7 +63,7 @@ namespace PagarMe.Mpos.Bridge.WebSocket
                 }
             }
 
-            Send(JsonConvert.SerializeObject(response));
+            send(response);
 
             base.OnMessage(e);
         }
@@ -76,7 +76,8 @@ namespace PagarMe.Mpos.Bridge.WebSocket
 
         private async Task initialize(Context context, PaymentRequest request, PaymentResponse response)
         {
-            await context.Initialize(request.Initialize);
+            await context.Initialize(request.Initialize, onError);
+
             response.ResponseType = PaymentResponse.Type.Initialized;
         }
 
@@ -108,17 +109,30 @@ namespace PagarMe.Mpos.Bridge.WebSocket
 
         protected override void OnError(ErrorEventArgs e)
         {
-            var response = new PaymentResponse {
-                ResponseType = PaymentResponse.Type.Error,
-                Error = e.Message
-            };
-
-            Send(JsonConvert.SerializeObject(response));
-
+            onError(e.Message);
             base.OnError(e);
         }
 
+        private void onError(Int32 errorCode)
+        {
+            onError($"Error: {errorCode}");
+        }
 
+        private void onError(String message)
+        {
+            var response = new PaymentResponse
+            {
+                ResponseType = PaymentResponse.Type.Error,
+                Error = message
+            };
+
+            send(response);
+        }
+
+        private void send(PaymentResponse response)
+        {
+            Send(JsonConvert.SerializeObject(response));
+        }
 
 
 

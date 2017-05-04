@@ -56,7 +56,7 @@ var webSocket = function (contextId, devicePort, encryptionKey, baudRate) {
 
 		else
 		{
-			alert("WebSocket NOT supported by your Browser!");
+			this.showMessage("WebSocket NOT supported by your Browser!");
 		}
 	};
 	
@@ -86,7 +86,7 @@ var webSocket = function (contextId, devicePort, encryptionKey, baudRate) {
 		
 		if (!valid)
 		{
-			alert("Errors:" + message);
+			this.showMessage("Errors:" + message);
 		}
 		
 		return valid;
@@ -120,15 +120,14 @@ var webSocket = function (contextId, devicePort, encryptionKey, baudRate) {
 				this.close();
 
 				var message = this.parent.getEndingMessage(responseContent);
-				if (message) alert(message);
+				if (message) this.parent.showMessage(message);
 
 				break;
 		}
 		
 	};
 	
-	this.getEndingMessage = function (response)
-	{
+	this.getEndingMessage = function (response) {
 		switch(response.ResponseType)
 		{
 			case this.response.finished:
@@ -145,12 +144,17 @@ var webSocket = function (contextId, devicePort, encryptionKey, baudRate) {
 		}
 	};
 	
+	this.showMessage = function(message) {
+		document.getElementById("messages")
+			.innerHTML += "<br />" + message;
+	};
+	
 	this.close = function() {
 		document.getElementById("sender").disabled = false;
 	};
 	
 	this.error = function(){
-		alert("Url '" + this.url + "' not found or disconnected");
+		this.parent.showMessage("Url '" + this.url + "' not found or disconnected");
 		this.close();
 	};
 	
