@@ -14,6 +14,7 @@ namespace PagarMe.Mpos.Bridge.Server
             var running = true;
             var options = new Options();
             var isValid = Parser.Default.ParseArgumentsStrict(args, options);
+            options.EnsureDefaults();
 
             if (!isValid)
                 return 1;
