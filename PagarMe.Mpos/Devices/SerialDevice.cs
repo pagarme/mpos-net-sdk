@@ -8,13 +8,13 @@ namespace PagarMe.Mpos.Devices
     {
         private SerialPort _port;
 
-        public string Port { get; set; }
+        public String Port { get; set; }
 
-        public string Id { get; set; }
+        public String Id { get; set; }
 
-        public string Name { get; set; }
+        public String Name { get; set; }
 
-        public string Manufacturer { get; set; }
+        public String Manufacturer { get; set; }
 
         public DeviceKind Kind
         {
@@ -24,22 +24,21 @@ namespace PagarMe.Mpos.Devices
             }
         }
 
-        public SerialDevice(string port, int baudRate)
+        public SerialDevice(String port)
         {
-            _port = new SerialPort(port, baudRate, Parity.None, 8, StopBits.One);
-
             Id = Guid.NewGuid().ToString();
             Port = port;
             Name = "Serial Device (" + port + ")";
             Manufacturer = "";
         }
         
-        public Stream Open()
+        public Stream Open(Int32 baudRate)
         {
-            if (_port.IsOpen)
-                _port.Close();
+            if (_port == null)
+                _port = new SerialPort(Port, baudRate, Parity.None, 8, StopBits.One);
 
-            _port.Open();
+            if (!_port.IsOpen)
+                _port.Open();
 
             return _port.BaseStream;
         }

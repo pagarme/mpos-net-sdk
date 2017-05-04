@@ -13,7 +13,7 @@ namespace PagarMe.Mpos.Bridge.Providers
         public Task Open(InitializationOptions options)
         {
             device = options.Device;
-            var stream = device.Open();
+            var stream = device.Open(options.BaudRate);
 
             _mpos = new Mpos(stream, options.EncryptionKey, options.StoragePath);
 

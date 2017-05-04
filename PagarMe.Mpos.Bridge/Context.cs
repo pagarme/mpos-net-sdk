@@ -27,20 +27,24 @@ namespace PagarMe.Mpos.Bridge
             _status = ContextStatus.Uninitialized;
         }
 
-        public Task<ListDevicesResponse> ListDevices()
+        public Task<IDevice[]> ListDevices()
         {
             var devices = _bridge.DeviceManager.FindAvailableDevices();
-
-            var result = new ListDevicesResponse
-            {
-                Devices = devices
-            };
-
-            return Task.FromResult(result);
+            return Task.FromResult(devices);
         }
+
+        private Boolean initialized = false;
 
         public async Task Initialize(InitializeRequest request)
         {
+            lock (this)
+            {
+                if (initialized)
+                    return;
+
+                initialized = true;
+            }
+
             await _lock.WaitAsync();
 
             try
@@ -52,7 +56,8 @@ namespace PagarMe.Mpos.Bridge
                 {
                     Device = device,
                     EncryptionKey = request.EncryptionKey,
-                    StoragePath = dataPath
+                    StoragePath = dataPath,
+                    BaudRate = request.BaudRate
                 });
 
                 await _provider.SynchronizeTables(false);

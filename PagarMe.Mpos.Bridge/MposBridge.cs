@@ -27,10 +27,15 @@ namespace PagarMe.Mpos.Bridge
 
         public DeviceManager DeviceManager { get { return _deviceManager; } }
 
+        internal Context GetContext(object contextName)
+        {
+            throw new NotImplementedException();
+        }
+
         public MposBridge(Options options)
         {
             _options = options;
-            _deviceManager = new DeviceManager(options.BaudRate);
+            _deviceManager = new DeviceManager();
         }
 
 
@@ -60,13 +65,11 @@ namespace PagarMe.Mpos.Bridge
 
             lock (_contexts)
             {
-                if (_contexts.Count >= serviceLimit)
-                {
-                    return null;
-                }
-
                 if (!_contexts.TryGetValue(name, out context))
                 {
+                    if (_contexts.Count >= serviceLimit)
+                        return null;
+
                     var provider = new MposProvider();
 
                     context = new Context(this, provider);

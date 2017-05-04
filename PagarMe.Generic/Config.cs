@@ -9,7 +9,6 @@ namespace PagarMe.Generic
         {
             Port = ConfigurationManager.AppSettings["Port"];
             BaudRate = Int32.Parse(ConfigurationManager.AppSettings["BaudRate"]);
-            DevicePartialName = ConfigurationManager.AppSettings["DevicePartialName"];
 
             EncryptionKey = ConfigurationManager.AppSettings["EncryptionKey"];
             ApiKey = ConfigurationManager.AppSettings["ApiKey"];
@@ -24,7 +23,5 @@ namespace PagarMe.Generic
         public readonly static String ApiKey;
 
         public readonly static String SqlitePath;
-
-        public readonly static String DevicePartialName;
     }
 }
