@@ -1,6 +1,5 @@
 using System;
 using PagarMe.Mpos.Bridge;
-using PagarMe.Generic;
 using CommandLine;
 using System.Threading;
 
@@ -12,12 +11,7 @@ namespace QuickTest
 
         private static int Main(string[] args)
         {
-            options = new Options()
-            {
-                BaudRate = Config.BaudRate,
-                EncryptionKey = Config.EncryptionKey
-            };
-
+            options = new Options();
             var isValid = Parser.Default.ParseArgumentsStrict(args, options);
             options.EnsureDefaults();
 
