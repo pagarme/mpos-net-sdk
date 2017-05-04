@@ -8,7 +8,8 @@ namespace PagarMe.Mpos.Bridge.Providers
     public class MposProvider : IProvider
     {
         private Mpos _mpos;
-        private IDevice device; 
+        private IDevice device;
+        private Action<Int32> onError;
 
         public Task Open(InitializationOptions options)
         {
@@ -17,8 +18,18 @@ namespace PagarMe.Mpos.Bridge.Providers
 
             _mpos = new Mpos(stream, options.EncryptionKey, options.StoragePath);
 
+            _mpos.Errored += errored;
+
+            onError = options.OnError;
+
             return _mpos.Initialize();
         }
+
+        private void errored(object sender, int error)
+        {
+            onError(error);
+        }
+
 
         public Task SynchronizeTables(bool force)
         {
@@ -57,6 +68,7 @@ namespace PagarMe.Mpos.Bridge.Providers
 
             return Task.FromResult(0);
         }
+
 
         public async Task Close()
         {
