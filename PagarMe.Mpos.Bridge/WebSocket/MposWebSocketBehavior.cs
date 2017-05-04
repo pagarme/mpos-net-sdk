@@ -9,19 +9,54 @@ namespace PagarMe.Mpos.Bridge.WebSocket
 {
     internal class MposWebSocketBehavior : WebSocketBehavior
     {
-        private MposBridge mposBridge;
+        private readonly MposBridge mposBridge;
+        private String requestCode;
         private Context context;
 
         public MposWebSocketBehavior(MposBridge mposBridge)
         {
             this.mposBridge = mposBridge;
+        }
 
-            var requestCode = GetHashCode().ToString();
-            context = mposBridge.GetContext(requestCode);
+        protected override async void OnOpen()
+        {
+            requestCode = GetHashCode().ToString();
+
+            lock (mposBridge)
+            {
+                context = mposBridge.GetContext(requestCode);
+            }
+
+            if (context == null)
+            {
+                var response = new PaymentResponse
+                {
+                    ResponseType = PaymentResponse.Type.Error,
+                    Error = "There is a transaction already opened, please wait until it finishes"
+                };
+
+                Send(JsonConvert.SerializeObject(response));
+
+                return;
+            }
+
+            var devices = mposBridge.DeviceManager.FindAvailableDevices();
+            var device = devices.Last();
+
+            await context.Initialize(new InitializeRequest
+            {
+                DeviceId = device.Id,
+                EncryptionKey = mposBridge.Options.EncryptionKey
+            });
+
+            base.OnOpen();
         }
 
         protected override async void OnMessage(MessageEventArgs e)
         {
+            if (context == null)
+                return;
+
             var request = JsonConvert.DeserializeObject<PaymentRequest>(e.Data);
             var response = new PaymentResponse();
 
@@ -59,24 +94,16 @@ namespace PagarMe.Mpos.Bridge.WebSocket
             base.OnError(e);
         }
 
-        protected override async void OnOpen()
-        {
-            var devices = mposBridge.DeviceManager.FindAvailableDevices();
-            var device = devices.Last();
-
-            await context.Initialize(new InitializeRequest
-            {
-                DeviceId = device.Id,
-                EncryptionKey = mposBridge.Options.EncryptionKey
-            });
-
-            base.OnOpen();
-        }
-
         protected override async void OnClose(CloseEventArgs e)
         {
-            await context.Close();
-            context.Dispose();
+            if (context != null)
+            {
+                await context.Close();
+                context.Dispose();
+
+                mposBridge.KillContext(requestCode);
+            }
+
             base.OnClose(e);
         }
 
