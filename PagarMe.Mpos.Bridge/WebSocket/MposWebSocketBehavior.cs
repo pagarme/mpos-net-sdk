@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using NLog;
 using PagarMe.Mpos.Bridge.Commands;
 using System;
 using System.Threading.Tasks;
@@ -9,15 +10,43 @@ namespace PagarMe.Mpos.Bridge.WebSocket
 {
     internal class MposWebSocketBehavior : WebSocketBehavior
     {
+        private static readonly NLog.Logger logger = LogManager.GetCurrentClassLogger();
+
         private readonly MposBridge mposBridge;
-        private String requestCode;
 
         public MposWebSocketBehavior(MposBridge mposBridge)
         {
             this.mposBridge = mposBridge;
         }
 
+
+        protected override void OnOpen()
+        {
+            logger.Info("Socket Opened");
+        }
+
+        protected override void OnClose(CloseEventArgs e)
+        {
+            logger.Info($"Socket Closed: [{e.Code}] {e.Reason}");
+        }
+
+
         protected override async void OnMessage(MessageEventArgs e)
+        {
+            logger.Info("Request Handling");
+
+            await logger.TryLogOnExceptionAsync(() => 
+            {
+                var task = handleMessage(e);
+
+                if (task.Exception != null)
+                    logger.Error(task.Exception);
+
+                return task;
+            });
+        }
+
+        private async Task handleMessage(MessageEventArgs e)
         {
             var request = JsonConvert.DeserializeObject<PaymentRequest>(e.Data);
             var response = new PaymentResponse();
@@ -26,46 +55,51 @@ namespace PagarMe.Mpos.Bridge.WebSocket
 
             if (context == null)
             {
+                logger.Info("No space for new context");
                 response.ResponseType = PaymentResponse.Type.Error;
                 response.Error = "Number of transactions opened exceeded, please wait until some of them finishes";
             }
             else
             {
-                switch (request.RequestType)
-                {
-                    case PaymentRequest.Type.ListDevices:
-                        await getDeviceList(context, response);
-                        break;
-
-                    case PaymentRequest.Type.Initialize:
-                        await initialize(context, request, response);
-                        break;
-
-                    case PaymentRequest.Type.Process:
-                        await process(context, request, response);
-                        break;
-
-                    case PaymentRequest.Type.Finish:
-                        await finish(context, request, response);
-                        break;
-
-                    case PaymentRequest.Type.DisplayMessage:
-                        await displayMessage(context, request, response);
-                        break;
-
-                    case PaymentRequest.Type.Close:
-                        await close(context, response);
-                        break;
-
-                    default:
-                        response.ResponseType = PaymentResponse.Type.UnknownCommand;
-                        break;
-                }
+                logger.Info(request.RequestType);
+                await handleRequest(context, request, response);
             }
 
             send(response);
+        }
 
-            base.OnMessage(e);
+        private async Task handleRequest(Context context, PaymentRequest request, PaymentResponse response)
+        {
+            switch (request.RequestType)
+            {
+                case PaymentRequest.Type.ListDevices:
+                    await getDeviceList(context, response);
+                    break;
+
+                case PaymentRequest.Type.Initialize:
+                    await initialize(context, request, response);
+                    break;
+
+                case PaymentRequest.Type.Process:
+                    await process(context, request, response);
+                    break;
+
+                case PaymentRequest.Type.Finish:
+                    await finish(context, request, response);
+                    break;
+
+                case PaymentRequest.Type.DisplayMessage:
+                    await displayMessage(context, request, response);
+                    break;
+
+                case PaymentRequest.Type.Close:
+                    await close(context, response);
+                    break;
+
+                default:
+                    response.ResponseType = PaymentResponse.Type.UnknownCommand;
+                    break;
+            }
         }
 
         private async Task getDeviceList(Context context, PaymentResponse response)
@@ -107,10 +141,11 @@ namespace PagarMe.Mpos.Bridge.WebSocket
         }
 
 
-        protected override void OnError(ErrorEventArgs e)
+        protected override void OnError(WebSocketSharp.ErrorEventArgs e)
         {
+            logger.Error(e.Message);
+            logger.Error(e.Exception);
             onError(e.Message);
-            base.OnError(e);
         }
 
         private void onError(Int32 errorCode)
@@ -134,8 +169,6 @@ namespace PagarMe.Mpos.Bridge.WebSocket
             Send(JsonConvert.SerializeObject(response));
         }
 
-
-
-
+        
     }
 }

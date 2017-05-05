@@ -18,7 +18,7 @@ namespace PagarMe.Mpos.Bridge.Service
 
         protected override void OnStart(string[] args)
         {
-            try
+            Logger.TryLogOnException(() =>
             {
                 var options = new Options();
                 var isValid = Parser.Default.ParseArgumentsStrict(args, options);
@@ -29,28 +29,19 @@ namespace PagarMe.Mpos.Bridge.Service
                 Logger.Info("mPOS Websocket Bridge");
                 Logger.Info("Starting server");
                 _bridge.Start();
-            }
-            catch(Exception e)
-            {
-                Logger.Error(e);
-                throw;
-            }
+            });
         }
 
         protected override void OnStop()
         {
             if (_bridge == null)
                 return;
-            try
+
+            Logger.TryLogOnException(() =>
             {
                 Logger.Info("Stopping server");
                 _bridge.Stop();
-            }
-            catch (Exception e)
-            {
-                Logger.Error(e);
-                throw;
-            }
+            });
         }
     }
 }
