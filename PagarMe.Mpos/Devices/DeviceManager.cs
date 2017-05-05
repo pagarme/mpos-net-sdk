@@ -9,13 +9,13 @@ namespace PagarMe.Mpos.Devices
     public class DeviceManager : IDisposable
     {
         private bool _disposed;
+        private Action<Action> tryLogOnException;
         private Dictionary<string, IDevice> _devices;
 
-        public DeviceManager()
+        public DeviceManager(Action<Action> tryLogOnException = null)
         {
+            this.tryLogOnException = tryLogOnException ?? noLog;
             _devices = new Dictionary<string, IDevice>();
-
-            update();
             updateTask();
         }
 
@@ -52,19 +52,22 @@ namespace PagarMe.Mpos.Devices
 
         private void update()
         {
-            var serialPorts = SerialPort.GetPortNames();
-
-            lock (_devices)
+            tryLogOnException(() => 
             {
-                var allDevices = serialPorts.Select(getBySerialPort).ToList();
-                var toRemove = _devices.Keys.Except(allDevices.Select(x => x.Id)).ToArray();
+                var serialPorts = SerialPort.GetPortNames();
 
-                foreach (var device in allDevices)
-                    _devices[device.Id] = device;
+                lock (_devices)
+                {
+                    var allDevices = serialPorts.Select(getBySerialPort).ToList();
+                    var toRemove = _devices.Keys.Except(allDevices.Select(x => x.Id)).ToArray();
 
-                foreach (var id in toRemove)
-                    _devices.Remove(id);
-            }
+                    foreach (var device in allDevices)
+                        _devices[device.Id] = device;
+
+                    foreach (var id in toRemove)
+                        _devices.Remove(id);
+                }
+            });
         }
 
         // TODO: Need to improve this to check if it's a new device on the same port
@@ -78,5 +81,11 @@ namespace PagarMe.Mpos.Devices
 
             return new SerialDevice(port);
         }
+
+        private void noLog(Action action)
+        {
+            action();
+        }
+
     }
 }
