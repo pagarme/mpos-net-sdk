@@ -1,6 +1,7 @@
 using System.ServiceProcess;
 using CommandLine;
 using NLog;
+using System;
 
 namespace PagarMe.Mpos.Bridge.Service
 {
@@ -17,24 +18,39 @@ namespace PagarMe.Mpos.Bridge.Service
 
         protected override void OnStart(string[] args)
         {
-            var options = new Options();
-            var isValid = Parser.Default.ParseArgumentsStrict(args, options);
-            options.EnsureDefaults();
+            try
+            {
+                var options = new Options();
+                var isValid = Parser.Default.ParseArgumentsStrict(args, options);
+                options.EnsureDefaults();
 
-            _bridge = new MposBridge(options);
+                _bridge = new MposBridge(options);
 
-            Logger.Info("mPOS Websocket Bridge");
-            Logger.Info("Starting server");
-            _bridge.Start();
+                Logger.Info("mPOS Websocket Bridge");
+                Logger.Info("Starting server");
+                _bridge.Start();
+            }
+            catch(Exception e)
+            {
+                Logger.Error(e);
+                throw;
+            }
         }
 
         protected override void OnStop()
         {
             if (_bridge == null)
                 return;
-
-            Logger.Info("Stopping server");
-            _bridge.Stop();
+            try
+            {
+                Logger.Info("Stopping server");
+                _bridge.Stop();
+            }
+            catch (Exception e)
+            {
+                Logger.Error(e);
+                throw;
+            }
         }
     }
 }
