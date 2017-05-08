@@ -17,6 +17,7 @@ namespace PagarMe.Mpos.Bridge.WebSocket
         public MposWebSocketBehavior(MposBridge mposBridge)
         {
             this.mposBridge = mposBridge;
+            IgnoreExtensions = true;
         }
 
 
