@@ -59,6 +59,7 @@
     <Compile Include="Commands\FinishPaymentRequest.cs" />
     <Compile Include="Commands\InitializeRequest.cs" />
     <Compile Include="Commands\ListDevicesResponse.cs" />
+    <Compile Include="LoggerExtension.cs" />
     <Compile Include="MposBridge.cs" />
     <Compile Include="Commands\ProcessPaymentRequest.cs" />
     <Compile Include="Commands\ProcessPaymentResponse.cs" />

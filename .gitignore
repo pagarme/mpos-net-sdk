@@ -18,3 +18,4 @@ PagarMe.AutomatedTests/App.config
 .DS_Store
 *.orig
 ubuntu-service/example-site/web.config
+ubuntu-service/service/*
