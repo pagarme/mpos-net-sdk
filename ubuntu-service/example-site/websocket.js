@@ -98,6 +98,7 @@ var webSocket = function (contextId, devicePort, encryptionKey, baudRate) {
 	};
 	
 	this.handleResponse = function (response) {
+		
 		var responseContent = JSON.parse(response.data);
 		
 		switch(responseContent.ResponseType)
@@ -180,7 +181,17 @@ var webSocket = function (contextId, devicePort, encryptionKey, baudRate) {
 				deviceId = devices[d].Id;
 			}
 		}
-	
+		
+		if (deviceId == null)
+		{
+			this.showMessage("Port " + this.devicePort + " not found");
+
+			this.ws.close();
+			this.close();
+
+			return;
+		}
+		
 		var request = {
 			RequestType: this.request.initialize,
 			ContextId: this.contextId,
@@ -190,7 +201,7 @@ var webSocket = function (contextId, devicePort, encryptionKey, baudRate) {
 				BaudRate: this.baudRate
 			}
 		};
-	
+		
 		this.sendMessage(request);
 	};
 	
@@ -224,7 +235,8 @@ var webSocket = function (contextId, devicePort, encryptionKey, baudRate) {
 	};
 
 	this.sendMessage = function(request) {
-		this.ws.send(JSON.stringify(request));
+		var message = JSON.stringify(request);
+		this.ws.send(message);
 	}
 
 	
