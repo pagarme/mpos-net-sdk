@@ -1,0 +1,15 @@
+div#form {
+	width: 300px;
+	text-align: center;
+	display: inline-block;
+	vertical-align: top;
+}
+
+div#messages {
+	display: inline-block;
+	vertical-align: top;
+}
+
+br {
+	margin-bottom: 20px;
+}
