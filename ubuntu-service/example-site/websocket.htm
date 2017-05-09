@@ -11,10 +11,8 @@
 		<input type="radio" name="paymentMethod" id="Credit" value="Credit"/><label for="Credit">Credit</label>
 		<input type="radio" name="paymentMethod" id="Debit" value="Debit"/><label for="Debit">Debit</label>
 		<br />
-		<button onclick="callWS('test', 'COM3', 'ek_test_f9cws0bU9700VqWE4UDuBlKLbvX4IO', 115200)"
-			id="sender" class="block">Send Windows</button>
-		<button onclick="callWS('test', '/dev/ttyS2', 'ek_test_f9cws0bU9700VqWE4UDuBlKLbvX4IO', 140000)"
-			id="sender" class="block">Send Linux</button>
+		<button onclick="callWS('test', 'COM3', 'ek_test_f9cws0bU9700VqWE4UDuBlKLbvX4IO', 115200)">Send Windows</button>
+		<button onclick="callWS('test', '/dev/ttyS0', 'ek_test_f9cws0bU9700VqWE4UDuBlKLbvX4IO', 140000)">Send Linux</button>
 	</div>
 	<div id="messages">
 		
