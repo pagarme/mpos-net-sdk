@@ -1,24 +1,29 @@
-var webSocket = {
+var callWS = function() {
+	var instance = new webSocket();
+	instance.call();
+}
 
-	amount: 0,
-	method: null,
-	ws: null,
+var webSocket = function () {
 
-	response: {
+	this.response = {
 		unknownCommand: 0,
 		processed: 1,
 		finished: 2,
 		error: 3
-	},
+	};
 	
-	request: {
+	this.request = {
 		process: 1,
 		finish: 2
-	},
+	};
+	
+	this.amount = 0;
+	this.method = null;
+	this.ws = null;
 
-	call: function() {
+	this.call = function() {
 		if ("WebSocket" in window)
-		{
+		{			
 			this.setValues();
 			
 			var valid = this.validate();
@@ -27,7 +32,8 @@ var webSocket = {
 				return;
 			
 			this.ws = new WebSocket("ws://localhost:2000/mpos");
-				
+
+			this.ws.parent = this;
 			this.ws.onopen = this.open;		
 			this.ws.onmessage = this.handleResponse;
 			this.ws.onclose = this.close;
@@ -38,101 +44,103 @@ var webSocket = {
 		{
 			alert("WebSocket NOT supported by your Browser!");
 		}
-	},
+	};
 	
-	setValues: function() {
+	this.setValues = function() {
 		this.amount = document.getElementById("amount").value;
 		
 		this.method = 
 			document.getElementById("Credit").checked ? "Credit" :
 			document.getElementById("Debit").checked ? "Debit" :
 			null;
-	},
+	};
 	
-	validate: function() {
-		var message = [];
+	this.validate = function() {
+		var message = "";
 		var valid = true;
 	
 		if (isNaN(this.amount) || this.amount <= 0)
 		{
-			message.add("Invalid amount");
+			message += "\n- Invalid amount";
 			valid = false;
 		}
 		if (this.method == null)
 		{
-			message.add("No method chosen");
+			message += "\n- No method chosen";
 			valid = false;
 		}
 		
 		if (!valid)
 		{
-			alert(message);
+			alert("Errors:" + message);
 		}
 		
 		return valid;
-	},
+	};
 	
-	open: function() {
-		document.getElementById("sender").disabled = true;
-		webSocket.callProcess();
-	},
+	this.open = function(a,b,c,d) {
+		//document.getElementById("sender").disabled = true;
+		this.parent.callProcess();
+	};
 	
-	handleResponse: function (response) {
+	this.handleResponse = function (response) {
 		var info = JSON.parse(response.data);
-		var that = webSocket;
 		
+		if (info.ResponseType == this.parent.response.processed)
+		{
+			this.parent.callFinish();
+		}
+		else
+		{
+			this.close();
+			alert(this.parent.getEndingMessage(info));
+		}
+	};
+	
+	this.getEndingMessage = function (info, that)
+	{
 		switch(info.ResponseType)
 		{
-			case that.response.processed:
-				that.callFinish();
-				break;
+			case this.response.finished:
+				return "Payment Succeded";
 				
-			case that.response.finished:
-				that.ws.close();
-				break;
+			case this.response.error:
+				return info.Error;
 				
-			case that.response.error:
-				alert(info.Message);
-				break;
-				
-			case that.response.unknownCommand:
-				alert("Unknown Request");
-				break;
+			case this.response.unknownCommand:
+				return "Unknown Request";
 				
 			default:
-				alert("Unknown Response");
-				break;
+				return "Unknown Response";
 		}
-	},
+	};
 	
-	close: function() {
-		alert("Payment Succeded");
+	this.close = function() {
 		document.getElementById("sender").disabled = false;
-	},
+	};
 	
-	error: function(){
-		alert("Url '" + webSocket.ws.url + "' not found or disconnected");
-	},
+	this.error = function(){
+		alert("Url '" + this.url + "' not found or disconnected");
+		this.close();
+	};
 	
-	callProcess: function() {
-		var that = webSocket;
+	this.callProcess = function() {
 
 		var requestInit = {
-			RequestType: that.request.process,
+			RequestType: this.request.process,
 			Process: {
-				Amount: that.amount * 100,
-				MagstripePaymentMethod: that.method
+				Amount: this.amount * 100,
+				MagstripePaymentMethod: this.method
 			}
 		};
 	
-		that.ws.send(JSON.stringify(requestInit));
-	},
+		this.ws.send(JSON.stringify(requestInit));
+	};
 	
-	callFinish: function() {
-		var that = webSocket;
+	this.callFinish = function() {
 
 		var requestFinish = {
-			RequestType: that.request.finish,
+			RequestType: this.request.finish,
 			Finish: {
 				Success: true,
 				ResponseCode: "0000",
@@ -140,7 +148,7 @@ var webSocket = {
 			}
 		};
 	
-		that.ws.send(JSON.stringify(requestFinish));
-	}
+		this.ws.send(JSON.stringify(requestFinish));
+	};
 
-}
+};
