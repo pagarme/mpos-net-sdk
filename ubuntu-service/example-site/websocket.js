@@ -92,8 +92,7 @@ var webSocket = function (contextId, devicePort, encryptionKey, baudRate) {
 		return valid;
 	};
 	
-	this.open = function(a,b,c,d) {
-		//document.getElementById("sender").disabled = true;
+	this.open = function() {
 		this.parent.listDevices();
 	};
 	
@@ -151,7 +150,6 @@ var webSocket = function (contextId, devicePort, encryptionKey, baudRate) {
 	};
 	
 	this.close = function() {
-		document.getElementById("sender").disabled = false;
 	};
 	
 	this.error = function(){
