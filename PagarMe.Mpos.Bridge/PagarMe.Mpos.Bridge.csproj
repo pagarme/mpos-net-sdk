@@ -53,6 +53,7 @@
   <ItemGroup>
     <Compile Include="Commands\PaymentRequest.cs" />
     <Compile Include="Commands\PaymentResponse.cs" />
+    <Compile Include="Commands\TypeExtension.cs" />
     <Compile Include="ContextStatus.cs" />
     <Compile Include="Context.cs" />
     <Compile Include="Commands\DisplayMessageRequest.cs" />

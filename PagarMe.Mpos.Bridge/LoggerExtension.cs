@@ -14,15 +14,7 @@ namespace PagarMe.Mpos.Bridge
             }
             catch (Exception e)
             {
-                try
-                {
-                    logger.Error(e);
-                }
-                catch
-                {
-                    // Log error should not override other errors
-                }
-
+                tryLog(logger, e);
                 throw;
             }
         }
@@ -35,16 +27,24 @@ namespace PagarMe.Mpos.Bridge
             }
             catch (Exception e)
             {
-                try
+                tryLog(logger, e);
+                throw;
+            }
+        }
+
+        private static void tryLog(Logger logger, Exception e)
+        {
+            try
+            {
+                while (e != null)
                 {
                     logger.Error(e);
+                    e = e.InnerException;
                 }
-                catch
-                {
-                    // Log error should not override other errors
-                }
-
-                throw;
+            }
+            catch
+            {
+                // Log error should not override other errors
             }
         }
 
