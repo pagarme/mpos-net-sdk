@@ -1,241 +1,248 @@
-var callWS = function(contextId, devicePort, encryptionKey, baudRate) {
-	var instance = new webSocket(contextId, devicePort, encryptionKey, baudRate);
-	instance.call();
+var callWS = function() {
+  var contextId = document.getElementById("contextId").value;
+  var devicePort = document.getElementById("devicePort").value;
+  var encryptionKey = document.getElementById("encryptionKey").value;
+  var baudRate = document.getElementById("baudRate").value;
+
+  var instance = new webSocket(contextId, devicePort, encryptionKey, baudRate);
+  instance.call();
 }
 
 var webSocket = function (contextId, devicePort, encryptionKey, baudRate) {
-	
-	this.contextId = contextId;
-	this.devicePort = devicePort;
-	this.encryptionKey = encryptionKey;
-	this.baudRate = baudRate;
 
-	this.response = {
-		unknownCommand: 0,
-		devicesListed: 1,
-		initialized: 2,
-		alreadyInitialized: 3,
-		processed: 4,
-		finished: 5,
-		messageDisplayed: 6,
-		closed: 7,
-		error: 8,
-	};
-	
-	this.request = {
-		listDevices: 1,
-		initialize: 2,
-		process: 3,
-		finish: 4,
-		displayMessage: 5,
-		close: 6,
-	};
-	
-	this.amount = 0;
-	this.method = null;
-	this.ws = null;
+  this.contextId = contextId;
+  this.devicePort = devicePort;
+  this.encryptionKey = encryptionKey;
+  this.baudRate = baudRate;
 
-	this.call = function() {
-		if ("WebSocket" in window)
-		{			
-			this.setValues();
-			
-			var valid = this.validate();
-			
-			if (!valid)
-				return;
-			
-			this.ws = new WebSocket("ws://localhost:2000/mpos");
+  this.response = {
+    unknownCommand: 0,
+    devicesListed: 1,
+    initialized: 2,
+    alreadyInitialized: 3,
+    processed: 4,
+    finished: 5,
+    messageDisplayed: 6,
+    closed: 7,
+    error: 8,
+  };
 
-			this.ws.parent = this;
-			this.ws.onopen = this.open;		
-			this.ws.onmessage = this.handleResponse;
-			this.ws.onclose = this.close;
-			this.ws.onerror = this.error;
-		}
+  this.request = {
+    listDevices: 1,
+    initialize: 2,
+    process: 3,
+    finish: 4,
+    displayMessage: 5,
+    close: 6,
+  };
 
-		else
-		{
-			this.showMessage("WebSocket NOT supported by your Browser!");
-		}
-	};
-	
-	this.setValues = function() {
-		this.amount = document.getElementById("amount").value;
-		
-		this.method = 
-			document.getElementById("Credit").checked ? "Credit" :
-			document.getElementById("Debit").checked ? "Debit" :
-			null;
-	};
-	
-	this.validate = function() {
-		var message = "";
-		var valid = true;
-	
-		if (isNaN(this.amount) || this.amount <= 0)
-		{
-			message += "\n- Invalid amount";
-			valid = false;
-		}
-		if (this.method == null)
-		{
-			message += "\n- No method chosen";
-			valid = false;
-		}
-		
-		if (!valid)
-		{
-			this.showMessage("Errors:" + message);
-		}
-		
-		return valid;
-	};
-	
-	this.open = function() {
-		this.parent.listDevices();
-	};
-	
-	this.handleResponse = function (response) {
-		
-		var responseContent = JSON.parse(response.data);
-		
-		switch(responseContent.ResponseType)
-		{
-			case (this.parent.response.devicesListed):
-				this.parent.initialize(responseContent);
-				break;
+  this.amount = 0;
+  this.method = null;
+  this.ws = null;
 
-			case (this.parent.response.initialized):
-			case (this.parent.response.alreadyInitialized):
-				
-				this.parent.process();
-				break;
+  this.call = function() {
+    if ("WebSocket" in window)
+    {			
+      this.setValues();
 
-			case (this.parent.response.processed):
-				this.parent.finish(responseContent);
-				break;
+      var valid = this.validate();
 
-			default:
-				this.close();
+      if (!valid)
+        return;
 
-				var message = this.parent.getEndingMessage(responseContent);
-				if (message) this.parent.showMessage(message);
+      this.ws = new WebSocket("ws://localhost:2000/mpos");
 
-				break;
-		}
-		
-	};
-	
-	this.getEndingMessage = function (response) {
-		switch(response.ResponseType)
-		{
-			case this.response.finished:
-				return "Payment Succeded";
-				
-			case this.response.error:
-				return response.Error;
-				
-			case this.response.unknownCommand:
-				return "Unknown Request";
-				
-			default:
-				return "Unknown Response";
-		}
-	};
-	
-	this.showMessage = function(message) {
-		document.getElementById("messages")
-			.innerHTML += "<br />" + message;
-	};
-	
-	this.close = function() {
-	};
-	
-	this.error = function(){
-		this.parent.showMessage("Url '" + this.url + "' not found or disconnected");
-		this.close();
-	};
-	
-	this.listDevices = function() {
+      this.ws.parent = this;
+      this.ws.onopen = this.open;		
+      this.ws.onmessage = this.handleResponse;
+      this.ws.onclose = this.close;
+      this.ws.onerror = this.error;
+    }
 
-		var request = {
-			RequestType: this.request.listDevices,
-			ContextId: this.contextId,
-		};
-	
-		this.sendMessage(request);
-	};
-	
-	this.initialize = function(response) {
+    else
+    {
+      this.showMessage("WebSocket NOT supported by your Browser!");
+    }
+  };
 
-		var devices = response.DeviceList;
-		var deviceId = null;
-	
-		for(var d = 0; d < devices.length; d++)
-		{
-			if (devices[d].Port == this.devicePort)
-			{
-				deviceId = devices[d].Id;
-			}
-		}
-		
-		if (deviceId == null)
-		{
-			this.showMessage("Port " + this.devicePort + " not found");
+  this.setValues = function() {
+    this.amount = document.getElementById("amount").value;
 
-			this.ws.close();
-			this.close();
+    this.method = 
+      document.getElementById("Credit").checked ? "Credit" :
+      document.getElementById("Debit").checked ? "Debit" :
+      null;
+  };
 
-			return;
-		}
-		
-		var request = {
-			RequestType: this.request.initialize,
-			ContextId: this.contextId,
-			Initialize: {
-				DeviceId: deviceId,
-				EncryptionKey: this.encryptionKey,
-				BaudRate: this.baudRate
-			}
-		};
-		
-		this.sendMessage(request);
-	};
-	
-	this.process = function() {
+  this.validate = function() {
+    var message = "";
+    var valid = true;
 
-		var request = {
-			RequestType: this.request.process,
-			ContextId: this.contextId,
-			Process: {
-				Amount: this.amount * 100,
-				MagstripePaymentMethod: this.method
-			}
-		};
-	
-		this.sendMessage(request);
-	};
-	
-	this.finish = function(response) {
+    if (isNaN(this.amount) || this.amount <= 0)
+    {
+      message += "\n- Invalid amount";
+      valid = false;
+    }
+    if (this.method == null)
+    {
+      message += "\n- No method chosen";
+      valid = false;
+    }
 
-		var request = {
-			RequestType: this.request.finish,
-			ContextId: this.contextId,
-			Finish: {
-				Success: true,
-				ResponseCode: "0000",
-				EmvData: "000000000.0000"
-			}
-		};
-	
-		this.sendMessage(request);
-	};
+    if (!valid)
+    {
+      this.showMessage("Errors:" + message);
+    }
 
-	this.sendMessage = function(request) {
-		var message = JSON.stringify(request);
-		this.ws.send(message);
-	}
+    return valid;
+  };
 
-	
+  this.open = function() {
+    this.parent.listDevices();
+  };
+
+  this.handleResponse = function (response) {
+
+    var responseContent = JSON.parse(response.data);
+
+    switch(responseContent.ResponseType)
+    {
+      case (this.parent.response.devicesListed):
+        this.parent.initialize(responseContent);
+        break;
+
+      case (this.parent.response.initialized):
+      case (this.parent.response.alreadyInitialized):
+
+        this.parent.process();
+        break;
+
+      case (this.parent.response.processed):
+        this.parent.finish(responseContent);
+        break;
+
+      default:
+        this.close();
+
+        var message = this.parent.getEndingMessage(responseContent);
+        if (message) this.parent.showMessage(message);
+
+        break;
+    }
+
+  };
+
+  this.getEndingMessage = function (response) {
+    switch(response.ResponseType)
+    {
+      case this.response.finished:
+        return "Payment Succeded";
+
+      case this.response.error:
+        return response.Error;
+
+      case this.response.unknownCommand:
+        return "Unknown Request";
+
+      default:
+        return "Unknown Response";
+    }
+  };
+
+  this.showMessage = function(message) {
+    var messages = document.getElementById("messages").innerHTML;
+    messages = "<div><pre>" + message + "</pre></div>" + messages;
+
+    document.getElementById("messages").innerHTML = messages;
+  };
+
+  this.close = function() {
+  };
+
+  this.error = function(){
+    this.parent.showMessage("Url '" + this.url + "' not found or disconnected");
+    this.close();
+  };
+
+  this.listDevices = function() {
+
+    var request = {
+      RequestType: this.request.listDevices,
+      ContextId: this.contextId,
+    };
+
+    this.sendMessage(request);
+  };
+
+  this.initialize = function(response) {
+
+    var devices = response.DeviceList;
+    var deviceId = null;
+
+    for(var d = 0; d < devices.length; d++)
+    {
+      if (devices[d].Port == this.devicePort)
+      {
+        deviceId = devices[d].Id;
+      }
+    }
+
+    if (deviceId == null)
+    {
+      this.showMessage("Port " + this.devicePort + " not found");
+
+      this.ws.close();
+      this.close();
+
+      return;
+    }
+
+    var request = {
+      RequestType: this.request.initialize,
+      ContextId: this.contextId,
+      Initialize: {
+        DeviceId: deviceId,
+        EncryptionKey: this.encryptionKey,
+        BaudRate: this.baudRate
+      }
+    };
+
+    this.sendMessage(request);
+  };
+
+  this.process = function() {
+
+    var request = {
+      RequestType: this.request.process,
+      ContextId: this.contextId,
+      Process: {
+        Amount: this.amount * 100,
+        MagstripePaymentMethod: this.method
+      }
+    };
+
+    this.sendMessage(request);
+  };
+
+  this.finish = function(response) {
+
+    var request = {
+      RequestType: this.request.finish,
+      ContextId: this.contextId,
+      Finish: {
+        Success: true,
+        ResponseCode: "0000",
+        EmvData: "000000000.0000"
+      }
+    };
+
+    this.sendMessage(request);
+  };
+
+  this.sendMessage = function(request) {
+    var message = JSON.stringify(request);
+    this.ws.send(message);
+  }
+
+
 };
