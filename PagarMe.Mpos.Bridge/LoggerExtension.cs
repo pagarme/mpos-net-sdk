@@ -32,14 +32,24 @@ namespace PagarMe.Mpos.Bridge
             }
         }
 
-        private static void tryLog(Logger logger, Exception e)
+        private static void tryLog(Logger logger, Exception exception)
         {
             try
             {
-                while (e != null)
+                if (exception == null)
+                    return;
+
+                if (exception is AggregateException aggregateException)
                 {
-                    logger.Error(e);
-                    e = e.InnerException;
+                    foreach (var childException in aggregateException.InnerExceptions)
+                    {
+                        tryLog(logger, childException);
+                    }
+                }
+                else
+                {
+                    logger.Error(exception);
+                    tryLog(logger, exception.InnerException);
                 }
             }
             catch
