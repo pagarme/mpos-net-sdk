@@ -19,3 +19,5 @@ PagarMe.AutomatedTests/App.config
 *.orig
 ubuntu-service/example-site/web.config
 ubuntu-service/service/*
+ubuntu-service/build-libabecs/
+*.log
