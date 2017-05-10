@@ -2,6 +2,7 @@ using Newtonsoft.Json;
 using NLog;
 using PagarMe.Mpos.Bridge.Commands;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using WebSocketSharp;
 using WebSocketSharp.Server;
@@ -38,12 +39,7 @@ namespace PagarMe.Mpos.Bridge.WebSocket
 
             await logger.TryLogOnExceptionAsync(() => 
             {
-                var task = handleMessage(e);
-
-                if (task.Exception != null)
-                    logger.Error(task.Exception);
-
-                return task;
+                return handleMessage(e);
             });
         }
 
@@ -71,6 +67,24 @@ namespace PagarMe.Mpos.Bridge.WebSocket
 
         private async Task handleRequest(Context context, PaymentRequest request, PaymentResponse response)
         {
+            lock (context)
+            {
+                if (request.RequestType != PaymentRequest.Type.DisplayMessage)
+                {
+                    var allowed = context.CurrentOperation.GetNextAllowed();
+
+                    if (!allowed.Contains(request.RequestType))
+                    {
+                        var allowedText = String.Join(", ", allowed);
+                        response.Error = $"Just follow operations allowed: {allowedText}";
+                        response.ResponseType = PaymentResponse.Type.Error;
+                        return;
+                    }
+
+                    context.CurrentOperation = request.RequestType;
+                }
+            }
+
             switch (request.RequestType)
             {
                 case PaymentRequest.Type.ListDevices:

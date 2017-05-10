@@ -35,6 +35,8 @@ namespace PagarMe.Mpos.Bridge
 
         private Boolean initialized = false;
 
+        internal PaymentRequest.Type CurrentOperation { get; set; }
+
         public async Task Initialize(InitializeRequest request, Action<Int32> onError)
         {
             lock (this)
