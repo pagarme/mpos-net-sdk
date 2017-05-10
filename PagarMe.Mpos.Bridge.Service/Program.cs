@@ -9,10 +9,7 @@ namespace PagarMe.Mpos.Bridge.Service
         /// </summary>
         private static void Main()
         {
-            ServiceBase.Run(new[]
-            {
-                new MposWebsocketService()
-            });
+            ServiceBase.Run(new MposWebsocketService());
         }
     }
 }

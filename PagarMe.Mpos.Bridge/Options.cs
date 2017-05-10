@@ -19,12 +19,6 @@ namespace PagarMe.Mpos.Bridge
         [Option('d', "data-path", Required = false, HelpText = "Database path", DefaultValue = "<appdata>")]
         public string DataPath { get; set; }
 
-        [Option('r', "baud-rate", Required = false, HelpText = "Baud rate for serial port")]
-        public int BaudRate { get; set; }
-
-        [Option('k', "encryption-key", Required = false, HelpText = "Enterprise Encryption Key")]
-        public string EncryptionKey { get; set; }
-
         public void EnsureDefaults()
         {
             if (DataPath == null || DataPath == "<appdata>")

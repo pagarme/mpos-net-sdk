@@ -29,6 +29,9 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
+      <HintPath>..\packages\NLog.4.4.8\lib\net45\NLog.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="BouncyCastle.Crypto">
       <HintPath>..\packages\BouncyCastle.1.7.0\lib\Net40-Client\BouncyCastle.Crypto.dll</HintPath>
@@ -40,9 +43,6 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="mscorlib" />
     <Reference Include="System.Core" />
-    <Reference Include="NLog">
-      <HintPath>..\packages\NLog.4.4.3\lib\net45\NLog.dll</HintPath>
-    </Reference>
     <Reference Include="CommandLine">
       <HintPath>..\packages\CommandLineParser.1.9.71\lib\net45\CommandLine.dll</HintPath>
     </Reference>
@@ -53,12 +53,14 @@
   <ItemGroup>
     <Compile Include="Commands\PaymentRequest.cs" />
     <Compile Include="Commands\PaymentResponse.cs" />
+    <Compile Include="Commands\TypeExtension.cs" />
     <Compile Include="ContextStatus.cs" />
     <Compile Include="Context.cs" />
     <Compile Include="Commands\DisplayMessageRequest.cs" />
     <Compile Include="Commands\FinishPaymentRequest.cs" />
     <Compile Include="Commands\InitializeRequest.cs" />
     <Compile Include="Commands\ListDevicesResponse.cs" />
+    <Compile Include="LoggerExtension.cs" />
     <Compile Include="MposBridge.cs" />
     <Compile Include="Commands\ProcessPaymentRequest.cs" />
     <Compile Include="Commands\ProcessPaymentResponse.cs" />

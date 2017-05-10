@@ -6,12 +6,14 @@ using PagarMe.Mpos.Bridge.Providers;
 using PagarMe.Mpos.Bridge.WebSocket;
 using PagarMe.Mpos.Devices;
 using WebSocketSharp.Server;
+using NLog.Targets;
+using System.IO;
 
 namespace PagarMe.Mpos.Bridge
 {
     public class MposBridge : IDisposable
     {
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
         private static readonly Dictionary<string, Context> _contexts
             = new Dictionary<string, Context>();
@@ -30,7 +32,7 @@ namespace PagarMe.Mpos.Bridge
         public MposBridge(Options options)
         {
             _options = options;
-            _deviceManager = new DeviceManager(options.BaudRate);
+            _deviceManager = new DeviceManager(logger.TryLogOnException);
         }
 
 
@@ -38,6 +40,8 @@ namespace PagarMe.Mpos.Bridge
         {
             var addresses = Dns.GetHostAddresses(Options.BindAddress);
             _server = new WebSocketServer(addresses[0], _options.BindPort);
+            _server.KeepClean = false;
+            _server.Log.File = getLogFileName();
             _server.AddWebSocketService("/mpos", () => new MposWebSocketBehavior(this));
             _server.Start();
         }
@@ -60,13 +64,11 @@ namespace PagarMe.Mpos.Bridge
 
             lock (_contexts)
             {
-                if (_contexts.Count >= serviceLimit)
-                {
-                    return null;
-                }
-
                 if (!_contexts.TryGetValue(name, out context))
                 {
+                    if (_contexts.Count >= serviceLimit)
+                        return null;
+
                     var provider = new MposProvider();
 
                     context = new Context(this, provider);
@@ -94,5 +96,20 @@ namespace PagarMe.Mpos.Bridge
         {
             return name == null || name == "" ? "<default>" : name;
         }
+
+        private static String getLogFileName()
+        {
+            var fileTarget = 
+                logger.Factory.Configuration
+                    .FindTargetByName<FileTarget>("file");
+
+            var logEventInfo = new LogEventInfo { TimeStamp = DateTime.Now };
+            var relativeFileName = fileTarget.FileName.Render(logEventInfo);
+            var absoluteFileName = Path.GetFullPath(relativeFileName);
+
+            return absoluteFileName;
+        }
+
+
     }
 }
