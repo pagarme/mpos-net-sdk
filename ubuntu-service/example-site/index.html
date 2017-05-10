@@ -1,0 +1,175 @@
+﻿<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Exemplo de como enviar transações</title>>
+    <script type="text/javascript" src="websocket.js"></script>
+    <link rel="stylesheet" href="websocket.css" />
+  </head>
+  <body class="home-page">
+    <nav id="navbar" class="navbar">
+      <div class="navbar-inner">
+        <div class="navbar__left">
+          <a href="/" class="navbar-brand">
+            <div class="display-table-cell">
+              Pagar.me
+            </div>
+          </a>
+
+          <div class="navbar-highlight">
+            <div class="display-table-cell">
+              <ul class="navbar-menu">
+                <li><a href="https://github.com/pagarme/mpos-net-sdk/blob/feature/bifrost-services/docs/websocket.md" target="_blank">Docs</a></li>
+                <li><a href="https://pagarme.zendesk.com/hc/pt-br" target="_blank">Suporte</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="navbar__right">
+          <div class="navbar-links">
+            <div class="display-table-cell">
+            </div>
+          </div>
+
+          <div class="navbar__separator">
+            <div class="display-table-cell">
+              <div class="separator"></div>
+            </div>
+          </div>
+
+          <div class="navbar__more">
+            <div class="navbar__more__inner">
+              <a class="navbar__more__toggle">
+                <span class="ss-icon ss-gizmo ss-rows"></span>
+                Mais
+              </a>
+
+              <a class="navbar__more__toggle">
+                <span class="ss-icon ss-gizmo ss-rows"></span>
+                Mais
+              </a>
+
+              <div class="navbar__more__dropdown-container">
+                <div class="navbar__more__dropdown">
+                  <div class="separator">
+                    <div></div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="navbar-buttons">
+            <div class="display-table-cell">
+              <a class="btn btn-primary-full" href="#quero-usar" onclick="_gaq.push([‘_trackEvent’, ‘button’, ’clicked’, ’quero usar (navbar)’,, ’true’])">
+                <span class="ss-icon ss-gizmo ss-plus"></span>
+                Quero Usar
+              </a>
+
+              <a class="btn btn-primary" href="http://dashboard.pagar.me/">
+                <span class="ss-icon ss-gizmo ss-login"></span>
+                Login
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+
+    <hr>
+
+    <section class="section">
+      <div class="next-section">
+        <a class="btn btn-mute" href="#quem-somos">
+          <span class="ss-icon ss-gizmo ss-navigatedown"></span>
+        </a>
+      </div>
+
+      <div class="section__container">
+
+        <div data-sr="" class="section__grid section__grid--left">
+
+          <div class="section__grid__inner">
+            <h2>Formulário de testes</h2>
+            <div>
+
+              <div id="form">
+                <p>
+                  <label for="amount">Valor da transação (R$):</label>
+                  <input type="text" name="amount" id="amount" />
+                </p>
+
+                <p>
+                  <label>Método de pagamento:</label>
+                  <input type="radio" name="paymentMethod" id="Debit" value="Debit" checked> <label class="no-label" for="Debit" style="margin-right: 10px">Debit</label>
+                  <input type="radio" name="paymentMethod" id="Credit" value="Credit"> <label class="no-label" for="Credit">Credit</label>
+                </p>
+
+                <p>
+                  <label for="contextId">ID do contexto:</label>
+                  <input type="text" name="contextId" id="contextId" value="test" />
+                </p>
+
+                <p>
+                  <label for="devicePort">Porta do dispositivo:</label>
+                  <input type="text" name="devicePort" id="devicePort" value="COM3" />
+                </p>
+
+                <p>
+                  <label for="encryptionKey">Encryption Key:</label>
+                  <input type="text" name="encryptionKey" id="encryptionKey" value="ek_test_f9cws0bU9700VqWE4UDuBlKLbvX4IO" />
+                </p>
+
+                <p>
+                  <label for="baudRate">Taxa de transmissão:</label>
+                  <input type="text" name="baudRate" id="baudRate" value="115200" />
+                </p>
+
+                <p>
+                  <button onclick="callWS()" class="btn btn-primary">Enviar</button>
+                </p>
+
+                <p>
+                  <div id="messages">
+                  </div>
+                </p>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+
+        <div data-sr="" class="section__grid section__grid--right">
+          <div class="section__grid__inner">
+            <h2 class="heading--section">Exemplo de como enviar transações</h2>
+
+            <p>
+              Este é um projeto simples que demonstra como utilizar o <strong>Bifrost</strong> para fazer transações EMV utilizando o <strong>Browser</strong> como client.
+            </p>
+            <p>
+              O sistema é composto por duas partes: o <strong>Browser com a aplicação client</strong> (como por exemplo esta página) e o serviço rodando na máquina host que irá basicamente expor o device de mPOS em um endpoint de <strong>WebSocket</strong>.
+            </p>
+            <p>
+              Você deverá chamar o serviço no client-side enviando o <strong>id do contexto</strong>, <strong>porta do dispositivo</strong>, <strong>encryption key do Pagar.me</strong>, <strong>taxa de transmissão</strong>.
+            </p>
+            <p>
+              Sugerimos você analisar o <strong>código fonte</strong> deste projeto, principalmente o arquivo <strong>websocket.js</strong> e realizar testes com o formulário abaixo.
+            </p>
+
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+
+
+
+
+
+
+  </body>
+</html>
