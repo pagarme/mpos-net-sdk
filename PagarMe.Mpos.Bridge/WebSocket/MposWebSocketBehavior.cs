@@ -67,23 +67,10 @@ namespace PagarMe.Mpos.Bridge.WebSocket
 
         private async Task handleRequest(Context context, PaymentRequest request, PaymentResponse response)
         {
-            lock (context)
-            {
-                if (request.RequestType != PaymentRequest.Type.DisplayMessage)
-                {
-                    var allowed = context.CurrentOperation.GetNextAllowed();
+            var keepProcessing = verifyContextSequence(context, request, response);
 
-                    if (!allowed.Contains(request.RequestType))
-                    {
-                        var allowedText = String.Join(", ", allowed);
-                        response.Error = $"Just follow operations allowed: {allowedText}";
-                        response.ResponseType = PaymentResponse.Type.Error;
-                        return;
-                    }
-
-                    context.CurrentOperation = request.RequestType;
-                }
-            }
+            if (!keepProcessing)
+                return;
 
             switch (request.RequestType)
             {
@@ -114,6 +101,36 @@ namespace PagarMe.Mpos.Bridge.WebSocket
                 default:
                     response.ResponseType = PaymentResponse.Type.UnknownCommand;
                     break;
+            }
+        }
+
+        private Boolean verifyContextSequence(Context context, PaymentRequest request, PaymentResponse response)
+        {
+            lock (context)
+            {
+                var canCallAnytime = new[]
+                {
+                    PaymentRequest.Type.ListDevices,
+                    PaymentRequest.Type.DisplayMessage,
+                    PaymentRequest.Type.Status
+                };
+
+                if (!canCallAnytime.Contains(request.RequestType))
+                {
+                    var allowed = context.CurrentOperation.GetNextAllowed();
+
+                    if (!allowed.Contains(request.RequestType))
+                    {
+                        var allowedText = String.Join(", ", allowed);
+                        response.Error = $"Just follow operations allowed: {allowedText}";
+                        response.ResponseType = PaymentResponse.Type.Error;
+                        return false;
+                    }
+
+                    context.CurrentOperation = request.RequestType;
+                }
+
+                return true;
             }
         }
 
