@@ -11,19 +11,16 @@ namespace PagarMe.Mpos.Bridge.Commands
             {
                 case Type.UnknownCommand:
                 case Type.Close:
-                    return new[] { Type.ListDevices, Type.Initialize };
-
-                case Type.ListDevices:
                     return new[] { Type.Initialize };
 
                 case Type.Initialize:
                     return new[] { Type.Process };
 
                 case Type.Process:
-                    return new[] { Type.Finish, Type.Close, Type.ListDevices, Type.Initialize };
+                    return new[] { Type.Finish, Type.Close, Type.Initialize };
 
                 case Type.Finish:
-                    return new[] { Type.Process, Type.Close, Type.ListDevices, Type.Initialize };
+                    return new[] { Type.Process, Type.Close, Type.Initialize };
 
                 default:
                     throw new NotImplementedException();
