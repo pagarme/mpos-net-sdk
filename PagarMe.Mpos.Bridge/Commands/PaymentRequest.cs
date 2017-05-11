@@ -17,10 +17,11 @@ namespace PagarMe.Mpos.Bridge.Commands
             UnknownCommand = 0,
             ListDevices = 1,
             Initialize = 2,
-            Process = 3,
-            Finish = 4,
-            DisplayMessage = 5,
-            Close = 6,
+            Process = 4,
+            Finish = 5,
+            DisplayMessage = 6,
+            Status = 7,
+            Close = 8,
         }
     }
 }

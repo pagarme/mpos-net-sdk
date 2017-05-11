@@ -94,6 +94,10 @@ namespace PagarMe.Mpos.Bridge.WebSocket
                     await displayMessage(context, request, response);
                     break;
 
+                case PaymentRequest.Type.Status:
+                    await status(context, response);
+                    break;
+
                 case PaymentRequest.Type.Close:
                     await close(context, response);
                     break;
@@ -145,6 +149,13 @@ namespace PagarMe.Mpos.Bridge.WebSocket
             await context.Initialize(request.Initialize, onError);
 
             response.ResponseType = PaymentResponse.Type.Initialized;
+        }
+
+        private async Task status(Context context, PaymentResponse response)
+        {
+            var result = await context.GetStatus();
+            response.Status = result;
+            response.ResponseType = PaymentResponse.Type.Status;
         }
 
         private async Task process(Context context, PaymentRequest request, PaymentResponse response)

@@ -6,10 +6,9 @@ namespace PagarMe.Mpos.Bridge.Commands
     public class PaymentResponse
     {
         public IDevice[] DeviceList { get; internal set; }
-
         public String CardHash { get; internal set; }
-
         public String Error { get; internal set; }
+        public StatusResponse Status { get; internal set; }
 
         public Type ResponseType { get; internal set; }
 
@@ -22,8 +21,9 @@ namespace PagarMe.Mpos.Bridge.Commands
             Processed = 4,
             Finished = 5,
             MessageDisplayed = 6,
-            Closed = 7,
-            Error = 8,
+            Status = 7,
+            Closed = 8,
+            Error = 9,
         }
     }
 }
