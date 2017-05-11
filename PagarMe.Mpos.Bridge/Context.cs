@@ -96,7 +96,7 @@ namespace PagarMe.Mpos.Bridge
 
             try
             {
-                await _provider.DisplayMessage(request.Message);
+                await _provider.DisplayMessage(request?.Message ?? String.Empty);
             }
             finally
             {

@@ -7,7 +7,7 @@ namespace PagarMe.Mpos.Bridge.Commands
         public ProcessPaymentRequest Process { get; set; }
         public FinishPaymentRequest Finish { get; set; }
         public InitializeRequest Initialize { get; set; }
-        public DisplayMessageRequest DisplayMessage { get; internal set; }
+        public DisplayMessageRequest DisplayMessage { get; set; }
 
         public String ContextId { get; set; }
         public Type RequestType { get; set; }
