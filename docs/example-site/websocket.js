@@ -122,6 +122,8 @@ var webSocket = function (contextId, devicePort, encryptionKey, baudRate) {
       case (this.parent.response.processed):
         this.parent.finish(responseContent);
         break;
+      case (this.parent.response.closed):
+        return;
 
       default:
         this.close();
