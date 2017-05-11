@@ -23,17 +23,19 @@ var webSocket = function (contextId, devicePort, encryptionKey, baudRate) {
     processed: 4,
     finished: 5,
     messageDisplayed: 6,
-    closed: 7,
-    error: 8,
+    status: 7,
+    closed: 8,
+    error: 9,
   };
 
   this.request = {
     listDevices: 1,
     initialize: 2,
-    process: 3,
-    finish: 4,
-    displayMessage: 5,
-    close: 6,
+    process: 4,
+    finish: 5,
+    displayMessage: 6,
+    status: 7,
+    close: 8,
   };
 
   this.amount = 0;
