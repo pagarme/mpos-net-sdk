@@ -161,7 +161,7 @@ namespace PagarMe.Mpos.Bridge.WebSocket
         private async Task process(Context context, PaymentRequest request, PaymentResponse response)
         {
             var result = await context.ProcessPayment(request.Process);
-            response.CardHash = result.Result.CardHash;
+            response.Process = result.Result;
             response.ResponseType = PaymentResponse.Type.Processed;
         }
 
