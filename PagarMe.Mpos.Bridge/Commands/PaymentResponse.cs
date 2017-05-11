@@ -6,11 +6,12 @@ namespace PagarMe.Mpos.Bridge.Commands
     public class PaymentResponse
     {
         public IDevice[] DeviceList { get; internal set; }
-        public String CardHash { get; internal set; }
-        public String Error { get; internal set; }
+        public PaymentResult Process { get; internal set; }
         public StatusResponse Status { get; internal set; }
 
         public Type ResponseType { get; internal set; }
+
+        public String Error { get; internal set; }
 
         public enum Type
         {
