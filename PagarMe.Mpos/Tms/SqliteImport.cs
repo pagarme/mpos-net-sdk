@@ -3,12 +3,12 @@ using System.Runtime.InteropServices;
 
 namespace PagarMe.Mpos.Tms
 {
-    class Bit32 : ISqliteImport
+    class SqliteImport : ISqliteImport
     {
-        const string LibraryPath = "sqlite3_32";
+        const string LibraryPath = "sqlite3";
 
-        public static ISqliteImport Dll = new Bit32();
-        private Bit32() { }
+        public static ISqliteImport Dll = new SqliteImport();
+        private SqliteImport() { }
 
         [DllImport(LibraryPath, EntryPoint = "sqlite3_threadsafe", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ThreadsafeInternal();

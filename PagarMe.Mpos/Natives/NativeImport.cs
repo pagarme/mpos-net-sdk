@@ -6,13 +6,13 @@ using PagarMe.Mpos.Entities;
 
 namespace PagarMe.Mpos.Natives
 {
-    class NativeBit32 : NativeConverter, INativeImport
+    class NativeImport : NativeConverter, INativeImport
     {
-        const String mpos = "mpos32";
-        const String tms = "tms32";
+        const String mpos = "mpos";
+        const String tms = "tms";
 
-        public static INativeImport Dll = new NativeBit32();
-        private NativeBit32() { }
+        public static INativeImport Dll = new NativeImport();
+        private NativeImport() { }
 
         [DllImport(mpos, EntryPoint = "mpos_new", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr CreateExtern(IntPtr stream, Native.MposNotificationCallbackDelegate notificationCallback, Native.MposOperationCompletedCallbackDelegate operationCompletedCallback);

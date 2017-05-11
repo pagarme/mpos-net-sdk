@@ -102,7 +102,7 @@ namespace PagarMe.Mpos.Natives
             IList<RiskManagement> riskProfileList, IList<Acquirer> acquirerList, IntPtr userData);
 
 
-        private readonly static INativeImport Dll = Environment.Is64BitProcess ? NativeBit64.Dll : NativeBit32.Dll;
+        private static readonly INativeImport Dll = NativeImport.Dll;
 
         public static IntPtr Create(AbecsStream stream, MposNotificationCallbackDelegate notificationCallback, MposOperationCompletedCallbackDelegate operationCompletedCallback)
         {

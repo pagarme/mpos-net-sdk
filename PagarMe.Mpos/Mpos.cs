@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using PagarMe.Mpos.Abecs;
 using PagarMe.Mpos.Callbacks;
 using PagarMe.Mpos.Entities;
+using PagarMe.Mpos.Helpers;
 using PagarMe.Mpos.Natives;
 using PagarMe.Mpos.Tms;
 using static PagarMe.Mpos.Natives.Native;
@@ -28,6 +29,8 @@ namespace PagarMe.Mpos
         {
             NotificationPin = HandleNotificationCallback;
             OperationPin = HandleOperationCompletedCallback;
+
+            EnvironmentHelper.CopyAllDll();
 
             this.stream = stream;
             EncryptionKey = encryptionKey;
