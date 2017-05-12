@@ -6,21 +6,23 @@ A websocket endpoint is provided on `/mpos`.
 
 All messages are encoded in JSON. All request messages have the following parameter:**
 
-**contextId:** The id of [context](architecture.md#context). Need to be the same on a transaction processing.
+**contextId:** The id of [context](architecture.md#context).
 
-**requestType:** Step of the transaction processing.
+**requestType:** Request type. A request can be a step of processing the transaction, initialize or close mpos connection, display message on mpos, or a request for current mpos status.
 
 All responses contains the following parameters:**
 
+**contextId:** The id of [context](architecture.md#context) which this response belongs.
+
 **responseType:** Type of the response, which can be success response, error on process or unknown command, in case of request type unknown.
 
-**error:** Error message if any ocurred. Response Type, in this caso, will be 9.
+**error:** The error message if any ocurred. `responseType` will be 9.
 
 In this documentation only request/response examples will be provided. For information on actual parameters, check [this](command.md).
 
 ## List Devices
 
-**RequestType:** "1" or "listDevices"
+**RequestType:** `1` or `listDevices`
 
 ### Request
 
@@ -46,7 +48,7 @@ In this documentation only request/response examples will be provided. For infor
 
 ## Initialize
 
-**RequestType:** "2" or "initialize"
+**RequestType:** `2` or `initialize`
 
 ### Request
 
@@ -82,7 +84,7 @@ Already Initialized:
 
 ## Process Payment
 
-**RequestType:** "4" or "process"
+**RequestType:** `4` or `process`
 
 ### Request
 
@@ -114,7 +116,7 @@ Already Initialized:
 
 ## Finish Payment
 
-**RequestType:** "5" or "finish"
+**RequestType:** `5` or `finish`
 
 ### Request
 
@@ -140,7 +142,7 @@ Already Initialized:
 
 ## Display Message
 
-**RequestType:** "6" or "displayMessage"
+**RequestType:** `6` or `displayMessage`
 
 ### Request
 
@@ -164,7 +166,7 @@ Already Initialized:
 
 ## Status
 
-**RequestType:** "7" or "status"
+**RequestType:** `7` or `status`
 
 ### Request
 
@@ -190,7 +192,7 @@ Already Initialized:
 
 ## Close
 
-**RequestType:** "8" or "close"
+**RequestType:** `8` or `close`
 
 ### Request
 
