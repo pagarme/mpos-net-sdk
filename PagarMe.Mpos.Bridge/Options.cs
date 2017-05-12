@@ -22,8 +22,10 @@ namespace PagarMe.Mpos.Bridge
         public void EnsureDefaults()
         {
             if (DataPath == null || DataPath == "<appdata>")
-                DataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                    "PagarMe.Mpos.Bridge");
+                DataPath = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                    "PagarMe.Mpos.Bridge"
+                );
         }
     }
 }

@@ -50,7 +50,7 @@ var webSocket = function (contextId, devicePort, encryptionKey, baudRate) {
       if (!valid)
         return;
 
-      this.ws = new WebSocket("ws://localhost:2000/mpos");
+      this.ws = new WebSocket("wss://localhost:2000/mpos");
 
       this.ws.parent = this;
       this.ws.onopen = this.open;		

@@ -39,9 +39,18 @@ namespace PagarMe.Mpos.Bridge
         public void Start()
         {
             var addresses = Dns.GetHostAddresses(Options.BindAddress);
-            _server = new WebSocketServer(addresses[0], _options.BindPort);
+            _server = new WebSocketServer(addresses[0], _options.BindPort, true);
+
+            TLSConfig.Address = Options.BindAddress;
+            _server.SslConfiguration.ServerCertificate = TLSConfig.GetCertificate();
+
+            _server.SslConfiguration.CheckCertificateRevocation = false;
+            _server.SslConfiguration.ClientCertificateRequired = false;
+            _server.SslConfiguration.ClientCertificateValidationCallback = TLSConfig.ClientValidate;
+
             _server.KeepClean = false;
             _server.Log.File = getLogFileName();
+
             _server.AddWebSocketService("/mpos", () => new MposWebSocketBehavior(this));
             _server.Start();
         }
