@@ -70,6 +70,10 @@
     <Compile Include="Providers\IProvider.cs" />
     <Compile Include="Providers\MposProvider.cs" />
     <Compile Include="Providers\InitializationOptions.cs" />
+    <Compile Include="TLS\CertificateChain.cs" />
+    <Compile Include="TLS\CertificateGenerator.cs" />
+    <Compile Include="TLS\ComposedCertificate.cs" />
+    <Compile Include="TLS\TLSConfig.cs" />
     <Compile Include="WebSocket\MposWebSocketBehavior.cs" />
   </ItemGroup>
   <ItemGroup>

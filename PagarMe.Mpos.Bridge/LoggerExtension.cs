@@ -19,6 +19,19 @@ namespace PagarMe.Mpos.Bridge
             }
         }
 
+        public static T TryLogOnException<T>(this Logger logger, Func<T> action)
+        {
+            try
+            {
+                return action();
+            }
+            catch (Exception e)
+            {
+                tryLog(logger, e);
+                throw;
+            }
+        }
+
         public static async Task TryLogOnExceptionAsync(this Logger logger, Func<Task> action)
         {
             try
