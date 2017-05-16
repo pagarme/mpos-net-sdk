@@ -10,15 +10,15 @@
 
 Pagarme's .NET SDK for mPOS.
 
-## PagarMe.Mpos.Bridge
+## PagarMe.Bifrost
 
 Actual bridge implementation.
 
-## PagarMe.Mpos.Bridge.Server
+## PagarMe.Bifrost.Server
 
 Standalone bridge server as a console application.
 
-## PagarMe.Mpos.Bridge.Service
+## PagarMe.Bifrost.Service
 
 Bridge server as a Windows service.
 
@@ -32,7 +32,7 @@ Setup package. Installs and registers the Windows service.
 
 The library exposes all needed interfaces directly.
 
-## Bridge
+## Bifrost
 
 Currently the bridge exposes mPOS devices on an websocket endpoint. You can check its documentation [here](docs/websocket.md).
 
