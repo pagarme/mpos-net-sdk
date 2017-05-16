@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.26430.15
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PagarMe.Mpos", "PagarMe.Mpos\PagarMe.Mpos.csproj", "{0D5CB93F-C493-4EAD-86FC-98DBFDD63D8D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaymentTest", "PaymentTest\PaymentTest.csproj", "{0CC68D90-78A0-42EC-9A74-0BC7F1393839}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PagarMe.Mpos.Example", "PagarMe.Mpos.Example\PagarMe.Mpos.Example.csproj", "{0CC68D90-78A0-42EC-9A74-0BC7F1393839}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PagarMe.Generic", "PagarMe.Generic\PagarMe.Generic.csproj", "{0B590C92-A6FB-4AF2-A275-05042EB8F4A1}"
 EndProject
