@@ -1,6 +1,7 @@
 using Newtonsoft.Json;
 using NLog;
 using PagarMe.Bifrost.Commands;
+using PagarMe.Generic;
 using System;
 using System.Linq;
 using System.Threading.Tasks;

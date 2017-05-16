@@ -8,6 +8,8 @@ using PagarMe.Mpos.Devices;
 using WebSocketSharp.Server;
 using NLog.Targets;
 using System.IO;
+using PagarMe.Generic;
+using PagarMe.Bifrost.Certificates.TLS;
 
 namespace PagarMe.Bifrost
 {
@@ -42,7 +44,7 @@ namespace PagarMe.Bifrost
             _server = new WebSocketServer(addresses[0], _options.BindPort, true);
 
             TLSConfig.Address = Options.BindAddress;
-            _server.SslConfiguration.ServerCertificate = TLSConfig.GetCertificate();
+            _server.SslConfiguration.ServerCertificate = TLSConfig.Get();
 
             _server.SslConfiguration.CheckCertificateRevocation = false;
             _server.SslConfiguration.ClientCertificateRequired = false;
