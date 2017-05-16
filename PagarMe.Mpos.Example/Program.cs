@@ -2,7 +2,7 @@ using PagarMe.Generic;
 using System;
 using System.Threading.Tasks;
 
-namespace PaymentTest
+namespace PagarMe.Mpos.Example
 {
     internal class MainClass
     {
