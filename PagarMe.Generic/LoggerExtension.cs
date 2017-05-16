@@ -2,7 +2,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace PagarMe.Bifrost
+namespace PagarMe.Generic
 {
     public static class LoggerExtension
     {

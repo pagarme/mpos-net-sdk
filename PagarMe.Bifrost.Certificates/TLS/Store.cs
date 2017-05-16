@@ -1,19 +1,22 @@
 ﻿using NLog;
+using PagarMe.Generic;
 using System;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 
-namespace PagarMe.Bifrost
+namespace PagarMe.Bifrost.Certificates.TLS
 {
     class Store
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
+        private const StoreLocation storeLocation = StoreLocation.CurrentUser;
+
         public static X509Certificate2 GetCertificate(String subject, String issuer, StoreName storeName)
         {
             return logger.TryLogOnException(() =>
             {
-                var store = new X509Store(storeName);
+                var store = new X509Store(storeName, storeLocation);
                 store.Open(OpenFlags.ReadOnly);
 
                 var collection = store.Certificates
@@ -37,7 +40,7 @@ namespace PagarMe.Bifrost
         {
             logger.TryLogOnException(() =>
             {
-                var store = new X509Store(storeName);
+                var store = new X509Store(storeName, storeLocation);
                 store.Open(OpenFlags.ReadWrite);
                 store.Add(cert);
 

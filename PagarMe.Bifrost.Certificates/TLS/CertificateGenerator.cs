@@ -14,7 +14,7 @@ using Org.BouncyCastle.X509;
 using System;
 using System.Security.Cryptography.X509Certificates;
 
-namespace PagarMe.Bifrost
+namespace PagarMe.Bifrost.Certificates.TLS
 {
     class CertificateGenerator
     {
