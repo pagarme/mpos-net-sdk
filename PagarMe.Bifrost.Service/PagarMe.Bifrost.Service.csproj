@@ -99,9 +99,17 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\PagarMe.Bifrost.Certificates\PagarMe.Bifrost.Certificates.csproj">
+      <Project>{751e182c-306a-4d2b-9fe6-98d09cd53753}</Project>
+      <Name>PagarMe.Bifrost.Certificates</Name>
+    </ProjectReference>
     <ProjectReference Include="..\PagarMe.Bifrost\PagarMe.Bifrost.csproj">
       <Project>{5bfa0ca7-fce9-419c-a069-3fd2ea0ea0a0}</Project>
       <Name>PagarMe.Bifrost</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PagarMe.Generic\PagarMe.Generic.csproj">
+      <Project>{0b590c92-a6fb-4af2-a275-05042eb8f4a1}</Project>
+      <Name>PagarMe.Generic</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

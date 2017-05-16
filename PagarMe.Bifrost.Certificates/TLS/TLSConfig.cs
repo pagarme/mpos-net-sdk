@@ -1,11 +1,10 @@
 ﻿using System;
-using System.IO;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 
-namespace PagarMe.Bifrost
+namespace PagarMe.Bifrost.Certificates.TLS
 {
-    internal class TLSConfig
+    public class TLSConfig
     {
         public static bool ClientValidate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
         {
@@ -18,13 +17,19 @@ namespace PagarMe.Bifrost
         static String subjectTls => "CN=" + Address;
         static String subjectCa => "CN=Bifrost";
 
-        internal static String Address;
+        public static String Address;
 
-        public static X509Certificate2 GetCertificate()
+        static CertificateChain certificateChain = new CertificateChain(algorithm, validYears, keyStrength);
+
+        public static X509Certificate2 Get()
         {
-            var certificateChain = new CertificateChain(algorithm, validYears, keyStrength);
-
-            return certificateChain.GetOrGenerate(subjectTls, subjectCa);
+            return certificateChain.Get(subjectTls, subjectCa);
         }
+
+        internal static X509Certificate2 GenerateIfNotExists()
+        {
+            return certificateChain.GenerateIfNotExists(subjectTls, subjectCa);
+        }
+
     }
 }

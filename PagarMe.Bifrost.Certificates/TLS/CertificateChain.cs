@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Security.Cryptography.X509Certificates;
 
-namespace PagarMe.Bifrost
+namespace PagarMe.Bifrost.Certificates.TLS
 {
     internal class CertificateChain
     {
@@ -12,9 +12,14 @@ namespace PagarMe.Bifrost
             certGen = new CertificateGenerator(algorithm, validYears, keyStrength);
         }
 
-        public X509Certificate2 GetOrGenerate(String subjectTls, String subjectCa)
+        public X509Certificate2 Get(String subjectTls, String subjectCa)
         {
-            var certificate = Store.GetCertificate(subjectTls, subjectCa, StoreName.My);
+            return Store.GetCertificate(subjectTls, subjectCa, StoreName.My);
+        }
+
+        public X509Certificate2 GenerateIfNotExists(String subjectTls, String subjectCa)
+        {
+            var certificate = Get(subjectTls, subjectCa);
 
             if (certificate == null)
             {
