@@ -8,6 +8,7 @@ using Org.BouncyCastle.Security;
 using Org.BouncyCastle.Utilities;
 using Org.BouncyCastle.X509;
 using System;
+using System.Security.AccessControl;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
@@ -108,7 +109,33 @@ namespace PagarMe.Bifrost.Certificates.TLS
                 Flags = CspProviderFlags.UseMachineKeyStore
             };
 
+            setNetworkServicePermissions(cspParams);
+
             var rsaProvider = new RSACryptoServiceProvider(cspParams);
+
+            setMathParameters(rsaProvider, key);
+
+            x509.PrivateKey = rsaProvider;
+        }
+
+        private static void setNetworkServicePermissions(CspParameters cspParams)
+        {
+            //Copied to do not delete any permission
+            cspParams.CryptoKeySecurity =
+                new RSACryptoServiceProvider(cspParams)
+                    .CspKeyContainerInfo.CryptoKeySecurity;
+
+            var networkService = new CryptoKeyAccessRule(
+                TLSConfig.GetServiceUser(),
+                CryptoKeyRights.FullControl,
+                AccessControlType.Allow
+            );
+
+            cspParams.CryptoKeySecurity.AddAccessRule(networkService);
+        }
+
+        private static void setMathParameters(RSACryptoServiceProvider rsaProvider, RsaPrivateCrtKeyParameters key)
+        {
             var parameters = new RSAParameters
             {
                 Modulus = key.Modulus.ToByteArrayUnsigned(),
@@ -122,8 +149,6 @@ namespace PagarMe.Bifrost.Certificates.TLS
             };
 
             rsaProvider.ImportParameters(parameters);
-
-            x509.PrivateKey = rsaProvider;
         }
 
     }
