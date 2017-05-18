@@ -10,7 +10,7 @@ namespace PagarMe.Bifrost.Certificates.TLS
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
-        private const StoreLocation storeLocation = StoreLocation.CurrentUser;
+        private const StoreLocation storeLocation = StoreLocation.LocalMachine;
 
         public static X509Certificate2 GetCertificate(String subject, String issuer, StoreName storeName)
         {
