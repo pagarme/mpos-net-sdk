@@ -20,6 +20,8 @@ namespace PagarMe.Bifrost.Certificates
 
             TLSConfig.Address = args.Length == 0 ? "localhost" : args[0];
             TLSConfig.GenerateIfNotExists();
+
+            TLSConfig.GrantLogAccess();
         }
 
         private static bool isAdministrator()

@@ -1,5 +1,7 @@
 ﻿using NLog;
+using NLog.Targets;
 using System;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace PagarMe.Generic
@@ -71,5 +73,27 @@ namespace PagarMe.Generic
             }
         }
 
+        public static String GetLogFilePath(this Logger logger)
+        {
+            var relativeFileName = logger.getLogFullPath();
+            return Path.GetFullPath(relativeFileName);
+        }
+
+        public static String GetLogDirectoryPath(this Logger logger)
+        {
+            var relativeFileName = logger.getLogFullPath();
+            return Path.GetDirectoryName(relativeFileName);
+        }
+
+        private static string getLogFullPath(this Logger logger)
+        {
+            var fileTarget =
+                logger.Factory.Configuration
+                    .FindTargetByName<FileTarget>("file");
+
+            var logEventInfo = new LogEventInfo { TimeStamp = DateTime.Now };
+            var relativeFileName = fileTarget.FileName.Render(logEventInfo);
+            return relativeFileName;
+        }
     }
 }
