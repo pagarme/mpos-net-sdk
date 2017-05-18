@@ -18,7 +18,7 @@ namespace PagarMe.Bifrost.Certificates.TLS
 
         static String algorithm => "SHA256WithRSA";
         static Int32 validYears => 100;
-        static Int32 keyStrength => 4096;
+        static Int32 keyStrength => 2048;
         static String subjectTls => "CN=" + Address;
         static String subjectCa => "CN=Bifrost";
 
