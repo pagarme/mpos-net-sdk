@@ -1,13 +1,9 @@
-﻿using Org.BouncyCastle.Asn1;
-using Org.BouncyCastle.Asn1.Pkcs;
-using Org.BouncyCastle.Asn1.X509;
+﻿using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Generators;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Crypto.Prng;
 using Org.BouncyCastle.Math;
-using Org.BouncyCastle.OpenSsl;
-using Org.BouncyCastle.Pkcs;
 using Org.BouncyCastle.Security;
 using Org.BouncyCastle.Utilities;
 using Org.BouncyCastle.X509;
@@ -113,7 +109,7 @@ namespace PagarMe.Bifrost.Certificates.TLS
             };
 
             var rsaProvider = new RSACryptoServiceProvider(cspParams);
-            var parameters = new RSAParameters()
+            var parameters = new RSAParameters
             {
                 Modulus = key.Modulus.ToByteArrayUnsigned(),
                 P = key.P.ToByteArrayUnsigned(),
