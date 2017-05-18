@@ -1,6 +1,11 @@
-﻿using System;
+﻿using NLog;
+using PagarMe.Generic;
+using System;
+using System.IO;
 using System.Net.Security;
+using System.Security.AccessControl;
 using System.Security.Cryptography.X509Certificates;
+using System.Security.Principal;
 
 namespace PagarMe.Bifrost.Certificates.TLS
 {
@@ -29,6 +34,30 @@ namespace PagarMe.Bifrost.Certificates.TLS
         internal static X509Certificate2 GenerateIfNotExists()
         {
             return certificateChain.GenerateIfNotExists(subjectTls, subjectCa);
+        }
+
+        internal static void GrantLogAccess()
+        {
+            var logger = LogManager.GetCurrentClassLogger();
+            var fullPath = logger.GetLogDirectoryPath();
+
+            var info = new DirectoryInfo(fullPath);
+            var security = info.GetAccessControl();
+
+            security.AddAccessRule(new FileSystemAccessRule(
+                GetServiceUser(), 
+                FileSystemRights.Read | FileSystemRights.Write, 
+                InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit, 
+                PropagationFlags.NoPropagateInherit, 
+                AccessControlType.Allow
+            ));
+
+            info.SetAccessControl(security);
+        }
+
+        internal static IdentityReference GetServiceUser()
+        {
+            return new SecurityIdentifier(WellKnownSidType.NetworkServiceSid, null);
         }
 
     }

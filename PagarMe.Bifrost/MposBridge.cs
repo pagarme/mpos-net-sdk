@@ -51,7 +51,7 @@ namespace PagarMe.Bifrost
             _server.SslConfiguration.ClientCertificateValidationCallback = TLSConfig.ClientValidate;
 
             _server.KeepClean = false;
-            _server.Log.File = getLogFileName();
+            _server.Log.File = logger.GetLogFilePath();
 
             _server.AddWebSocketService("/mpos", () => new MposWebSocketBehavior(this));
             _server.Start();
@@ -106,19 +106,6 @@ namespace PagarMe.Bifrost
         private string normalize(string name)
         {
             return name == null || name == "" ? "<default>" : name;
-        }
-
-        private static String getLogFileName()
-        {
-            var fileTarget = 
-                logger.Factory.Configuration
-                    .FindTargetByName<FileTarget>("file");
-
-            var logEventInfo = new LogEventInfo { TimeStamp = DateTime.Now };
-            var relativeFileName = fileTarget.FileName.Render(logEventInfo);
-            var absoluteFileName = Path.GetFullPath(relativeFileName);
-
-            return absoluteFileName;
         }
 
 
