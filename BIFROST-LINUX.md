@@ -7,7 +7,7 @@
 
 ## Initialize service
 
-* sudo mono-service share/ubuntu-service/service/PagarMe.Mpos.Bridge.Service.exe
+* sudo mono-service [path-to-the-service]/PagarMe.Bifrost.Service.exe
 
 ## Stop service normally
 
