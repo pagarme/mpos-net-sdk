@@ -10,7 +10,7 @@ packages
 *.dylib
 *.dll
 
-PaymentTest/App.config
+PagarMe.Mpos.Example/App.config
 *.csproj.user
 PagarMe.AutomatedTests/App.config
 

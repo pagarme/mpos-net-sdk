@@ -5,17 +5,17 @@ VisualStudioVersion = 15.0.26403.7
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PagarMe.Mpos", "PagarMe.Mpos\PagarMe.Mpos.csproj", "{0D5CB93F-C493-4EAD-86FC-98DBFDD63D8D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaymentTest", "PaymentTest\PaymentTest.csproj", "{0CC68D90-78A0-42EC-9A74-0BC7F1393839}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PagarMe.Mpos.Example", "PagarMe.Mpos.Example\PagarMe.Mpos.Example.csproj", "{0CC68D90-78A0-42EC-9A74-0BC7F1393839}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PagarMe.Mpos.Bridge.Service", "PagarMe.Mpos.Bridge.Service\PagarMe.Mpos.Bridge.Service.csproj", "{260A53A3-7BEF-49D7-8D8A-AC4753464218}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PagarMe.Bifrost.Service", "PagarMe.Bifrost.Service\PagarMe.Bifrost.Service.csproj", "{260A53A3-7BEF-49D7-8D8A-AC4753464218}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PagarMe.Mpos.Bridge", "PagarMe.Mpos.Bridge\PagarMe.Mpos.Bridge.csproj", "{5BFA0CA7-FCE9-419C-A069-3FD2EA0EA0A0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PagarMe.Bifrost", "PagarMe.Bifrost\PagarMe.Bifrost.csproj", "{5BFA0CA7-FCE9-419C-A069-3FD2EA0EA0A0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PagarMe.Mpos.Bridge.Server", "PagarMe.Mpos.Bridge.Server\PagarMe.Mpos.Bridge.Server.csproj", "{F358E3DE-E143-426B-819D-0B90A809C9AB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PagarMe.Bifrost.Server", "PagarMe.Bifrost.Server\PagarMe.Bifrost.Server.csproj", "{F358E3DE-E143-426B-819D-0B90A809C9AB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuickTest", "QuickTest\QuickTest.csproj", "{9AE62913-7199-4F87-9DD2-F34496DCD09F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PagarMe.Bifrost.Example", "PagarMe.Bifrost.Example\PagarMe.Bifrost.Example.csproj", "{9AE62913-7199-4F87-9DD2-F34496DCD09F}"
 EndProject
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Setup", "Setup\Setup.vdproj", "{AA68B3AF-6A8A-44E7-8992-D033D66A77CE}"
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "PagarMe.Bifrost.Setup", "PagarMe.Bifrost.Setup\PagarMe.Bifrost.Setup.vdproj", "{AA68B3AF-6A8A-44E7-8992-D033D66A77CE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PagarMe.Generic", "PagarMe.Generic\PagarMe.Generic.csproj", "{0B590C92-A6FB-4AF2-A275-05042EB8F4A1}"
 EndProject

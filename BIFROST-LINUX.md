@@ -7,16 +7,16 @@
 
 ## Initialize service
 
-* sudo mono-service share/ubuntu-service/service/PagarMe.Mpos.Bridge.Service.exe
+* sudo mono-service [path-to-the-service]/PagarMe.Bifrost.Service.exe
 
 ## Stop service normally
 
-* sudo kill $(sudo cat /tmp/PagarMe.Mpos.Bridge.Service.exe.lock)
+* sudo kill $(sudo cat /tmp/PagarMe.Bifrost.Service.exe.lock)
 
 ## Remove lock of service when it ends up with exception
 
-* sudo rm /tmp/PagarMe.Mpos.Bridge.Service.exe.lock
+* sudo rm /tmp/PagarMe.Bifrost.Service.exe.lock
 
 ## Bifrost log
 
-* sudo cat .config/PagarMe.Mpos.Bridge/{yyyy}-{mm}-{dd}.log
+* sudo cat .config/PagarMe.Bifrost/{yyyy}-{mm}-{dd}.log
