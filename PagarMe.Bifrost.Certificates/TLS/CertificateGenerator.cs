@@ -1,20 +1,18 @@
-﻿using Org.BouncyCastle.Asn1;
-using Org.BouncyCastle.Asn1.Pkcs;
-using Org.BouncyCastle.Asn1.X509;
+﻿using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Generators;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Crypto.Prng;
 using Org.BouncyCastle.Math;
-using Org.BouncyCastle.OpenSsl;
-using Org.BouncyCastle.Pkcs;
 using Org.BouncyCastle.Security;
 using Org.BouncyCastle.Utilities;
 using Org.BouncyCastle.X509;
 using System;
+using System.Security.AccessControl;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
-namespace PagarMe.Bifrost
+namespace PagarMe.Bifrost.Certificates.TLS
 {
     class CertificateGenerator
     {
@@ -97,27 +95,60 @@ namespace PagarMe.Bifrost
             var certificate = generator.Generate(keyParameter, random);
 
             // merge into X509Certificate2
-            return new X509Certificate2(certificate.GetEncoded());
+            return new X509Certificate2(certificate.GetEncoded(), "", X509KeyStorageFlags.Exportable);
         }
 
         private void setPrivateKey(X509Certificate2 x509, AsymmetricCipherKeyPair keyPair)
         {
-            // correcponding private key
-            var info = PrivateKeyInfoFactory.CreatePrivateKeyInfo(keyPair.Private);
+            var key = ((RsaPrivateCrtKeyParameters)keyPair.Private);
 
-            var seq = (Asn1Sequence)Asn1Object.FromByteArray(info.PrivateKey.GetDerEncoded());
-            if (seq.Count != 9)
-                throw new PemException("malformed sequence in RSA private key");
+            var cspParams = new CspParameters()
+            {
+                KeyContainerName = Guid.NewGuid().ToString(),
+                KeyNumber = (int)KeyNumber.Exchange,
+                Flags = CspProviderFlags.UseMachineKeyStore
+            };
 
-            var rsa = new RsaPrivateKeyStructure(seq);
-            var rsaparams = new RsaPrivateCrtKeyParameters(
-                rsa.Modulus, rsa.PublicExponent, rsa.PrivateExponent,
-                rsa.Prime1, rsa.Prime2,
-                rsa.Exponent1, rsa.Exponent2,
-                rsa.Coefficient
+            setNetworkServicePermissions(cspParams);
+
+            var rsaProvider = new RSACryptoServiceProvider(cspParams);
+
+            setMathParameters(key, rsaProvider);
+
+            x509.PrivateKey = rsaProvider;
+        }
+
+        private static void setNetworkServicePermissions(CspParameters cspParams)
+        {
+            //Copied to do not delete any permission
+            cspParams.CryptoKeySecurity =
+                new RSACryptoServiceProvider(cspParams)
+                    .CspKeyContainerInfo.CryptoKeySecurity;
+
+            var networkService = new CryptoKeyAccessRule(
+                TLSConfig.GetServiceUser(),
+                CryptoKeyRights.FullControl,
+                AccessControlType.Allow
             );
 
-            x509.PrivateKey = DotNetUtilities.ToRSA(rsaparams);
+            cspParams.CryptoKeySecurity.AddAccessRule(networkService);
+        }
+
+        private static void setMathParameters(RsaPrivateCrtKeyParameters key, RSACryptoServiceProvider rsaProvider)
+        {
+            var parameters = new RSAParameters
+            {
+                Modulus = key.Modulus.ToByteArrayUnsigned(),
+                P = key.P.ToByteArrayUnsigned(),
+                Q = key.Q.ToByteArrayUnsigned(),
+                DP = key.DP.ToByteArrayUnsigned(),
+                DQ = key.DQ.ToByteArrayUnsigned(),
+                InverseQ = key.QInv.ToByteArrayUnsigned(),
+                D = key.Exponent.ToByteArrayUnsigned(),
+                Exponent = key.PublicExponent.ToByteArrayUnsigned()
+            };
+
+            rsaProvider.ImportParameters(parameters);
         }
 
     }

@@ -1,10 +1,13 @@
-﻿using System;
+﻿using NLog;
+using System;
 using System.Security.Cryptography.X509Certificates;
 
-namespace PagarMe.Bifrost
+namespace PagarMe.Bifrost.Certificates.TLS
 {
     internal class CertificateChain
     {
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+
         private CertificateGenerator certGen;
 
         public CertificateChain(String algorithm, Int32 validYears, Int32 keyStrength)
@@ -12,9 +15,19 @@ namespace PagarMe.Bifrost
             certGen = new CertificateGenerator(algorithm, validYears, keyStrength);
         }
 
-        public X509Certificate2 GetOrGenerate(String subjectTls, String subjectCa)
+        public X509Certificate2 Get(String subjectTls, String subjectCa)
         {
             var certificate = Store.GetCertificate(subjectTls, subjectCa, StoreName.My);
+
+            if (certificate != null)
+                logger.Info($"Certificate: {certificate.Subject} [{certificate.Issuer}]");
+
+            return certificate;
+        }
+
+        public X509Certificate2 GenerateIfNotExists(String subjectTls, String subjectCa)
+        {
+            var certificate = Get(subjectTls, subjectCa);
 
             if (certificate == null)
             {

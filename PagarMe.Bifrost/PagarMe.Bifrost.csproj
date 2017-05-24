@@ -60,7 +60,6 @@
     <Compile Include="Commands\FinishPaymentRequest.cs" />
     <Compile Include="Commands\InitializeRequest.cs" />
     <Compile Include="Commands\ListDevicesResponse.cs" />
-    <Compile Include="LoggerExtension.cs" />
     <Compile Include="MposBridge.cs" />
     <Compile Include="Commands\ProcessPaymentRequest.cs" />
     <Compile Include="Commands\ProcessPaymentResponse.cs" />
@@ -70,11 +69,6 @@
     <Compile Include="Providers\IProvider.cs" />
     <Compile Include="Providers\MposProvider.cs" />
     <Compile Include="Providers\InitializationOptions.cs" />
-    <Compile Include="TLS\CertificateChain.cs" />
-    <Compile Include="TLS\CertificateGenerator.cs" />
-    <Compile Include="TLS\ComposedCertificate.cs" />
-    <Compile Include="TLS\Store.cs" />
-    <Compile Include="TLS\TLSConfig.cs" />
     <Compile Include="WebSocket\MposWebSocketBehavior.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -83,6 +77,14 @@
   <ItemGroup />
   <ItemGroup />
   <ItemGroup>
+    <ProjectReference Include="..\PagarMe.Bifrost.Certificates\PagarMe.Bifrost.Certificates.csproj">
+      <Project>{751e182c-306a-4d2b-9fe6-98d09cd53753}</Project>
+      <Name>PagarMe.Bifrost.Certificates</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PagarMe.Generic\PagarMe.Generic.csproj">
+      <Project>{0b590c92-a6fb-4af2-a275-05042eb8f4a1}</Project>
+      <Name>PagarMe.Generic</Name>
+    </ProjectReference>
     <ProjectReference Include="..\PagarMe.Mpos\PagarMe.Mpos.csproj">
       <Project>{0D5CB93F-C493-4EAD-86FC-98DBFDD63D8D}</Project>
       <Name>PagarMe.Mpos</Name>
