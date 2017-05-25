@@ -1,8 +1,8 @@
 var callWS = function() {
-  var contextId = getById("contextId").value;
-  var devicePort = getById("devicePort").value;
-  var encryptionKey = getById("encryptionKey").value;
-  var baudRate = getById("baudRate").value;
+  var contextId = getById("context-id").value;
+  var devicePort = getById("device-port").value;
+  var encryptionKey = getById("encryption-key").value;
+  var baudRate = getById("baud-rate").value;
 
   var instance = new webSocket(contextId, devicePort, encryptionKey, baudRate);
   instance.call();
@@ -71,8 +71,8 @@ var webSocket = function (contextId, devicePort, encryptionKey, baudRate) {
     this.amount = getById("amount").value;
 
     this.method = 
-      getById("Credit").checked ? "Credit" :
-      getById("Debit").checked ? "Debit" :
+      getById("credit").checked ? "Credit" :
+      getById("debit").checked ? "Debit" :
       null;
   };
 
