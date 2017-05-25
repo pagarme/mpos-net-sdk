@@ -1,8 +1,8 @@
 var callWS = function() {
-  var contextId = document.getElementById("contextId").value;
-  var devicePort = document.getElementById("devicePort").value;
-  var encryptionKey = document.getElementById("encryptionKey").value;
-  var baudRate = document.getElementById("baudRate").value;
+  var contextId = getById("contextId").value;
+  var devicePort = getById("devicePort").value;
+  var encryptionKey = getById("encryptionKey").value;
+  var baudRate = getById("baudRate").value;
 
   var instance = new webSocket(contextId, devicePort, encryptionKey, baudRate);
   instance.call();
@@ -68,11 +68,11 @@ var webSocket = function (contextId, devicePort, encryptionKey, baudRate) {
   };
 
   this.setValues = function() {
-    this.amount = document.getElementById("amount").value;
+    this.amount = getById("amount").value;
 
     this.method = 
-      document.getElementById("Credit").checked ? "Credit" :
-      document.getElementById("Debit").checked ? "Debit" :
+      getById("Credit").checked ? "Credit" :
+      getById("Debit").checked ? "Debit" :
       null;
   };
 
@@ -154,10 +154,10 @@ var webSocket = function (contextId, devicePort, encryptionKey, baudRate) {
   };
 
   this.showMessage = function(message) {
-    var messages = document.getElementById("messages").innerHTML;
+    var messages = getById("messages").innerHTML;
     messages = "<div><pre>" + message + "</pre></div>" + messages;
 
-    document.getElementById("messages").innerHTML = messages;
+    getById("messages").innerHTML = messages;
   };
 
   this.close = function() {
@@ -248,5 +248,8 @@ var webSocket = function (contextId, devicePort, encryptionKey, baudRate) {
     this.ws.send(message);
   }
 
-
 };
+
+var getById = function(id) {
+	return document.getElementById(id);
+}
