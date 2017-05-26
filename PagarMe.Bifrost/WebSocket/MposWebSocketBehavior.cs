@@ -117,7 +117,8 @@ namespace PagarMe.Bifrost.WebSocket
                 {
                     PaymentRequest.Type.ListDevices,
                     PaymentRequest.Type.DisplayMessage,
-                    PaymentRequest.Type.Status
+                    PaymentRequest.Type.Status,
+                    PaymentRequest.Type.UnknownCommand,
                 };
 
                 if (!canCallAnytime.Contains(request.RequestType))
