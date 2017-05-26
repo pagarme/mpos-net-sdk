@@ -46,7 +46,7 @@ namespace PagarMe.Bifrost.WebSocket
 
         private async Task handleMessage(MessageEventArgs e)
         {
-            var request = JsonConvert.DeserializeObject<PaymentRequest>(e.Data);
+            var request = JsonConvert.DeserializeObject<PaymentRequest>(e.Data, SnakeCase.Settings);
             var response = new PaymentResponse();
 
             var context = mposBridge.GetContext(request.ContextId);
@@ -210,7 +210,7 @@ namespace PagarMe.Bifrost.WebSocket
 
         private void send(PaymentResponse response)
         {
-            Send(JsonConvert.SerializeObject(response));
+            Send(JsonConvert.SerializeObject(response, SnakeCase.Settings));
         }
 
         
