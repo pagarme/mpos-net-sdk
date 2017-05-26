@@ -107,7 +107,7 @@ var webSocket = function (contextId, devicePort, encryptionKey, baudRate) {
 
     var responseContent = JSON.parse(response.data);
 
-    switch(responseContent.ResponseType)
+    switch(responseContent.response_type)
     {
       case (this.parent.response.devicesListed):
         this.parent.initialize(responseContent);
@@ -136,14 +136,14 @@ var webSocket = function (contextId, devicePort, encryptionKey, baudRate) {
 
   };
 
-  this.getEndingMessage = function (response) {
-    switch(response.ResponseType)
+  this.getEndingMessage = function (responseContent) {
+    switch(responseContent.response_type)
     {
       case this.response.finished:
         return "Payment Succeded";
 
       case this.response.error:
-        return response.Error;
+        return responseContent.error;
 
       case this.response.unknownCommand:
         return "Unknown Request";
@@ -171,8 +171,8 @@ var webSocket = function (contextId, devicePort, encryptionKey, baudRate) {
   this.listDevices = function() {
 
     var request = {
-      RequestType: this.request.listDevices,
-      ContextId: this.contextId,
+      request_type: this.request.listDevices,
+      context_id: this.contextId,
     };
 
     this.sendMessage(request);
@@ -180,14 +180,14 @@ var webSocket = function (contextId, devicePort, encryptionKey, baudRate) {
 
   this.initialize = function(response) {
 
-    var devices = response.DeviceList;
+    var devices = response.device_list;
     var deviceId = null;
 
     for(var d = 0; d < devices.length; d++)
     {
-      if (devices[d].Port == this.devicePort)
+      if (devices[d].port == this.devicePort)
       {
-        deviceId = devices[d].Id;
+        deviceId = devices[d].id;
       }
     }
 
@@ -202,12 +202,12 @@ var webSocket = function (contextId, devicePort, encryptionKey, baudRate) {
     }
 
     var request = {
-      RequestType: this.request.initialize,
-      ContextId: this.contextId,
-      Initialize: {
-        DeviceId: deviceId,
-        EncryptionKey: this.encryptionKey,
-        BaudRate: this.baudRate
+      request_type: this.request.initialize,
+      context_id: this.contextId,
+      initialize: {
+        device_id: deviceId,
+        encryption_key: this.encryptionKey,
+        baud_rate: this.baudRate
       }
     };
 
@@ -217,11 +217,11 @@ var webSocket = function (contextId, devicePort, encryptionKey, baudRate) {
   this.process = function() {
 
     var request = {
-      RequestType: this.request.process,
-      ContextId: this.contextId,
-      Process: {
-        Amount: this.amount * 100,
-        MagstripePaymentMethod: this.method
+      request_type: this.request.process,
+      context_id: this.contextId,
+      process: {
+        amount: this.amount * 100,
+        magstripe_payment_method: this.method
       }
     };
 
@@ -231,12 +231,12 @@ var webSocket = function (contextId, devicePort, encryptionKey, baudRate) {
   this.finish = function(response) {
 
     var request = {
-      RequestType: this.request.finish,
-      ContextId: this.contextId,
-      Finish: {
-        Success: true,
-        ResponseCode: "0000",
-        EmvData: "000000000.0000"
+      request_type: this.request.finish,
+      context_id: this.contextId,
+      finish: {
+        success: true,
+        response_code: "0000",
+        emv_data: "000000000.0000"
       }
     };
 
