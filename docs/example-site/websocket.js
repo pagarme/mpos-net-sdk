@@ -1,10 +1,10 @@
-var callWS = function() {
-  var contextId = getById("context-id").value;
-  var devicePort = getById("device-port").value;
-  var encryptionKey = getById("encryption-key").value;
-  var baudRate = getById("baud-rate").value;
+function callWS() {
+  const contextId = getById("context-id").value;
+  const devicePort = getById("device-port").value;
+  const encryptionKey = getById("encryption-key").value;
+  const baudRate = getById("baud-rate").value;
 
-  var instance = new webSocket(contextId, devicePort, encryptionKey, baudRate);
+  const instance = new webSocket(contextId, devicePort, encryptionKey, baudRate);
   instance.call();
 }
 
@@ -14,7 +14,7 @@ var webSocket = function (contextId, devicePort, encryptionKey, baudRate) {
   this.devicePort = devicePort;
   this.encryptionKey = encryptionKey;
   this.baudRate = baudRate;
-
+  
   this.response = {
     unknownCommand: 0,
     devicesListed: 1,
@@ -47,7 +47,7 @@ var webSocket = function (contextId, devicePort, encryptionKey, baudRate) {
     {			
       this.setValues();
 
-      var valid = this.validate();
+      const valid = this.validate();
 
       if (!valid)
         return;
@@ -77,8 +77,8 @@ var webSocket = function (contextId, devicePort, encryptionKey, baudRate) {
   };
 
   this.validate = function() {
-    var message = "";
-    var valid = true;
+    let message = "";
+    let valid = true;
 
     if (isNaN(this.amount) || this.amount <= 0)
     {
@@ -105,7 +105,7 @@ var webSocket = function (contextId, devicePort, encryptionKey, baudRate) {
 
   this.handleResponse = function (response) {
 
-    var responseContent = JSON.parse(response.data);
+    const responseContent = JSON.parse(response.data);
 
     switch(responseContent.response_type)
     {
@@ -128,7 +128,7 @@ var webSocket = function (contextId, devicePort, encryptionKey, baudRate) {
       default:
         this.close();
 
-        var message = this.parent.getEndingMessage(responseContent);
+        const message = this.parent.getEndingMessage(responseContent);
         if (message) this.parent.showMessage(message);
 
         break;
@@ -154,7 +154,7 @@ var webSocket = function (contextId, devicePort, encryptionKey, baudRate) {
   };
 
   this.showMessage = function(message) {
-    var messages = getById("messages").innerHTML;
+    let messages = getById("messages").innerHTML;
     messages = "<div><pre>" + message + "</pre></div>" + messages;
 
     getById("messages").innerHTML = messages;
@@ -170,7 +170,7 @@ var webSocket = function (contextId, devicePort, encryptionKey, baudRate) {
 
   this.listDevices = function() {
 
-    var request = {
+    const request = {
       request_type: this.request.listDevices,
       context_id: this.contextId,
     };
@@ -180,10 +180,10 @@ var webSocket = function (contextId, devicePort, encryptionKey, baudRate) {
 
   this.initialize = function(response) {
 
-    var devices = response.device_list;
-    var deviceId = null;
+    const devices = response.device_list;
+    let deviceId = null;
 
-    for(var d = 0; d < devices.length; d++)
+    for(let d = 0; d < devices.length; d++)
     {
       if (devices[d].port == this.devicePort)
       {
@@ -201,7 +201,7 @@ var webSocket = function (contextId, devicePort, encryptionKey, baudRate) {
       return;
     }
 
-    var request = {
+    const request = {
       request_type: this.request.initialize,
       context_id: this.contextId,
       initialize: {
@@ -216,7 +216,7 @@ var webSocket = function (contextId, devicePort, encryptionKey, baudRate) {
 
   this.process = function() {
 
-    var request = {
+    const request = {
       request_type: this.request.process,
       context_id: this.contextId,
       process: {
@@ -230,7 +230,7 @@ var webSocket = function (contextId, devicePort, encryptionKey, baudRate) {
 
   this.finish = function(response) {
 
-    var request = {
+    const request = {
       request_type: this.request.finish,
       context_id: this.contextId,
       finish: {
@@ -244,12 +244,12 @@ var webSocket = function (contextId, devicePort, encryptionKey, baudRate) {
   };
 
   this.sendMessage = function(request) {
-    var message = JSON.stringify(request);
+    const message = JSON.stringify(request);
     this.ws.send(message);
   }
 
 };
 
-var getById = function(id) {
+function getById(id) {
 	return document.getElementById(id);
 }
