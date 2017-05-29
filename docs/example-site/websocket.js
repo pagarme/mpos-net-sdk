@@ -110,6 +110,19 @@ var webSocketWrap = function (contextId) {
     this.sendMessage(request);
   };
 
+  this.displayMessage = function(text) {
+
+    const request = {
+      request_type: this.request.displayMessage,
+      context_id: this.contextId,
+      display_message: {
+        message: text
+      }
+    };
+
+    this.sendMessage(request);
+  };
+
   this.sendMessage = function(request) {
     const message = JSON.stringify(request);
     this.ws.send(message);
