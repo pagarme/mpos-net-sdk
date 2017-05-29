@@ -65,7 +65,7 @@ var webSocketWrap = function (contextId) {
     this.parent.sendMessage(request);
   };
 
-  this.initialize = function(encryptionKey, deviceId, baudRate) {
+  this.initialize = function(encryptionKey, deviceId, baudRate, simpleInitialize) {
 
     const request = {
       request_type: this.request.initialize,
@@ -73,7 +73,8 @@ var webSocketWrap = function (contextId) {
       initialize: {
         device_id: deviceId,
         encryption_key: encryptionKey,
-        baud_rate: baudRate
+        baud_rate: baudRate,
+        simple_initialize: simpleInitialize,
       }
     };
 
