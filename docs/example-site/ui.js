@@ -8,3 +8,16 @@ function showMessage(message) {
 
   getById("messages").innerHTML = messages;
 };
+
+function getLocal(name) {
+  var value = window.localStorage[name];
+
+  if (!value)
+    return null;
+
+  return value;
+};
+
+function setLocal(name, value) {
+  window.localStorage[name] = value;
+};
