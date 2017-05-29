@@ -1,19 +1,6 @@
-function callWS() {
-  const contextId = getById("context-id").value;
-  const devicePort = getById("device-port").value;
-  const encryptionKey = getById("encryption-key").value;
-  const baudRate = getById("baud-rate").value;
-
-  const instance = new webSocket(contextId, devicePort, encryptionKey, baudRate);
-  instance.call();
-}
-
-var webSocket = function (contextId, devicePort, encryptionKey, baudRate) {
+var webSocketWrap = function (contextId) {
 
   this.contextId = contextId;
-  this.devicePort = devicePort;
-  this.encryptionKey = encryptionKey;
-  this.baudRate = baudRate;
   
   this.response = {
     unknownCommand: 0,
@@ -42,172 +29,51 @@ var webSocket = function (contextId, devicePort, encryptionKey, baudRate) {
   this.method = null;
   this.ws = null;
 
-  this.call = function() {
-    if ("WebSocket" in window)
-    {			
-      this.setValues();
-
-      const valid = this.validate();
-
-      if (!valid)
-        return;
-
+  this.call = function(onopen, onmessage) {
+    if ("WebSocket" in window) {
       this.ws = new WebSocket("wss://localhost:2000/mpos");
 
       this.ws.parent = this;
-      this.ws.onopen = this.open;		
-      this.ws.onmessage = this.handleResponse;
+      this.ws.onopen = onopen;
+      this.ws.onmessage = onmessage;
       this.ws.onclose = this.close;
       this.ws.onerror = this.error;
+
+	  this.parent = this;
     }
 
-    else
-    {
-      this.showMessage("WebSocket NOT supported by your Browser!");
+    else {
+      showMessage("WebSocket NOT supported by your Browser!");
     }
-  };
-
-  this.setValues = function() {
-    this.amount = getById("amount").value;
-
-    this.method = 
-      getById("credit").checked ? "Credit" :
-      getById("debit").checked ? "Debit" :
-      null;
-  };
-
-  this.validate = function() {
-    let message = "";
-    let valid = true;
-
-    if (isNaN(this.amount) || this.amount <= 0)
-    {
-      message += "\n- Invalid amount";
-      valid = false;
-    }
-    if (this.method == null)
-    {
-      message += "\n- No method chosen";
-      valid = false;
-    }
-
-    if (!valid)
-    {
-      this.showMessage("Errors:" + message);
-    }
-
-    return valid;
-  };
-
-  this.open = function() {
-    this.parent.listDevices();
-  };
-
-  this.handleResponse = function (response) {
-
-    const responseContent = JSON.parse(response.data);
-
-    switch(responseContent.response_type)
-    {
-      case (this.parent.response.devicesListed):
-        this.parent.initialize(responseContent);
-        break;
-
-      case (this.parent.response.initialized):
-      case (this.parent.response.alreadyInitialized):
-
-        this.parent.process();
-        break;
-
-      case (this.parent.response.processed):
-        this.parent.finish(responseContent);
-        break;
-      case (this.parent.response.closed):
-        return;
-
-      default:
-        this.close();
-
-        const message = this.parent.getEndingMessage(responseContent);
-        if (message) this.parent.showMessage(message);
-
-        break;
-    }
-
-  };
-
-  this.getEndingMessage = function (responseContent) {
-    switch(responseContent.response_type)
-    {
-      case this.response.finished:
-        return "Payment Succeded";
-
-      case this.response.error:
-        return responseContent.error;
-
-      case this.response.unknownCommand:
-        return "Unknown Request";
-
-      default:
-        return "Unknown Response";
-    }
-  };
-
-  this.showMessage = function(message) {
-    let messages = getById("messages").innerHTML;
-    messages = "<div><pre>" + message + "</pre></div>" + messages;
-
-    getById("messages").innerHTML = messages;
   };
 
   this.close = function() {
   };
 
   this.error = function(){
-    this.parent.showMessage("Url '" + this.url + "' not found or disconnected");
+    showMessage("Url '" + this.url + "' not found or disconnected");
     this.close();
   };
 
   this.listDevices = function() {
-
+  
     const request = {
-      request_type: this.request.listDevices,
-      context_id: this.contextId,
+      request_type: this.parent.request.listDevices,
+      context_id: this.parent.contextId,
     };
 
-    this.sendMessage(request);
+    this.parent.sendMessage(request);
   };
 
-  this.initialize = function(response) {
-
-    const devices = response.device_list;
-    let deviceId = null;
-
-    for(let d = 0; d < devices.length; d++)
-    {
-      if (devices[d].port == this.devicePort)
-      {
-        deviceId = devices[d].id;
-      }
-    }
-
-    if (deviceId == null)
-    {
-      this.showMessage("Port " + this.devicePort + " not found");
-
-      this.ws.close();
-      this.close();
-
-      return;
-    }
+  this.initialize = function(encryptionKey, deviceId, baudRate) {
 
     const request = {
       request_type: this.request.initialize,
       context_id: this.contextId,
       initialize: {
         device_id: deviceId,
-        encryption_key: this.encryptionKey,
-        baud_rate: this.baudRate
+        encryption_key: encryptionKey,
+        baud_rate: baudRate
       }
     };
 
@@ -249,7 +115,3 @@ var webSocket = function (contextId, devicePort, encryptionKey, baudRate) {
   }
 
 };
-
-function getById(id) {
-	return document.getElementById(id);
-}
