@@ -1,7 +1,7 @@
 var webSocketWrap = function (contextId) {
 
   this.contextId = contextId;
-  
+
   this.response = {
     unknownCommand: 0,
     devicesListed: 1,
@@ -39,7 +39,7 @@ var webSocketWrap = function (contextId) {
       this.ws.onclose = this.close;
       this.ws.onerror = this.error;
 
-	  this.parent = this;
+      this.parent = this;
     }
 
     else {
@@ -56,7 +56,7 @@ var webSocketWrap = function (contextId) {
   };
 
   this.listDevices = function() {
-  
+
     const request = {
       request_type: this.parent.request.listDevices,
       context_id: this.parent.contextId,
