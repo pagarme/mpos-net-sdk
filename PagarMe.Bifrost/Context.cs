@@ -63,7 +63,10 @@ namespace PagarMe.Bifrost
                     OnError = onError
                 });
 
-                await _provider.SynchronizeTables(false);
+                if (!request.SimpleInitialize)
+                {
+                    await _provider.SynchronizeTables(false);
+                }
 
                 _device = device;
                 _status = ContextStatus.Ready;
