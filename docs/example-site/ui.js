@@ -12,8 +12,7 @@ function showMessage (message) {
 function getLocal (name) {
   var value = window.localStorage[name];
 
-  if (!value)
-    return null;
+  if (!value) return null;
 
   return value;
 };

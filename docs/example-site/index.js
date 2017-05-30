@@ -16,8 +16,7 @@ function callWS () {
 
   const valid = validate(wsWrap);
 
-  if (!valid)
-	return;
+  if (!valid) return;
 
   wsWrap.call(wsWrap.listDevices, handleResponse);
 }
@@ -91,8 +90,9 @@ function initialize (wsWrap, responseJson) {
 
   const deviceId = getDevice(wsWrap, responseJson);
 
-  if (deviceId != null)
+  if (deviceId != null) {
 	wsWrap.initialize(encryptionKey, deviceId, baudRate);
+  }
 }
 
 function getDevice (wsWrap, responseJson) {
