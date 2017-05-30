@@ -1,14 +1,14 @@
 var devicePort = getLocal("device-port");
 var baudRate = getLocal("baud-rate");
 
-function init() {
+function init () {
   getById("device-port").value = devicePort;
   getById("baud-rate").value = baudRate;
 }
 
 init();
 
-function callWS() {
+function callWS () {
   const contextId = getById("context-id").value;
   const wsWrap = new webSocketWrap(contextId);
 
@@ -22,7 +22,7 @@ function callWS() {
   wsWrap.call(wsWrap.listDevices, handleResponse);
 }
 
-function setValues(wsWrap) {
+function setValues (wsWrap) {
   wsWrap.amount = getById("amount").value;
 
   wsWrap.method =
@@ -31,7 +31,7 @@ function setValues(wsWrap) {
     null;
 };
 
-function validate(wsWrap) {
+function validate (wsWrap) {
   let message = "";
   let valid = true;
 
@@ -52,29 +52,28 @@ function validate(wsWrap) {
   return valid;
 };
 
-function handleResponse(response) {
+function handleResponse (response) {
 
   const ws = this;
   const wsWrap = ws.parent;
 
   const responseJson = JSON.parse(response.data);
 
-  switch(responseJson.response_type) {
-
-    case (wsWrap.response.devicesListed):
+  switch (responseJson.response_type) {
+    case wsWrap.response.devicesListed:
 	  initialize(wsWrap, responseJson);
   	  break;
 
-    case (wsWrap.response.initialized):
-    case (wsWrap.response.alreadyInitialized):
+    case wsWrap.response.initialized:
+    case wsWrap.response.alreadyInitialized:
   	  wsWrap.process();
   	  break;
 
-    case (wsWrap.response.processed):
+    case wsWrap.response.processed:
   	  wsWrap.finish(responseJson);
 	  break;
 
-	case (wsWrap.response.closed):
+    case wsWrap.response.closed:
   	  return;
 
     default:
@@ -87,7 +86,7 @@ function handleResponse(response) {
   }
 };
 
-function initialize(wsWrap, responseJson) {
+function initialize (wsWrap, responseJson) {
   const encryptionKey = getById("encryption-key").value;
 
   const deviceId = getDevice(wsWrap, responseJson);
@@ -96,7 +95,7 @@ function initialize(wsWrap, responseJson) {
 	wsWrap.initialize(encryptionKey, deviceId, baudRate);
 }
 
-function getDevice(wsWrap, responseJson) {
+function getDevice (wsWrap, responseJson) {
   const devices = responseJson.device_list;
 
   for(let d = 0; d < devices.length; d++) {
@@ -113,8 +112,8 @@ function getDevice(wsWrap, responseJson) {
   return null;
 }
 
-function getEndingMessage(wsWrap, responseJson) {
-  switch(responseJson.response_type) {
+function getEndingMessage (wsWrap, responseJson) {
+  switch (responseJson.response_type) {
     case wsWrap.response.finished:
       return "Payment Succeded";
 

@@ -1,7 +1,7 @@
 var wsWrap = null;
 var devices = null;
 
-function init() {
+function init () {
   setIfNull("baud-rate");
 
   const contextId = getById("context-id").value;
@@ -10,7 +10,7 @@ function init() {
   getPortList();
 }
 
-function setIfNull(name) {
+function setIfNull (name) {
   const currentValue = getById(name).value;
 
   if (!currentValue) {
@@ -18,20 +18,21 @@ function setIfNull(name) {
   }
 }
 
-function getPortList() {
+function getPortList () {
   wsWrap.call(wsWrap.listDevices, handleResponse);
 }
 
-function handleResponse(response) {
+function handleResponse (response) {
 
   const responseJson = JSON.parse(response.data);
 
-  switch(responseJson.response_type) {
-    case (wsWrap.response.devicesListed):
+  switch (responseJson.response_type) {
+    case wsWrap.response.devicesListed:
       populateDeviceList(responseJson);
       break;
-      case (wsWrap.response.alreadyInitialized):
-    case (wsWrap.response.initialized):
+
+    case wsWrap.response.alreadyInitialized:
+    case wsWrap.response.initialized:
       wsWrap.displayMessage("Configurado");
       break;
 
@@ -39,7 +40,7 @@ function handleResponse(response) {
       configured();
       break;
 
-    case (wsWrap.response.closed):
+    case wsWrap.response.closed:
       break;
 
     default:
@@ -53,7 +54,7 @@ function handleResponse(response) {
 
 };
 
-function populateDeviceList(responseJson) {
+function populateDeviceList (responseJson) {
   devices = responseJson.device_list;
   const devicePortSelect = getById("device-port");
 
@@ -81,20 +82,20 @@ function populateDeviceList(responseJson) {
   toggleSaveButton(true);
 }
 
-function toggleSaveButton(enabled) {
+function toggleSaveButton (enabled) {
   const button = getById("save");
   button.className = "btn btn-" + (enabled ? "primary" : "mute");
   button.disabled = !enabled;
 }
 
-function configured() {
+function configured () {
   setLocal("device-port", getSelected(getById("device-port")));
   setLocal("baud-rate", getById("baud-rate").value);
   showMessage("Configurations saved at browser");
 }
 
-function getEndingMessage(wsWrap, responseJson) {
-  switch(responseJson.response_type) {
+function getEndingMessage (wsWrap, responseJson) {
+  switch (responseJson.response_type) {
 
     case wsWrap.response.error:
       return responseJson.error;
@@ -107,7 +108,7 @@ function getEndingMessage(wsWrap, responseJson) {
   }
 };
 
-function testAndSaveConfig() {
+function testAndSaveConfig () {
   const encryptionKey = "";
 
   if (!devices) {
@@ -141,7 +142,7 @@ function testAndSaveConfig() {
 
 
 
-function getSelected(select) {
+function getSelected (select) {
   return select.options[select.selectedIndex].value;
 }
 
