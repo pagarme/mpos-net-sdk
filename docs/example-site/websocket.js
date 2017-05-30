@@ -1,5 +1,5 @@
 var WebSocketWrap = function (contextId) {
-  this.contextId = contextId;
+  this.contextId = contextId
 
   this.response = {
     unknownCommand: 0,
@@ -12,7 +12,7 @@ var WebSocketWrap = function (contextId) {
     status: 7,
     closed: 8,
     error: 9,
-  };
+  }
 
   this.request = {
     listDevices: 1,
@@ -22,44 +22,44 @@ var WebSocketWrap = function (contextId) {
     displayMessage: 6,
     status: 7,
     close: 8,
-  };
+  }
 
-  this.amount = 0;
-  this.method = null;
-  this.ws = null;
+  this.amount = 0
+  this.method = null
+  this.ws = null
 
   this.call = function (onopen, onmessage) {
     if ('WebSocket' in window) {
-      this.ws = new WebSocket('wss://localhost:2000/mpos');
+      this.ws = new WebSocket('wss://localhost:2000/mpos')
 
-      this.ws.parent = this;
-      this.ws.onopen = onopen;
-      this.ws.onmessage = onmessage;
-      this.ws.onclose = this.close;
-      this.ws.onerror = this.error;
+      this.ws.parent = this
+      this.ws.onopen = onopen
+      this.ws.onmessage = onmessage
+      this.ws.onclose = this.close
+      this.ws.onerror = this.error
 
-      this.parent = this;
+      this.parent = this
     } else {
-      showMessage('WebSocket NÃO suportado neste navegador');
+      showMessage('WebSocket NÃO suportado neste navegador')
     }
-  };
+  }
 
   this.close = function () {
-  };
+  }
 
   this.error = function (){
-    showMessage('Endereço "' + this.url + '" não encontrado ou desconectou');
-    this.close();
-  };
+    showMessage('Endereço "' + this.url + '" não encontrado ou desconectou')
+    this.close()
+  }
 
   this.listDevices = function () {
     const request = {
       request_type: this.parent.request.listDevices,
       context_id: this.parent.contextId,
-    };
+    }
 
-    this.parent.sendMessage(request);
-  };
+    this.parent.sendMessage(request)
+  }
 
   this.initialize = function (encryptionKey, deviceId, baudRate, simpleInitialize) {
     const request = {
@@ -71,10 +71,10 @@ var WebSocketWrap = function (contextId) {
         baud_rate: baudRate,
         simple_initialize: simpleInitialize,
       }
-    };
+    }
 
-    this.sendMessage(request);
-  };
+    this.sendMessage(request)
+  }
 
   this.process = function () {
     const request = {
@@ -84,10 +84,10 @@ var WebSocketWrap = function (contextId) {
         amount: this.amount * 100,
         magstripe_payment_method: this.method
       }
-    };
+    }
 
-    this.sendMessage(request);
-  };
+    this.sendMessage(request)
+  }
 
   this.finish = function (response) {
     const request = {
@@ -98,10 +98,10 @@ var WebSocketWrap = function (contextId) {
         response_code: '0000',
         emv_data: '000000000.0000'
       }
-    };
+    }
 
-    this.sendMessage(request);
-  };
+    this.sendMessage(request)
+  }
 
   this.displayMessage = function (text) {
     const request = {
@@ -110,13 +110,13 @@ var WebSocketWrap = function (contextId) {
       display_message: {
         message: text
       }
-    };
+    }
 
-    this.sendMessage(request);
-  };
+    this.sendMessage(request)
+  }
 
   this.sendMessage = function (request) {
-    const message = JSON.stringify(request);
-    this.ws.send(message);
+    const message = JSON.stringify(request)
+    this.ws.send(message)
   }
-};
+}
