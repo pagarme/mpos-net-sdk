@@ -99,7 +99,7 @@ function getDevice (wsWrap, responseJson) {
   const devices = responseJson.device_list;
 
   for(let d = 0; d < devices.length; d++) {
-    if (devices[d].port == devicePort) {
+    if (devices[d].port === devicePort) {
       return devices[d].id;
     }
   }

@@ -69,7 +69,7 @@ function populateDeviceList (responseJson) {
   const chosenPort = getLocal('device-port');
 
   for(let d = 0; d < devices.length; d++) {
-    const selected = chosenPort == devices[d].port ? 'selected' : '';
+    const selected = chosenPort === devices[d].port ? 'selected' : '';
 
     devicePortSelect.innerHTML +=
       '<option value="' + devices[d].port + '"'
@@ -131,7 +131,7 @@ function testAndSaveConfig () {
   }
 
   for(let d = 0; d < devices.length; d++) {
-    if (devices[d].port == devicePort)
+    if (devices[d].port === devicePort)
       wsWrap.initialize('', devices[d].id, baudRate, true);
   }
 
