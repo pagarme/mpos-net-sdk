@@ -131,8 +131,9 @@ function testAndSaveConfig () {
   }
 
   for(let d = 0; d < devices.length; d++) {
-    if (devices[d].port === devicePort)
+    if (devices[d].port === devicePort) {
       wsWrap.initialize('', devices[d].id, baudRate, true);
+    }
   }
 
   if (!devices) {
