@@ -23,7 +23,6 @@ function getPortList () {
 }
 
 function handleResponse (response) {
-
   const responseJson = JSON.parse(response.data);
 
   switch (responseJson.response_type) {
@@ -51,7 +50,6 @@ function handleResponse (response) {
 
       break;
   }
-
 };
 
 function populateDeviceList (responseJson) {
@@ -96,7 +94,6 @@ function configured () {
 
 function getEndingMessage (wsWrap, responseJson) {
   switch (responseJson.response_type) {
-
     case wsWrap.response.error:
       return responseJson.error;
 
