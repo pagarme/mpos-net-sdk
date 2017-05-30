@@ -36,17 +36,17 @@ function validate (wsWrap) {
   let valid = true;
 
   if (isNaN(wsWrap.amount) || wsWrap.amount <= 0) {
-    message += '\n- Invalid amount';
+    message += '\n- Valor inválido';
     valid = false;
   }
 
   if (wsWrap.method == null) {
-    message += '\n- No method chosen';
+    message += '\n- Método de pagamento não escolhido';
     valid = false;
   }
 
   if (!valid) {
-    showMessage('Errors:' + message);
+    showMessage('Erros:' + message);
   }
 
   return valid;
@@ -104,7 +104,7 @@ function getDevice (wsWrap, responseJson) {
     }
   }
 
-  showMessage('Port ' + devicePort + ' not found');
+  showMessage('Porta ' + devicePort + ' não encontrada');
 
   wsWrap.ws.close();
   wsWrap.close();
@@ -115,15 +115,15 @@ function getDevice (wsWrap, responseJson) {
 function getEndingMessage (wsWrap, responseJson) {
   switch (responseJson.response_type) {
     case wsWrap.response.finished:
-      return 'Payment Succeded';
+      return 'Pagamento feito com sucesso';
 
     case wsWrap.response.error:
       return responseJson.error;
 
     case wsWrap.response.unknownCommand:
-      return 'Unknown Request';
+      return 'Comando desconhecido';
 
     default:
-      return 'Unknown Response';
+      return 'Resposta desconhecida';
   }
 };

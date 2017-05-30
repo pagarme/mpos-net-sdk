@@ -60,7 +60,7 @@ function populateDeviceList (responseJson) {
 
   if (devices.length === 0) {
     devicePortSelect.innerHTML = '<option value="">---</option>';
-    showMessage('No ports found');
+    showMessage('Não foram encontradas portas');
     toggleSaveButton(false);
     return;
   }
@@ -91,7 +91,7 @@ function toggleSaveButton (enabled) {
 function configured () {
   setLocal('device-port', getSelected(getById('device-port')));
   setLocal('baud-rate', getById('baud-rate').value);
-  showMessage('Configurations saved at browser');
+  showMessage('Configurações salvas no navegador');
 }
 
 function getEndingMessage (wsWrap, responseJson) {
@@ -101,10 +101,10 @@ function getEndingMessage (wsWrap, responseJson) {
       return responseJson.error;
 
     case wsWrap.response.unknownCommand:
-      return 'Unknown Request';
+      return 'Comando desconhecido';
 
     default:
-      return 'Unknown Response';
+      return 'Resposta desconhecida';
   }
 };
 
@@ -136,7 +136,7 @@ function testAndSaveConfig () {
   }
 
   if (!devices) {
-    showMessage('Device ' + devicePort + ' not found');
+    showMessage('Porta ' + devicePort + ' não encontrada');
   }
 }
 
