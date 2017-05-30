@@ -1,18 +1,17 @@
 using System.ServiceProcess;
 using CommandLine;
 using NLog;
-using System;
 using PagarMe.Generic;
 
 namespace PagarMe.Bifrost.Service
 {
-    public partial class MposWebsocketService : ServiceBase
+    public partial class BifrostService : ServiceBase
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         private MposBridge _bridge;
 
-        public MposWebsocketService()
+        public BifrostService()
         {
             InitializeComponent();
         }

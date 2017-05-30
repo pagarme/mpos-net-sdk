@@ -6,8 +6,6 @@ using PagarMe.Bifrost.Providers;
 using PagarMe.Bifrost.WebSocket;
 using PagarMe.Mpos.Devices;
 using WebSocketSharp.Server;
-using NLog.Targets;
-using System.IO;
 using PagarMe.Generic;
 using PagarMe.Bifrost.Certificates.TLS;
 
@@ -53,7 +51,7 @@ namespace PagarMe.Bifrost
             _server.KeepClean = false;
             _server.Log.File = logger.GetLogFilePath();
 
-            _server.AddWebSocketService("/mpos", () => new MposWebSocketBehavior(this));
+            _server.AddWebSocketService("/mpos", () => new BifrostBehavior(this));
             _server.Start();
         }
 
