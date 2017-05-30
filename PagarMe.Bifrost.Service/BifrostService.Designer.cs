@@ -1,6 +1,6 @@
 namespace PagarMe.Bifrost.Service
 {
-    partial class MposWebsocketService
+    partial class BifrostService
     {
         /// <summary> 
         /// Required designer variable.
@@ -29,9 +29,9 @@ namespace PagarMe.Bifrost.Service
         private void InitializeComponent()
         {
             // 
-            // MposWebsocketService
+            // BifrostService
             // 
-            this.ServiceName = "MposWebsocketService";
+            this.ServiceName = "Pagar.me Bifrost";
 
         }
 

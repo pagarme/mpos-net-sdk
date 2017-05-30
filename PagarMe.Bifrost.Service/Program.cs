@@ -9,7 +9,7 @@ namespace PagarMe.Bifrost.Service
         /// </summary>
         private static void Main()
         {
-            ServiceBase.Run(new MposWebsocketService());
+            ServiceBase.Run(new BifrostService());
         }
     }
 }

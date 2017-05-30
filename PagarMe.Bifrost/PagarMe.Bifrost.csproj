@@ -68,7 +68,7 @@
     <Compile Include="Providers\IProvider.cs" />
     <Compile Include="Providers\MposProvider.cs" />
     <Compile Include="Providers\InitializationOptions.cs" />
-    <Compile Include="WebSocket\MposWebSocketBehavior.cs" />
+    <Compile Include="WebSocket\BifrostBehavior.cs" />
     <Compile Include="WebSocket\SnakeCase.cs" />
   </ItemGroup>
   <ItemGroup>

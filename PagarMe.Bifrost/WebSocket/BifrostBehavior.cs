@@ -10,13 +10,13 @@ using WebSocketSharp.Server;
 
 namespace PagarMe.Bifrost.WebSocket
 {
-    internal class MposWebSocketBehavior : WebSocketBehavior
+    internal class BifrostBehavior : WebSocketBehavior
     {
         private static readonly NLog.Logger logger = LogManager.GetCurrentClassLogger();
 
         private readonly MposBridge mposBridge;
 
-        public MposWebSocketBehavior(MposBridge mposBridge)
+        public BifrostBehavior(MposBridge mposBridge)
         {
             this.mposBridge = mposBridge;
             IgnoreExtensions = true;
