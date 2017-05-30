@@ -30,8 +30,8 @@ var webSocketWrap = function (contextId) {
   this.ws = null;
 
   this.call = function (onopen, onmessage) {
-    if ("WebSocket" in window) {
-      this.ws = new WebSocket("wss://localhost:2000/mpos");
+    if ('WebSocket' in window) {
+      this.ws = new WebSocket('wss://localhost:2000/mpos');
 
       this.ws.parent = this;
       this.ws.onopen = onopen;
@@ -43,7 +43,7 @@ var webSocketWrap = function (contextId) {
     }
 
     else {
-      showMessage("WebSocket NOT supported by your Browser!");
+      showMessage('WebSocket NOT supported by your Browser!');
     }
   };
 
@@ -51,7 +51,7 @@ var webSocketWrap = function (contextId) {
   };
 
   this.error = function (){
-    showMessage("Url '" + this.url + "' not found or disconnected");
+    showMessage('Url "' + this.url + '" not found or disconnected');
     this.close();
   };
 
@@ -102,8 +102,8 @@ var webSocketWrap = function (contextId) {
       context_id: this.contextId,
       finish: {
         success: true,
-        response_code: "0000",
-        emv_data: "000000000.0000"
+        response_code: '0000',
+        emv_data: '000000000.0000'
       }
     };
 
