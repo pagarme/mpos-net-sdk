@@ -141,12 +141,4 @@ function testAndSaveConfig () {
   }
 }
 
-
-
-function getSelected (select) {
-  return select.options[select.selectedIndex].value;
-}
-
-
-
 init();

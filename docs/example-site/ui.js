@@ -20,3 +20,7 @@ function getLocal (name) {
 function setLocal (name, value) {
   window.localStorage[name] = value;
 };
+
+function getSelected (select) {
+  return select.options[select.selectedIndex].value;
+};
