@@ -43,7 +43,7 @@ var webSocketWrap = function (contextId) {
     }
 
     else {
-      showMessage('WebSocket NOT supported by your Browser!');
+      showMessage('WebSocket NÃO suportado neste navegador');
     }
   };
 
@@ -51,7 +51,7 @@ var webSocketWrap = function (contextId) {
   };
 
   this.error = function (){
-    showMessage('Url "' + this.url + '" not found or disconnected');
+    showMessage('Endereço "' + this.url + '" não encontrado ou desconectou');
     this.close();
   };
 
