@@ -60,28 +60,28 @@ function handleResponse (response) {
 
   switch (responseJson.response_type) {
     case wsWrap.response.devicesListed:
-	  initialize(wsWrap, responseJson);
-  	  break;
+      initialize(wsWrap, responseJson);
+      break;
 
     case wsWrap.response.initialized:
     case wsWrap.response.alreadyInitialized:
-  	  wsWrap.process();
-  	  break;
+      wsWrap.process();
+      break;
 
     case wsWrap.response.processed:
-  	  wsWrap.finish(responseJson);
-	  break;
+      wsWrap.finish(responseJson);
+      break;
 
     case wsWrap.response.closed:
-  	  return;
+      return;
 
     default:
-  	  ws.close();
+      ws.close();
 
-  	  const message = getEndingMessage(wsWrap, responseJson);
-  	  if (message) showMessage(message);
+      const message = getEndingMessage(wsWrap, responseJson);
+      if (message) showMessage(message);
 
-  	  break;
+      break;
   }
 };
 
@@ -91,7 +91,7 @@ function initialize (wsWrap, responseJson) {
   const deviceId = getDevice(wsWrap, responseJson);
 
   if (deviceId != null) {
-	wsWrap.initialize(encryptionKey, deviceId, baudRate);
+    wsWrap.initialize(encryptionKey, deviceId, baudRate);
   }
 }
 
