@@ -10,7 +10,7 @@ init();
 
 function callWS () {
   const contextId = getById('context-id').value;
-  const wsWrap = new webSocketWrap(contextId);
+  const wsWrap = new WebSocketWrap(contextId);
 
   setValues(wsWrap);
 
