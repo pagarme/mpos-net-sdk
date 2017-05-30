@@ -1,15 +1,15 @@
-var devicePort = getLocal("device-port");
-var baudRate = getLocal("baud-rate");
+var devicePort = getLocal('device-port');
+var baudRate = getLocal('baud-rate');
 
 function init () {
-  getById("device-port").value = devicePort;
-  getById("baud-rate").value = baudRate;
+  getById('device-port').value = devicePort;
+  getById('baud-rate').value = baudRate;
 }
 
 init();
 
 function callWS () {
-  const contextId = getById("context-id").value;
+  const contextId = getById('context-id').value;
   const wsWrap = new webSocketWrap(contextId);
 
   setValues(wsWrap);
@@ -23,30 +23,30 @@ function callWS () {
 }
 
 function setValues (wsWrap) {
-  wsWrap.amount = getById("amount").value;
+  wsWrap.amount = getById('amount').value;
 
   wsWrap.method =
-    getById("credit").checked ? "Credit" :
-    getById("debit").checked ? "Debit" :
+    getById('credit').checked ? 'Credit' :
+    getById('debit').checked ? 'Debit' :
     null;
 };
 
 function validate (wsWrap) {
-  let message = "";
+  let message = '';
   let valid = true;
 
   if (isNaN(wsWrap.amount) || wsWrap.amount <= 0) {
-    message += "\n- Invalid amount";
+    message += '\n- Invalid amount';
     valid = false;
   }
 
   if (wsWrap.method == null) {
-    message += "\n- No method chosen";
+    message += '\n- No method chosen';
     valid = false;
   }
 
   if (!valid) {
-    showMessage("Errors:" + message);
+    showMessage('Errors:' + message);
   }
 
   return valid;
@@ -87,7 +87,7 @@ function handleResponse (response) {
 };
 
 function initialize (wsWrap, responseJson) {
-  const encryptionKey = getById("encryption-key").value;
+  const encryptionKey = getById('encryption-key').value;
 
   const deviceId = getDevice(wsWrap, responseJson);
 
@@ -104,7 +104,7 @@ function getDevice (wsWrap, responseJson) {
     }
   }
 
-  showMessage("Port " + devicePort + " not found");
+  showMessage('Port ' + devicePort + ' not found');
 
   wsWrap.ws.close();
   wsWrap.close();
@@ -115,15 +115,15 @@ function getDevice (wsWrap, responseJson) {
 function getEndingMessage (wsWrap, responseJson) {
   switch (responseJson.response_type) {
     case wsWrap.response.finished:
-      return "Payment Succeded";
+      return 'Payment Succeded';
 
     case wsWrap.response.error:
       return responseJson.error;
 
     case wsWrap.response.unknownCommand:
-      return "Unknown Request";
+      return 'Unknown Request';
 
     default:
-      return "Unknown Response";
+      return 'Unknown Response';
   }
 };

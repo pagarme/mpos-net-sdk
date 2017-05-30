@@ -2,9 +2,9 @@ var wsWrap = null;
 var devices = null;
 
 function init () {
-  setIfNull("baud-rate");
+  setIfNull('baud-rate');
 
-  const contextId = getById("context-id").value;
+  const contextId = getById('context-id').value;
   wsWrap = new webSocketWrap(contextId);
 
   getPortList();
@@ -33,7 +33,7 @@ function handleResponse (response) {
 
     case wsWrap.response.alreadyInitialized:
     case wsWrap.response.initialized:
-      wsWrap.displayMessage("Configurado");
+      wsWrap.displayMessage('Configurado');
       break;
 
     case wsWrap.response.messageDisplayed:
@@ -56,42 +56,42 @@ function handleResponse (response) {
 
 function populateDeviceList (responseJson) {
   devices = responseJson.device_list;
-  const devicePortSelect = getById("device-port");
+  const devicePortSelect = getById('device-port');
 
   if (devices.length === 0) {
-    devicePortSelect.innerHTML = "<option value=''>---</option>";
-    showMessage("No ports found");
+    devicePortSelect.innerHTML = '<option value="">---</option>';
+    showMessage('No ports found');
     toggleSaveButton(false);
     return;
   }
 
-  devicePortSelect.innerHTML = "<option value=''>-- Selecione --</option>";
-  const chosenPort = getLocal("device-port");
+  devicePortSelect.innerHTML = '<option value="">-- Selecione --</option>';
+  const chosenPort = getLocal('device-port');
 
   for(let d = 0; d < devices.length; d++) {
-    const selected = chosenPort == devices[d].port ? "selected" : "";
+    const selected = chosenPort == devices[d].port ? 'selected' : '';
 
     devicePortSelect.innerHTML +=
-      "<option value='" + devices[d].port + "'"
+      '<option value="' + devices[d].port + '"'
         + selected +
-      ">"
+      '>'
         + devices[d].port +
-      "</option>";
+      '</option>';
   }
 
   toggleSaveButton(true);
 }
 
 function toggleSaveButton (enabled) {
-  const button = getById("save");
-  button.className = "btn btn-" + (enabled ? "primary" : "mute");
+  const button = getById('save');
+  button.className = 'btn btn-' + (enabled ? 'primary' : 'mute');
   button.disabled = !enabled;
 }
 
 function configured () {
-  setLocal("device-port", getSelected(getById("device-port")));
-  setLocal("baud-rate", getById("baud-rate").value);
-  showMessage("Configurations saved at browser");
+  setLocal('device-port', getSelected(getById('device-port')));
+  setLocal('baud-rate', getById('baud-rate').value);
+  showMessage('Configurations saved at browser');
 }
 
 function getEndingMessage (wsWrap, responseJson) {
@@ -101,42 +101,42 @@ function getEndingMessage (wsWrap, responseJson) {
       return responseJson.error;
 
     case wsWrap.response.unknownCommand:
-      return "Unknown Request";
+      return 'Unknown Request';
 
     default:
-      return "Unknown Response";
+      return 'Unknown Response';
   }
 };
 
 function testAndSaveConfig () {
-  const encryptionKey = "";
+  const encryptionKey = '';
 
   if (!devices) {
-    showMessage("Carregue as opções primeiro");
+    showMessage('Carregue as opções primeiro');
     return;
   }
 
-  const devicePort = getSelected(getById("device-port"));
+  const devicePort = getSelected(getById('device-port'));
 
   if (!devicePort) {
-    showMessage("Porta inválida");
+    showMessage('Porta inválida');
     return;
   }
 
-  const baudRate = getById("baud-rate").value;
+  const baudRate = getById('baud-rate').value;
 
   if (!baudRate) {
-    showMessage("Taxa de transmissão inválida");
+    showMessage('Taxa de transmissão inválida');
     return;
   }
 
   for(let d = 0; d < devices.length; d++) {
     if (devices[d].port == devicePort)
-      wsWrap.initialize("", devices[d].id, baudRate, true);
+      wsWrap.initialize('', devices[d].id, baudRate, true);
   }
 
   if (!devices) {
-    showMessage("Device " + devicePort + " not found");
+    showMessage('Device ' + devicePort + ' not found');
   }
 }
 
