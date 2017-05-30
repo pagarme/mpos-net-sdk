@@ -40,9 +40,7 @@ var webSocketWrap = function (contextId) {
       this.ws.onerror = this.error;
 
       this.parent = this;
-    }
-
-    else {
+    } else {
       showMessage('WebSocket NÃO suportado neste navegador');
     }
   };
