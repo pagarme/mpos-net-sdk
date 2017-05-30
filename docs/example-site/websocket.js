@@ -1,4 +1,4 @@
-var webSocketWrap = function (contextId) {
+var WebSocketWrap = function (contextId) {
 
   this.contextId = contextId;
 

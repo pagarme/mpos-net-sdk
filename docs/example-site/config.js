@@ -5,7 +5,7 @@ function init () {
   setIfNull('baud-rate');
 
   const contextId = getById('context-id').value;
-  wsWrap = new webSocketWrap(contextId);
+  wsWrap = new WebSocketWrap(contextId);
 
   getPortList();
 }
