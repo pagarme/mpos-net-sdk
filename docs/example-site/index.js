@@ -52,7 +52,6 @@ function validate (wsWrap) {
 };
 
 function handleResponse (response) {
-
   const ws = this;
   const wsWrap = ws.parent;
 

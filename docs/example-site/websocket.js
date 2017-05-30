@@ -1,5 +1,4 @@
 var WebSocketWrap = function (contextId) {
-
   this.contextId = contextId;
 
   this.response = {
@@ -54,7 +53,6 @@ var WebSocketWrap = function (contextId) {
   };
 
   this.listDevices = function () {
-
     const request = {
       request_type: this.parent.request.listDevices,
       context_id: this.parent.contextId,
@@ -64,7 +62,6 @@ var WebSocketWrap = function (contextId) {
   };
 
   this.initialize = function (encryptionKey, deviceId, baudRate, simpleInitialize) {
-
     const request = {
       request_type: this.request.initialize,
       context_id: this.contextId,
@@ -80,7 +77,6 @@ var WebSocketWrap = function (contextId) {
   };
 
   this.process = function () {
-
     const request = {
       request_type: this.request.process,
       context_id: this.contextId,
@@ -94,7 +90,6 @@ var WebSocketWrap = function (contextId) {
   };
 
   this.finish = function (response) {
-
     const request = {
       request_type: this.request.finish,
       context_id: this.contextId,
@@ -109,7 +104,6 @@ var WebSocketWrap = function (contextId) {
   };
 
   this.displayMessage = function (text) {
-
     const request = {
       request_type: this.request.displayMessage,
       context_id: this.contextId,
@@ -125,5 +119,4 @@ var WebSocketWrap = function (contextId) {
     const message = JSON.stringify(request);
     this.ws.send(message);
   }
-
 };
