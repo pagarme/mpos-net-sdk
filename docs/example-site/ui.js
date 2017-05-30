@@ -1,15 +1,15 @@
-function getById(id) {
+function getById (id) {
   return document.getElementById(id);
 }
 
-function showMessage(message) {
+function showMessage (message) {
   let messages = getById("messages").innerHTML;
   messages = "<div><pre>" + message + "</pre></div>" + messages;
 
   getById("messages").innerHTML = messages;
 };
 
-function getLocal(name) {
+function getLocal (name) {
   var value = window.localStorage[name];
 
   if (!value)
@@ -18,6 +18,6 @@ function getLocal(name) {
   return value;
 };
 
-function setLocal(name, value) {
+function setLocal (name, value) {
   window.localStorage[name] = value;
 };

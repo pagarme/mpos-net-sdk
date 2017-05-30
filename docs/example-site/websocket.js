@@ -29,7 +29,7 @@ var webSocketWrap = function (contextId) {
   this.method = null;
   this.ws = null;
 
-  this.call = function(onopen, onmessage) {
+  this.call = function (onopen, onmessage) {
     if ("WebSocket" in window) {
       this.ws = new WebSocket("wss://localhost:2000/mpos");
 
@@ -47,15 +47,15 @@ var webSocketWrap = function (contextId) {
     }
   };
 
-  this.close = function() {
+  this.close = function () {
   };
 
-  this.error = function(){
+  this.error = function (){
     showMessage("Url '" + this.url + "' not found or disconnected");
     this.close();
   };
 
-  this.listDevices = function() {
+  this.listDevices = function () {
 
     const request = {
       request_type: this.parent.request.listDevices,
@@ -65,7 +65,7 @@ var webSocketWrap = function (contextId) {
     this.parent.sendMessage(request);
   };
 
-  this.initialize = function(encryptionKey, deviceId, baudRate, simpleInitialize) {
+  this.initialize = function (encryptionKey, deviceId, baudRate, simpleInitialize) {
 
     const request = {
       request_type: this.request.initialize,
@@ -81,7 +81,7 @@ var webSocketWrap = function (contextId) {
     this.sendMessage(request);
   };
 
-  this.process = function() {
+  this.process = function () {
 
     const request = {
       request_type: this.request.process,
@@ -95,7 +95,7 @@ var webSocketWrap = function (contextId) {
     this.sendMessage(request);
   };
 
-  this.finish = function(response) {
+  this.finish = function (response) {
 
     const request = {
       request_type: this.request.finish,
@@ -110,7 +110,7 @@ var webSocketWrap = function (contextId) {
     this.sendMessage(request);
   };
 
-  this.displayMessage = function(text) {
+  this.displayMessage = function (text) {
 
     const request = {
       request_type: this.request.displayMessage,
@@ -123,7 +123,7 @@ var webSocketWrap = function (contextId) {
     this.sendMessage(request);
   };
 
-  this.sendMessage = function(request) {
+  this.sendMessage = function (request) {
     const message = JSON.stringify(request);
     this.ws.send(message);
   }
