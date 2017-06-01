@@ -21,3 +21,4 @@ docs/example-site/web.config
 docs/service/*
 docs/build-libabecs/
 *.log
+docs/.goutputstream*

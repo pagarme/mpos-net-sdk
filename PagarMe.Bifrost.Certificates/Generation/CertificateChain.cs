@@ -1,8 +1,9 @@
 ﻿using NLog;
+using PagarMe.Bifrost.Certificates.Stores;
 using System;
 using System.Security.Cryptography.X509Certificates;
 
-namespace PagarMe.Bifrost.Certificates.TLS
+namespace PagarMe.Bifrost.Certificates.Generation
 {
     internal class CertificateChain
     {
@@ -17,7 +18,7 @@ namespace PagarMe.Bifrost.Certificates.TLS
 
         public X509Certificate2 Get(String subjectTls, String subjectCa)
         {
-            return Store.GetCertificate(subjectTls, subjectCa, StoreName.My);
+            return Store.Instance.GetCertificate(subjectTls, subjectCa, StoreName.My);
         }
 
         public X509Certificate2 GenerateIfNotExists(String subjectTls, String subjectCa)
@@ -27,23 +28,24 @@ namespace PagarMe.Bifrost.Certificates.TLS
             if (certificate == null)
             {
                 logger.Info("Certificate not found. Start generating.");
-                var ca = getOrGenerate(StoreName.Root, false, subjectCa);
+                var ca = getOrGenerate(false, subjectCa);
                 logger.Info("Root certificate generated.");
-                var tls = getOrGenerate(StoreName.My, true, subjectTls, ca);
+                var tls = getOrGenerate(true, subjectTls, ca);
                 logger.Info("Tls certificate generated.");
+
+                Store.Instance.AddCertificate(ca.X509, tls.X509);
+
                 certificate = tls.X509;
             }
 
             return certificate;
         }
 
-        private ComposedCertificate getOrGenerate(StoreName storeName, Boolean setPrivate, String subject, ComposedCertificate parent = null)
+        private ComposedCertificate getOrGenerate(Boolean setPrivate, String subject, ComposedCertificate parent = null)
         {
             var issuer = parent?.X509.Subject;
 
             var certificate = certGen.Generate(setPrivate, subject, issuer, parent?.Private);
-
-            Store.AddCertificate(certificate.X509, storeName);
 
             return certificate;
         }

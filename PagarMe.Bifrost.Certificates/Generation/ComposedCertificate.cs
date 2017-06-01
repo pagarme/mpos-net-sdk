@@ -1,7 +1,7 @@
 ﻿using System.Security.Cryptography.X509Certificates;
 using Org.BouncyCastle.Crypto;
 
-namespace PagarMe.Bifrost.Certificates.TLS
+namespace PagarMe.Bifrost.Certificates.Generation
 {
     internal class ComposedCertificate
     {

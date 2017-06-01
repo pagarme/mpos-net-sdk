@@ -51,15 +51,20 @@
   <ItemGroup>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TLS\CertificateChain.cs" />
-    <Compile Include="TLS\CertificateGenerator.cs" />
-    <Compile Include="TLS\ComposedCertificate.cs" />
-    <Compile Include="TLS\Store.cs" />
-    <Compile Include="TLS\TLSConfig.cs" />
+    <Compile Include="Generation\CertificateChain.cs" />
+    <Compile Include="Generation\CertificateGenerator.cs" />
+    <Compile Include="Generation\ComposedCertificate.cs" />
+    <Compile Include="Stores\Store.cs" />
+    <Compile Include="Generation\TLSConfig.cs" />
+    <Compile Include="Stores\UnixStore.cs" />
+    <Compile Include="Stores\WindowsStore.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+    <Content Include="certificates-unix-store.sh">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\PagarMe.Generic\PagarMe.Generic.csproj">
