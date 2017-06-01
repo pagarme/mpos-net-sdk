@@ -1,4 +1,5 @@
-﻿using Org.BouncyCastle.Asn1.X509;
+﻿using NLog;
+using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Generators;
 using Org.BouncyCastle.Crypto.Parameters;
@@ -7,12 +8,13 @@ using Org.BouncyCastle.Math;
 using Org.BouncyCastle.Security;
 using Org.BouncyCastle.Utilities;
 using Org.BouncyCastle.X509;
+using PagarMe.Generic;
 using System;
 using System.Security.AccessControl;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
-namespace PagarMe.Bifrost.Certificates.TLS
+namespace PagarMe.Bifrost.Certificates.Generation
 {
     class CertificateGenerator
     {
@@ -62,7 +64,7 @@ namespace PagarMe.Bifrost.Certificates.TLS
             var issuerDN = issuerName == null ? subjectDN : new X509Name(issuerName);
             generator.SetIssuerDN(issuerDN);
 
-            var subjectAlt = subjectName.Replace("CN=", "");
+            var subjectAlt = subjectName.CleanSubject();
             var subjectAltName = new GeneralNames(new GeneralName(GeneralName.DnsName, subjectAlt));
             generator.AddExtension(X509Extensions.SubjectAlternativeName, false, subjectAltName);
         }
@@ -109,7 +111,8 @@ namespace PagarMe.Bifrost.Certificates.TLS
                 Flags = CspProviderFlags.UseMachineKeyStore
             };
 
-            setNetworkServicePermissions(cspParams);
+            if (!TLSConfig.IsUnix)
+                setNetworkServicePermissions(cspParams);
 
             var rsaProvider = new RSACryptoServiceProvider(cspParams);
 
@@ -117,6 +120,8 @@ namespace PagarMe.Bifrost.Certificates.TLS
 
             x509.PrivateKey = rsaProvider;
         }
+
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
         private static void setNetworkServicePermissions(CspParameters cspParams)
         {

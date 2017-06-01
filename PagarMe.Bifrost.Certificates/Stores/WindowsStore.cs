@@ -1,18 +1,15 @@
-﻿using NLog;
-using PagarMe.Generic;
+﻿using PagarMe.Generic;
 using System;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 
-namespace PagarMe.Bifrost.Certificates.TLS
+namespace PagarMe.Bifrost.Certificates.Stores
 {
-    class Store
+    class WindowsStore : Store
     {
-        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+        private static StoreLocation storeLocation = StoreLocation.LocalMachine;
 
-        private const StoreLocation storeLocation = StoreLocation.LocalMachine;
-
-        public static X509Certificate2 GetCertificate(String subject, String issuer, StoreName storeName)
+        public override X509Certificate2 GetCertificate(String subject, String issuer, StoreName storeName)
         {
             return logger.TryLogOnException(() =>
             {
@@ -36,19 +33,24 @@ namespace PagarMe.Bifrost.Certificates.TLS
             });
         }
 
-        public static void AddCertificate(X509Certificate2 cert, StoreName storeName)
+        public override void AddCertificate(X509Certificate2 ca, X509Certificate2 tls)
         {
             logger.TryLogOnException(() =>
             {
-                var store = new X509Store(storeName, storeLocation);
-                store.Open(OpenFlags.ReadWrite);
-                store.Add(cert);
-
-                store.Close();
+                addCertificate(ca, StoreName.Root);
+                addCertificate(tls, StoreName.My);
             });
         }
-    }
 
+        private static void addCertificate(X509Certificate2 certificate, StoreName storeName)
+        {
+            var store = new X509Store(storeName, storeLocation);
+            store.Open(OpenFlags.ReadWrite);
+            store.Add(certificate);
+
+            store.Close();
+        }
+    }
 
 
 }

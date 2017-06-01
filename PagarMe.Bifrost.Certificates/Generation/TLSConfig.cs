@@ -7,7 +7,7 @@ using System.Security.AccessControl;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
 
-namespace PagarMe.Bifrost.Certificates.TLS
+namespace PagarMe.Bifrost.Certificates.Generation
 {
     public class TLSConfig
     {
@@ -28,6 +28,9 @@ namespace PagarMe.Bifrost.Certificates.TLS
 
         public static X509Certificate2 Get()
         {
+            if (IsUnix)
+                return GenerateIfNotExists();
+
             return certificateChain.Get(subjectTls, subjectCa);
         }
 
@@ -58,6 +61,11 @@ namespace PagarMe.Bifrost.Certificates.TLS
         internal static IdentityReference GetServiceUser()
         {
             return new SecurityIdentifier(WellKnownSidType.NetworkServiceSid, null);
+        }
+
+        internal static Boolean IsUnix
+        {
+            get { return Environment.OSVersion.Platform == PlatformID.Unix; }
         }
 
     }

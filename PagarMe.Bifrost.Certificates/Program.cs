@@ -1,5 +1,5 @@
 ﻿using NLog;
-using PagarMe.Bifrost.Certificates.TLS;
+using PagarMe.Bifrost.Certificates.Generation;
 using System;
 using System.Security.Principal;
 

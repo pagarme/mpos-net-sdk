@@ -7,7 +7,7 @@ using PagarMe.Bifrost.WebSocket;
 using PagarMe.Mpos.Devices;
 using WebSocketSharp.Server;
 using PagarMe.Generic;
-using PagarMe.Bifrost.Certificates.TLS;
+using PagarMe.Bifrost.Certificates.Generation;
 
 namespace PagarMe.Bifrost
 {
