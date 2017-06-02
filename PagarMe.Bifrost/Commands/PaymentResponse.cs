@@ -24,7 +24,7 @@ namespace PagarMe.Bifrost.Commands
             Finished = 5,
             MessageDisplayed = 6,
             Status = 7,
-            Closed = 8,
+            ContextClosed = 8,
             Error = 9,
         }
     }

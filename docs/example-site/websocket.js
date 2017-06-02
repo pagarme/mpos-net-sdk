@@ -10,7 +10,7 @@ var WebSocketWrap = function (contextId) {
     finished: 5,
     messageDisplayed: 6,
     status: 7,
-    closed: 8,
+    contextClosed: 8,
     error: 9,
   }
 
@@ -21,7 +21,7 @@ var WebSocketWrap = function (contextId) {
     finish: 5,
     displayMessage: 6,
     status: 7,
-    close: 8,
+    closeContext: 8,
   }
 
   this.amount = 0
@@ -47,7 +47,7 @@ var WebSocketWrap = function (contextId) {
   this.close = function () {
   }
 
-  this.error = function (){
+  this.error = function () {
     showMessage('Endereço "' + this.url + '" não encontrado ou desconectou')
     this.close()
   }
@@ -113,6 +113,15 @@ var WebSocketWrap = function (contextId) {
     }
 
     this.sendMessage(request)
+  }
+
+  this.closeContext = function () {
+    const request = {
+      request_type: this.parent.request.closeContext,
+      context_id: this.parent.contextId,
+    }
+
+    this.parent.sendMessage(request)
   }
 
   this.sendMessage = function (request) {

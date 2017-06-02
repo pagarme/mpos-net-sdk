@@ -99,8 +99,8 @@ namespace PagarMe.Bifrost.WebSocket
                     await status(context, response);
                     break;
 
-                case PaymentRequest.Type.Close:
-                    await close(context, response);
+                case PaymentRequest.Type.CloseContext:
+                    await close(context, request, response);
                     break;
 
                 default:
@@ -119,6 +119,7 @@ namespace PagarMe.Bifrost.WebSocket
                     PaymentRequest.Type.DisplayMessage,
                     PaymentRequest.Type.Status,
                     PaymentRequest.Type.UnknownCommand,
+                    PaymentRequest.Type.CloseContext,
                 };
 
                 if (!canCallAnytime.Contains(request.RequestType))
@@ -190,10 +191,10 @@ namespace PagarMe.Bifrost.WebSocket
             response.ResponseType = PaymentResponse.Type.MessageDisplayed;
         }
 
-        private async Task close(Context context, PaymentResponse response)
+        private async Task close(Context context, PaymentRequest request, PaymentResponse response)
         {
-            await context.Close();
-            response.ResponseType = PaymentResponse.Type.Closed;
+            await mposBridge.KillContext(request.ContextId);
+            response.ResponseType = PaymentResponse.Type.ContextClosed;
         }
 
 
@@ -222,7 +223,10 @@ namespace PagarMe.Bifrost.WebSocket
 
         private void send(PaymentResponse response)
         {
-            Send(JsonConvert.SerializeObject(response, SnakeCase.Settings));
+            if (State == WebSocketState.Open)
+            {
+                Send(JsonConvert.SerializeObject(response, SnakeCase.Settings));
+            }
         }
 
         
