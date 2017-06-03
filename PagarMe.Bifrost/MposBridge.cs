@@ -8,6 +8,7 @@ using PagarMe.Mpos.Devices;
 using WebSocketSharp.Server;
 using PagarMe.Generic;
 using PagarMe.Bifrost.Certificates.Generation;
+using System.Linq;
 
 namespace PagarMe.Bifrost
 {
@@ -63,6 +64,17 @@ namespace PagarMe.Bifrost
         public void Dispose()
         {
             _deviceManager.Dispose();
+        }
+
+        public String GetDeviceContextName(String deviceId)
+        {
+            lock (_contexts)
+            {
+                return _contexts
+                    .Where(c => c.Value != null && c.Value.DeviceId == deviceId)
+                    .Select(c => c.Key)
+                    .SingleOrDefault();
+            }
         }
 
         public Context GetContext(string name)

@@ -148,7 +148,18 @@ namespace PagarMe.Bifrost.WebSocket
 
         private async Task initialize(Context context, PaymentRequest request, PaymentResponse response)
         {
-            await context.Initialize(request.Initialize, onError);
+            var initialize = request.Initialize;
+
+            var deviceContextName = mposBridge.GetDeviceContextName(initialize.DeviceId);
+
+            if (deviceContextName != null && deviceContextName != request.ContextId)
+            {
+                response.ResponseType = PaymentResponse.Type.Error;
+                response.Error = $"Device already in use by context {deviceContextName}";
+                return;
+            }
+
+            await context.Initialize(initialize, onError);
 
             response.ResponseType = PaymentResponse.Type.Initialized;
         }

@@ -19,6 +19,8 @@ namespace PagarMe.Bifrost
 
         private ContextStatus _status;
 
+        internal String DeviceId => _device?.Id;
+
         public Context(MposBridge bridge, IProvider provider)
         {
             _bridge = bridge;
