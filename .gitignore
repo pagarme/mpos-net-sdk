@@ -9,6 +9,8 @@ packages
 *.msi
 *.dylib
 *.dll
+!deps/windows-firefox/*.exe
+!deps/windows-firefox/*.dll
 
 PagarMe.Mpos.Example/App.config
 *.csproj.user
@@ -22,3 +24,4 @@ docs/service/*
 docs/build-libabecs/
 *.log
 docs/.goutputstream*
+PagarMe.Bifrost.Certificates/cert_path.txt
