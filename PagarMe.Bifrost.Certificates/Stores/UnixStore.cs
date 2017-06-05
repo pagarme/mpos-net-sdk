@@ -2,9 +2,7 @@
 using PagarMe.Bifrost.Certificates.Generation;
 using PagarMe.Generic;
 using System;
-using System.Diagnostics;
 using System.IO;
-using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 
 namespace PagarMe.Bifrost.Certificates.Stores
@@ -38,11 +36,10 @@ namespace PagarMe.Bifrost.Certificates.Stores
             var crtPath = createCrt(certificate);
             var keyPath = createKey(certificate);
 
-            var assemblyInfo = new FileInfo(Assembly.GetEntryAssembly().Location);
-            var storeScriptPath = Path.Combine(assemblyInfo.Directory.FullName, "certificates-unix-store-add.sh");
+            var storeScriptPath = "certificates-unix-store-add.sh";
             var info = new FileInfo(storeScriptPath);
 
-            var exitCodeInstall = run("sh", storeScriptPath, storePath, certName);
+            var exitCodeInstall = Terminal.Run("sh", storeScriptPath, storePath, certName);
             if (exitCodeInstall != 0)
             {
                 throw new Exception($"Could not install certificate: bash exited with code {exitCodeInstall}");
@@ -80,27 +77,5 @@ namespace PagarMe.Bifrost.Certificates.Stores
 
             return certPath;
         }
-
-        private static Int32 run(String command, params String[] args)
-        {
-            var joinedArgs = String.Join(" ", args);
-
-            var proc = new Process
-            {
-                StartInfo = new ProcessStartInfo(command, joinedArgs)
-                {
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    UseShellExecute = false,
-                },
-                EnableRaisingEvents = true,
-            };
-
-            proc.Start();
-            proc.WaitForExit();
-
-            return proc.ExitCode;
-        }
     }
-
 }

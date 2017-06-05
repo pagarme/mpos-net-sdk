@@ -1,4 +1,5 @@
 *.dylib
 *.dll
 *.so
-
+!windows-firefox/*.exe
+!windows-firefox/*.dll
