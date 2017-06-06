@@ -10,17 +10,16 @@ namespace PagarMe.Bifrost.Commands
             switch (type)
             {
                 case Type.UnknownCommand:
-                case Type.CloseContext:
                     return new[] { Type.Initialize };
 
                 case Type.Initialize:
-                    return new[] { Type.Process };
+                    return new[] { Type.Initialize /*answers already initialized*/, Type.Process };
 
                 case Type.Process:
-                    return new[] { Type.Finish, Type.CloseContext, Type.Initialize };
+                    return new[] { Type.Finish, Type.Initialize };
 
                 case Type.Finish:
-                    return new[] { Type.Process, Type.CloseContext, Type.Initialize };
+                    return new[] { Type.Process, Type.Initialize };
 
                 default:
                     throw new NotImplementedException();
