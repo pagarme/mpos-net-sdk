@@ -11,55 +11,67 @@ namespace PagarMe.Bifrost.Certificates.Stores
 {
     class UnixStore : Store
     {
+        private const String storePath = "/usr/local/share/ca-certificates";
+        private static readonly String certName = TLSConfig.Address;
+        private static readonly String pfxPath = Path.Combine(storePath, $"{certName}.pfx");
+
         public override X509Certificate2 GetCertificate(String subject, String issuer, StoreName storeName)
         {
             return logger.TryLogOnException(() =>
             {
-                X509Certificate2 certificate = null;
-                return certificate;
+                if (!File.Exists(pfxPath)) return null;
+                return new X509Certificate2(pfxPath);
             });
         }
-
-        private const String storePath = "/usr/local/share/ca-certificates";
 
         public override void AddCertificate(X509Certificate2 ca, X509Certificate2 tls)
         {
             logger.TryLogOnException(() =>
             {
-                addCertficate(ca, tls);
+                addCertficate(tls);
+                logger.Info("Finish generating");
             });
         }
 
-        private static void addCertficate(params X509Certificate2[] certificateList)
+        private static void addCertficate(X509Certificate2 certificate)
         {
-            foreach (var certificate in certificateList)
-            {
-                createFile(certificate);
-            }
+            var crtPath = createCrt(certificate);
+            var keyPath = createKey(certificate);
 
             var assemblyInfo = new FileInfo(Assembly.GetEntryAssembly().Location);
-            var storeScriptPath = Path.Combine(assemblyInfo.Directory.FullName, "certificates-unix-store.sh");
+            var storeScriptPath = Path.Combine(assemblyInfo.Directory.FullName, "certificates-unix-store-add.sh");
             var info = new FileInfo(storeScriptPath);
 
-            var exitCode = run("sh", storeScriptPath, storePath, TLSConfig.Address);
-
-            if (exitCode != 0)
+            var exitCodeInstall = run("sh", storeScriptPath, storePath, certName);
+            if (exitCodeInstall != 0)
             {
-                throw new Exception($"Could not install certificate: bash exited with code {exitCode}");
+                throw new Exception($"Could not install certificate: bash exited with code {exitCodeInstall}");
             }
+
+            File.Delete(crtPath);
+            File.Delete(keyPath);
         }
 
-        private static String createFile(X509Certificate2 certificate)
+        private static String createCrt(X509Certificate2 certificate)
         {
-            var certFileName = certificate.Subject.CleanSubject();
-            var certPath = Path.Combine(storePath, $"{certFileName}.crt");
+            return createPemFile("CERTIFICATE", certificate.RawData, "crt");
+        }
+
+        public static String createKey(X509Certificate2 certificate)
+        {
+            return createPemFile("RSA PRIVATE KEY", certificate.GetPrivateKeyRawData(), "key");
+        }
+
+        private static String createPemFile(String title, Byte[] content, String extension)
+        {
+            var certPath = Path.Combine(storePath, $"{certName}.{extension}");
 
             using (var stream = new FileStream(certPath, FileMode.Create))
             using (var textWriter = new StreamWriter(stream))
             {
                 var pemWriter = new PemWriter(textWriter);
 
-                var pemObj = new PemObject("CERTIFICATE", certificate.RawData);
+                var pemObj = new PemObject(title, content);
                 pemWriter.WriteObject(pemObj);
 
                 pemWriter.Writer.Flush();
@@ -90,6 +102,5 @@ namespace PagarMe.Bifrost.Certificates.Stores
             return proc.ExitCode;
         }
     }
-
 
 }
