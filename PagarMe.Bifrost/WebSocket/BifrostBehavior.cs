@@ -99,7 +99,7 @@ namespace PagarMe.Bifrost.WebSocket
                     await status(context, response);
                     break;
 
-                case PaymentRequest.Type.Close:
+                case PaymentRequest.Type.CloseContext:
                     await close(context, response);
                     break;
 
@@ -193,7 +193,7 @@ namespace PagarMe.Bifrost.WebSocket
         private async Task close(Context context, PaymentResponse response)
         {
             await context.Close();
-            response.ResponseType = PaymentResponse.Type.Closed;
+            response.ResponseType = PaymentResponse.Type.ContextClosed;
         }
 
 

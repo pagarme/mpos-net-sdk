@@ -39,7 +39,7 @@ function handleResponse (response) {
       configured()
       break
 
-    case wsWrap.response.closed:
+    case wsWrap.response.contextClosed:
       break
 
     default:
