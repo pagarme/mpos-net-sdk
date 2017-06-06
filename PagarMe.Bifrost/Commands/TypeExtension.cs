@@ -25,7 +25,6 @@ namespace PagarMe.Bifrost.Commands
                 default:
                     throw new NotImplementedException();
             }
-
         }
     }
 }
