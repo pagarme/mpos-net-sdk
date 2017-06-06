@@ -47,7 +47,7 @@ var WebSocketWrap = function (contextId) {
   this.close = function () {
   }
 
-  this.error = function (){
+  this.error = function () {
     showMessage('Endereço "' + this.url + '" não encontrado ou desconectou')
     this.close()
   }
