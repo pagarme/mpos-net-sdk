@@ -10,7 +10,7 @@ var WebSocketWrap = function (contextId) {
     finished: 5,
     messageDisplayed: 6,
     status: 7,
-    closed: 8,
+    contextClosed: 8,
     error: 9,
   }
 
@@ -21,7 +21,7 @@ var WebSocketWrap = function (contextId) {
     finish: 5,
     displayMessage: 6,
     status: 7,
-    close: 8,
+    closeContext: 8,
   }
 
   this.amount = 0
