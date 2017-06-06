@@ -32,7 +32,7 @@ function handleResponse (response) {
 
     case wsWrap.response.alreadyInitialized:
     case wsWrap.response.initialized:
-      wsWrap.displayMessage('Configurado')
+      wsWrap.displayMessage("Configurado")
       break
 
     case wsWrap.response.messageDisplayed:
