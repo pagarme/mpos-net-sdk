@@ -119,6 +119,7 @@ namespace PagarMe.Bifrost.WebSocket
                     PaymentRequest.Type.DisplayMessage,
                     PaymentRequest.Type.Status,
                     PaymentRequest.Type.UnknownCommand,
+                    PaymentRequest.Type.CloseContext,
                 };
 
                 if (!canCallAnytime.Contains(request.RequestType))
