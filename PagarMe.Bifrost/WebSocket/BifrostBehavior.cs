@@ -224,7 +224,14 @@ namespace PagarMe.Bifrost.WebSocket
 
         private void send(PaymentResponse response)
         {
-            Send(JsonConvert.SerializeObject(response, SnakeCase.Settings));
+            if (State == WebSocketState.Open)
+            {
+                Send(JsonConvert.SerializeObject(response, SnakeCase.Settings));
+            }
+            else
+            {
+                logger.Warn($"Could not send response of {response.ResponseType}, websocket connection not opened.");
+            }
         }
 
         
