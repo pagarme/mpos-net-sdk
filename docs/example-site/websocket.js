@@ -115,6 +115,15 @@ var WebSocketWrap = function (contextId) {
     this.sendMessage(request)
   }
 
+  this.closeContext = function () {
+    const request = {
+      request_type: this.parent.request.closeContext,
+      context_id: this.parent.contextId,
+    }
+
+    this.parent.sendMessage(request)
+  }
+
   this.sendMessage = function (request) {
     const message = JSON.stringify(request)
     this.ws.send(message)
