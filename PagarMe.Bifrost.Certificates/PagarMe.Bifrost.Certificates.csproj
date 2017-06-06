@@ -58,11 +58,15 @@
     <Compile Include="Generation\TLSConfig.cs" />
     <Compile Include="Stores\UnixStore.cs" />
     <Compile Include="Stores\WindowsStore.cs" />
+    <Compile Include="Stores\X509Certificate2Extension.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <Content Include="certificates-unix-store-get.sh">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="packages.config" />
-    <Content Include="certificates-unix-store.sh">
+    <Content Include="certificates-unix-store-add.sh">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
