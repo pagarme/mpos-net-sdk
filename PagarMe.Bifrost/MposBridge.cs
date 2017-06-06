@@ -9,6 +9,7 @@ using WebSocketSharp.Server;
 using PagarMe.Generic;
 using PagarMe.Bifrost.Certificates.Generation;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace PagarMe.Bifrost
 {
@@ -95,16 +96,24 @@ namespace PagarMe.Bifrost
             return context;
         }
 
-        public void KillContext(string name)
+        public async Task KillContext(string name)
         {
             name = normalize(name);
+            Context context = null;
 
             lock (_contexts)
             {
                 if (_contexts.ContainsKey(name))
                 {
+                    context = _contexts[name];
                     _contexts.Remove(name);
                 }
+            }
+
+            if (context != null)
+            {
+                await context.Close();
+                context.Dispose();
             }
         }
 
