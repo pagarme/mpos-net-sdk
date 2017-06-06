@@ -53,9 +53,10 @@ namespace PagarMe.Bifrost.WebSocket
 
             if (context == null)
             {
-                logger.Info("No space for new context");
+                var message = "Error on creating context";
+                logger.Info(message);
                 response.ResponseType = PaymentResponse.Type.Error;
-                response.Error = "Number of transactions opened exceeded, please wait until some of them finishes";
+                response.Error = message;
             }
             else
             {

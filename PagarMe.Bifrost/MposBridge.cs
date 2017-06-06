@@ -24,8 +24,6 @@ namespace PagarMe.Bifrost
 
         private WebSocketServer _server;
 
-        private const Int32 serviceLimit = 1;
-
         public Options Options { get { return _options; } }
 
         public DeviceManager DeviceManager { get { return _deviceManager; } }
@@ -87,9 +85,6 @@ namespace PagarMe.Bifrost
             {
                 if (!_contexts.TryGetValue(name, out context))
                 {
-                    if (_contexts.Count >= serviceLimit)
-                        return null;
-
                     var provider = new MposProvider();
 
                     context = new Context(this, provider);
