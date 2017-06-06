@@ -71,11 +71,15 @@ function handleResponse (response) {
       wsWrap.finish(responseJson)
       break
 
-    case wsWrap.response.closed:
-      return
+    case wsWrap.response.finished:
+      showMessage("Pagamento feito com sucesso")
+	  break
+	  
+    case wsWrap.response.contextClosed:
+      break
 
     default:
-      ws.close()
+      wsWrap.closeContext()
 
       const message = getEndingMessage(wsWrap, responseJson)
       if (message) showMessage(message)
@@ -113,9 +117,6 @@ function getDevice (wsWrap, responseJson) {
 
 function getEndingMessage (wsWrap, responseJson) {
   switch (responseJson.response_type) {
-    case wsWrap.response.finished:
-      return 'Pagamento feito com sucesso'
-
     case wsWrap.response.error:
       return responseJson.error
 

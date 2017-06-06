@@ -90,7 +90,9 @@ namespace PagarMe.Bifrost
             };
 
             if (_device != null)
+            {
                 response.ConnectedDeviceId = _device.Id;
+            }
 
             return Task.FromResult(response);
         }

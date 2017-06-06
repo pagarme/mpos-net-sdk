@@ -21,7 +21,7 @@ namespace PagarMe.Bifrost.Commands
             Finish = 5,
             DisplayMessage = 6,
             Status = 7,
-            Close = 8,
+            CloseContext = 8,
         }
     }
 }
