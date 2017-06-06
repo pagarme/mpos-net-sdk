@@ -75,7 +75,7 @@ function handleResponse (response) {
       break
 
     default:
-      ws.close()
+      wsWrap.closeContext()
 
       const message = getEndingMessage(wsWrap, responseJson)
       if (message) showMessage(message)
