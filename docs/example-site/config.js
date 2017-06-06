@@ -36,7 +36,8 @@ function handleResponse (response) {
       break
 
     case wsWrap.response.messageDisplayed:
-      configured()
+      showMessage("Verifique o visor da mpos")
+      toggleButton("save", true)
       break
 
     case wsWrap.response.contextClosed:
@@ -59,7 +60,8 @@ function populateDeviceList (responseJson) {
   if (devices.length === 0) {
     devicePortSelect.innerHTML = '<option value="">---</option>'
     showMessage('Não foram encontradas portas')
-    toggleSaveButton(false)
+    toggleButton("test", false)
+    toggleButton("save", false)
     return
   }
 
@@ -77,19 +79,13 @@ function populateDeviceList (responseJson) {
       '</option>'
   }
 
-  toggleSaveButton(true)
+  toggleButton("test", true)
 }
 
-function toggleSaveButton (enabled) {
-  const button = getById('save')
+function toggleButton (id, enabled) {
+  const button = getById(id)
   button.className = 'btn btn-' + (enabled ? 'primary' : 'mute')
   button.disabled = !enabled
-}
-
-function configured () {
-  setLocal('device-port', getSelected(getById('device-port')))
-  setLocal('baud-rate', getById('baud-rate').value)
-  showMessage('Configurações salvas no navegador')
 }
 
 function getEndingMessage (wsWrap, responseJson) {
@@ -105,7 +101,7 @@ function getEndingMessage (wsWrap, responseJson) {
   }
 }
 
-function testAndSaveConfig () {
+function testConfig () {
   const encryptionKey = ''
 
   if (!devices) {
@@ -136,6 +132,15 @@ function testAndSaveConfig () {
   if (!devices) {
     showMessage('Porta ' + devicePort + ' não encontrada')
   }
+}
+
+function saveAndFinish () {
+  wsWrap.closeContext()
+  setLocal('device-port', getSelected(getById('device-port')))
+  setLocal('baud-rate', getById('baud-rate').value)
+  toggleButton("test", false)
+  toggleButton("save", false)
+  showMessage('Configurações salvas no navegador')
 }
 
 init()
