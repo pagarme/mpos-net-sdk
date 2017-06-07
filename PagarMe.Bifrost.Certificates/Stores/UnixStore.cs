@@ -2,7 +2,6 @@
 using PagarMe.Bifrost.Certificates.Generation;
 using PagarMe.Generic;
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
@@ -37,11 +36,10 @@ namespace PagarMe.Bifrost.Certificates.Stores
                 createFile(certificate);
             }
 
-            var assemblyInfo = new FileInfo(Assembly.GetEntryAssembly().Location);
-            var storeScriptPath = Path.Combine(assemblyInfo.Directory.FullName, "certificates-unix-store.sh");
+            var storeScriptPath = "certificates-unix-store.sh";
             var info = new FileInfo(storeScriptPath);
 
-            var exitCode = run("sh", storeScriptPath, storePath, TLSConfig.Address);
+            var exitCode = Terminal.Run("sh", storeScriptPath, storePath, TLSConfig.Address);
 
             if (exitCode != 0)
             {
@@ -68,28 +66,5 @@ namespace PagarMe.Bifrost.Certificates.Stores
 
             return certPath;
         }
-
-        private static Int32 run(String command, params String[] args)
-        {
-            var joinedArgs = String.Join(" ", args);
-
-            var proc = new Process
-            {
-                StartInfo = new ProcessStartInfo(command, joinedArgs)
-                {
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    UseShellExecute = false,
-                },
-                EnableRaisingEvents = true,
-            };
-
-            proc.Start();
-            proc.WaitForExit();
-
-            return proc.ExitCode;
-        }
     }
-
-
 }
