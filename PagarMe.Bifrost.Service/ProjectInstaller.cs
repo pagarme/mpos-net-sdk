@@ -1,5 +1,7 @@
+using System.Collections;
 using System.ComponentModel;
 using System.Configuration.Install;
+using System.ServiceProcess;
 
 namespace PagarMe.Bifrost.Service
 {
@@ -9,6 +11,16 @@ namespace PagarMe.Bifrost.Service
         public ProjectInstaller()
         {
             InitializeComponent();
+        }
+
+        protected override void OnCommitted(IDictionary savedState)
+        {
+            base.OnCommitted(savedState);
+
+            using (var controller = new ServiceController(serviceInstaller.ServiceName))
+            {
+                controller.Start();
+            }
         }
     }
 }
