@@ -11,6 +11,8 @@ namespace PagarMe.Bifrost.Certificates
 
         static void Main(string[] args)
         {
+            changeConsoleUi();
+
             if (!isAdministrator())
             {
                 var message = "Certificate not created: the certificate can only be set under administrator permissions";
@@ -22,6 +24,18 @@ namespace PagarMe.Bifrost.Certificates
             TLSConfig.Generate();
 
             TLSConfig.GrantLogAccess();
+        }
+
+        private static void changeConsoleUi()
+        {
+            Console.SetWindowSize(28, 3);
+            Console.BufferWidth = 28;
+            Console.BufferHeight = 3;
+            Console.Title = "SSL";
+            Console.CursorVisible = false;
+            Console.WriteLine("   ------------------------");
+            Console.WriteLine("     Enabling Bifrost SSL  ");
+            Console.Write    ("   ------------------------");
         }
 
         private static bool isAdministrator()
