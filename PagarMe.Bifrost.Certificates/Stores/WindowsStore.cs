@@ -46,10 +46,18 @@ namespace PagarMe.Bifrost.Certificates.Stores
             });
         }
 
-        private static void addToOS(X509Certificate2 certificate, StoreName storeName)
+        private void addToOS(X509Certificate2 certificate, StoreName storeName)
         {
             var store = new X509Store(storeName, storeLocation);
             store.Open(OpenFlags.ReadWrite);
+
+            var oldCert = GetCertificate(certificate.Subject, certificate.Issuer, storeName);
+
+            if (oldCert != null)
+            {
+                store.Remove(oldCert);
+            }
+
             store.Add(certificate);
 
             store.Close();

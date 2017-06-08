@@ -28,15 +28,19 @@ namespace PagarMe.Bifrost.Certificates.Generation
 
         public static X509Certificate2 Get()
         {
-            if (IsUnix)
-                return GenerateIfNotExists();
+            var certificate = certificateChain.Get(subjectTls, subjectCa);
 
-            return certificateChain.Get(subjectTls, subjectCa);
+            if (IsUnix && certificate == null)
+            {
+                certificate = Generate();
+            }
+
+            return certificate;
         }
 
-        internal static X509Certificate2 GenerateIfNotExists()
+        internal static X509Certificate2 Generate()
         {
-            return certificateChain.GenerateIfNotExists(subjectTls, subjectCa);
+            return certificateChain.Generate(subjectTls, subjectCa);
         }
 
         internal static void GrantLogAccess()
