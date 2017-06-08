@@ -21,24 +21,17 @@ namespace PagarMe.Bifrost.Certificates.Generation
             return Store.Instance.GetCertificate(subjectTls, subjectCa, StoreName.My);
         }
 
-        public X509Certificate2 GenerateIfNotExists(String subjectTls, String subjectCa)
+        public X509Certificate2 Generate(String subjectTls, String subjectCa)
         {
-            var certificate = Get(subjectTls, subjectCa);
+            logger.Info("Start generating certificates.");
+            var ca = getOrGenerate(false, subjectCa);
+            logger.Info("Root certificate generated.");
+            var tls = getOrGenerate(true, subjectTls, ca);
+            logger.Info("Tls certificate generated.");
 
-            if (certificate == null)
-            {
-                logger.Info("Certificate not found. Start generating.");
-                var ca = getOrGenerate(false, subjectCa);
-                logger.Info("Root certificate generated.");
-                var tls = getOrGenerate(true, subjectTls, ca);
-                logger.Info("Tls certificate generated.");
+            Store.Instance.AddCertificate(ca.X509, tls.X509);
 
-                Store.Instance.AddCertificate(ca.X509, tls.X509);
-
-                certificate = tls.X509;
-            }
-
-            return certificate;
+            return tls.X509;
         }
 
         private ComposedCertificate getOrGenerate(Boolean setPrivate, String subject, ComposedCertificate parent = null)

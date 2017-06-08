@@ -19,7 +19,7 @@ namespace PagarMe.Bifrost.Certificates
             }
 
             TLSConfig.Address = args.Length == 0 ? "localhost" : args[0];
-            TLSConfig.GenerateIfNotExists();
+            TLSConfig.Generate();
 
             TLSConfig.GrantLogAccess();
         }
