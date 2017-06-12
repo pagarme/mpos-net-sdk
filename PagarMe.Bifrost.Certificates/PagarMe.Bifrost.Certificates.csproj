@@ -62,7 +62,6 @@
     <Compile Include="Generation\ComposedCertificate.cs" />
     <Compile Include="Stores\Store.cs" />
     <Compile Include="Generation\TLSConfig.cs" />
-    <Compile Include="Stores\Terminal.cs" />
     <Compile Include="Stores\UnixStore.cs" />
     <Compile Include="Stores\WindowsStore.cs" />
     <Compile Include="Stores\X509Certificate2Extension.cs" />
