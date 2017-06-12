@@ -3,9 +3,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 
-namespace PagarMe.Bifrost.Certificates.Stores
+namespace PagarMe.Generic
 {
-    static class Terminal
+    public static class Terminal
     {
         static Terminal()
         {
