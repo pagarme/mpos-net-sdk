@@ -100,6 +100,11 @@ namespace PagarMe.Bifrost.Certificates.Stores
 
         private static void installOnFireFox(String storePath)
         {
+            var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            var mozilla = Path.Combine(appData, "Mozilla");
+
+            if (!Directory.Exists(mozilla)) return;
+
             var storeScriptPath = "certificates-windows-firefox-store.bat";
             var exitCode = Terminal.Run(storeScriptPath, storePath, TLSConfig.Address);
 

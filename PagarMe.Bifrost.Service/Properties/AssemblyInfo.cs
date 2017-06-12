@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 
-[assembly: AssemblyTitle("Pagarme.Mpos.Websocket.Service")]
+[assembly: AssemblyTitle("Pagarme.Bifrost")]
 [assembly: AssemblyDescription("Pagar.me Bifrost")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Pagar.me")]
-[assembly: AssemblyProduct("Pagar.me mPOS")]
+[assembly: AssemblyProduct("Pagar.me Bifrost")]
 [assembly: AssemblyCopyright("Pagar.me Pagamentos S/A")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("Pagar.me Bifrost")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Pagar.me")]
-[assembly: AssemblyProduct("Pagar.me mPOS")]
+[assembly: AssemblyProduct("Pagar.me Bifrost")]
 [assembly: AssemblyCopyright("Pagar.me Pagamentos S/A")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

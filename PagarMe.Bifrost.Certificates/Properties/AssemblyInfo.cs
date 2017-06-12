@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("PagarMe.Bifrost.Certificates")]
-[assembly: AssemblyCopyright("Copyright ©  2017")]
+[assembly: AssemblyCopyright("Pagar.me Pagamentos S/A")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
