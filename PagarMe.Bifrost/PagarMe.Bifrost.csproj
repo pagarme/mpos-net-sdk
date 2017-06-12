@@ -51,6 +51,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\PagarMe.Generic\Properties\PagarMeAssemblyInfo.cs">
+      <Link>Properties\PagarMeAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="Commands\PaymentRequest.cs" />
     <Compile Include="Commands\PaymentResponse.cs" />
     <Compile Include="Commands\TypeExtension.cs" />
@@ -62,6 +65,7 @@
     <Compile Include="MposBridge.cs" />
     <Compile Include="Commands\ProcessPaymentRequest.cs" />
     <Compile Include="Commands\ProcessPaymentResponse.cs" />
+    <Compile Include="Properties\BifrostAssemblyInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="Commands\StatusResponse.cs" />
