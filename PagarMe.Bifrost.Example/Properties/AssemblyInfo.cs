@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 
-[assembly: AssemblyTitle("QuickTest")]
+[assembly: AssemblyTitle("PagarMe.Bifrost.Example")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("QuickTest")]
-[assembly: AssemblyCopyright("Copyright ©  2017")]
+[assembly: AssemblyProduct("PagarMe.Bifrost.Example")]
+[assembly: AssemblyCopyright("Pagar.me Pagamentos S/A")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
