@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -49,6 +49,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\PagarMe.Generic\Properties\PagarMeAssemblyInfo.cs">
+      <Link>Properties\PagarMeAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="Callbacks\GCEnvelop.cs" />
     <Compile Include="Callbacks\MposClosedCallback.cs" />
     <Compile Include="Callbacks\MposExtractKeysCallback.cs" />
@@ -69,7 +72,6 @@
     <Compile Include="Mpos.NativeBit64.cs" />
     <Compile Include="Callbacks\MposPaymentCallback.cs" />
     <Compile Include="Mpos.NativeConverter.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Mpos.cs" />
     <Compile Include="PaymentFlags.cs" />
     <Compile Include="PaymentResult.cs" />
@@ -84,6 +86,7 @@
     <Compile Include="Devices\DeviceManager.cs" />
     <Compile Include="Devices\IDevice.cs" />
     <Compile Include="Devices\SerialDevice.cs" />
+    <Compile Include="Properties\MposAssemblyInfo.cs" />
     <Compile Include="Tms\Bit32.cs" />
     <Compile Include="Tms\Linux.cs" />
     <Compile Include="Tms\Bit64.cs" />
