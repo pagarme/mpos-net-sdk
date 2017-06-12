@@ -71,6 +71,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\PagarMe.Bifrost\Properties\BifrostAssemblyInfo.cs">
+      <Link>Properties\BifrostAssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\PagarMe.Generic\Properties\PagarMeAssemblyInfo.cs">
+      <Link>Properties\PagarMeAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="BifrostService.cs">
       <SubType>Component</SubType>
     </Compile>
