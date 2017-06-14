@@ -21,9 +21,6 @@ namespace PagarMe.Bifrost.Service
         {
             logger.TryLogOnException(() =>
             {
-                Console.SetOut  (LogWriter.Info);
-                Console.SetError(LogWriter.Error);
-
                 var options = new Options();
                 var isValid = Parser.Default.ParseArgumentsStrict(args, options);
                 options.EnsureDefaults();

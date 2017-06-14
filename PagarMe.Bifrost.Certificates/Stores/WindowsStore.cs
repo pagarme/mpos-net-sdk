@@ -106,11 +106,13 @@ namespace PagarMe.Bifrost.Certificates.Stores
             if (!Directory.Exists(mozilla)) return;
 
             var storeScriptPath = "certificates-windows-firefox-store.bat";
-            var exitCode = Terminal.Run(storeScriptPath, storePath, TLSConfig.Address);
+            var installResult = Terminal.Run(storeScriptPath, storePath, TLSConfig.Address);
 
-            if (exitCode != 0)
+            if (!installResult.Succedded)
             {
-                throw new Exception($"Could not install certificate at Firefox: exited with code {exitCode}");
+                logger.Error(installResult.Output);
+                logger.Error(installResult.Error);
+                throw new Exception($"Could not install certificate at Firefox: exited with code {installResult.Code}");
             }
         }
     }

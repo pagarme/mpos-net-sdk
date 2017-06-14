@@ -83,7 +83,6 @@
     <Compile Include="BifrostService.Designer.cs">
       <DependentUpon>BifrostService.cs</DependentUpon>
     </Compile>
-    <Compile Include="LogWriter.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="ProjectInstaller.cs">
       <SubType>Component</SubType>

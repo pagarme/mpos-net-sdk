@@ -39,10 +39,12 @@ namespace PagarMe.Bifrost.Certificates.Stores
             var storeScriptPath = "certificates-unix-store-add.sh";
             var info = new FileInfo(storeScriptPath);
 
-            var exitCodeInstall = Terminal.Run("sh", storeScriptPath, storePath, certName);
-            if (exitCodeInstall != 0)
+            var installResult = Terminal.Run("sh", storeScriptPath, storePath, certName);
+            if (!installResult.Succedded)
             {
-                throw new Exception($"Could not install certificate: bash exited with code {exitCodeInstall}");
+                logger.Error(installResult.Output);
+                logger.Error(installResult.Error);
+                throw new Exception($"Could not install certificate: bash exited with code {installResult}");
             }
 
             File.Delete(crtPath);
