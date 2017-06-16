@@ -112,7 +112,7 @@ namespace PagarMe.Bifrost.Certificates.Generation
             };
 
             if (!TLSConfig.IsUnix)
-                setNetworkServicePermissions(cspParams);
+                setServiceUserPermissions(cspParams);
 
             var rsaProvider = new RSACryptoServiceProvider(cspParams);
 
@@ -123,20 +123,20 @@ namespace PagarMe.Bifrost.Certificates.Generation
 
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
-        private static void setNetworkServicePermissions(CspParameters cspParams)
+        private static void setServiceUserPermissions(CspParameters cspParams)
         {
             //Copied to do not delete any permission
             cspParams.CryptoKeySecurity =
                 new RSACryptoServiceProvider(cspParams)
                     .CspKeyContainerInfo.CryptoKeySecurity;
 
-            var networkService = new CryptoKeyAccessRule(
+            var serviceUser = new CryptoKeyAccessRule(
                 TLSConfig.GetServiceUser(),
                 CryptoKeyRights.FullControl,
                 AccessControlType.Allow
             );
 
-            cspParams.CryptoKeySecurity.AddAccessRule(networkService);
+            cspParams.CryptoKeySecurity.AddAccessRule(serviceUser);
         }
 
         private static void setMathParameters(RSACryptoServiceProvider rsaProvider, RsaPrivateCrtKeyParameters key)
