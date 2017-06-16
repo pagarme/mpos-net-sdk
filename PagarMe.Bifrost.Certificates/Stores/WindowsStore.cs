@@ -98,15 +98,19 @@ namespace PagarMe.Bifrost.Certificates.Stores
             }
         }
 
-        private static void installOnFireFox(String storePath)
+        private static void installOnFireFox(String windowsStorePath)
         {
             var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            var mozilla = Path.Combine(appData, "Mozilla");
+            var mozillaPath = Path.Combine(appData, "Mozilla");
 
-            if (!Directory.Exists(mozilla)) return;
+            if (!Directory.Exists(mozillaPath)) return;
 
             var storeScriptPath = "certificates-windows-firefox-store.bat";
-            var installResult = Terminal.Run(storeScriptPath, storePath, TLSConfig.Address);
+
+            var certDbs = Directory.GetFiles(mozillaPath, "*cert*.db", SearchOption.AllDirectories);
+            var mozillaCertPath = Path.GetDirectoryName(certDbs.First());
+
+            var installResult = Terminal.Run(storeScriptPath, mozillaCertPath, windowsStorePath, TLSConfig.Address);
 
             if (!installResult.Succedded)
             {
