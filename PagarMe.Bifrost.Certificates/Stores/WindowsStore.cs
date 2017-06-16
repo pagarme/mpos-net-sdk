@@ -98,21 +98,28 @@ namespace PagarMe.Bifrost.Certificates.Stores
             }
         }
 
-        private static void installOnFireFox(String storePath)
+        private static void installOnFireFox(String windowsStorePath)
         {
             var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            var mozilla = Path.Combine(appData, "Mozilla");
+            var mozillaPath = Path.Combine(appData, "Mozilla");
 
-            if (!Directory.Exists(mozilla)) return;
+            if (!Directory.Exists(mozillaPath)) return;
 
             var storeScriptPath = "certificates-windows-firefox-store.bat";
-            var installResult = Terminal.Run(storeScriptPath, storePath, TLSConfig.Address);
 
-            if (!installResult.Succedded)
+            var certDbs = Directory.GetFiles(mozillaPath, "*cert*.db", SearchOption.AllDirectories);
+            foreach(var certDb in certDbs)
             {
-                logger.Error(installResult.Output);
-                logger.Error(installResult.Error);
-                throw new Exception($"Could not install certificate at Firefox: exited with code {installResult.Code}");
+                var mozillaCertPath = Path.GetDirectoryName(certDb);
+
+                var installResult = Terminal.Run(storeScriptPath, mozillaCertPath, windowsStorePath, TLSConfig.Address);
+
+                if (!installResult.Succedded)
+                {
+                    logger.Error(installResult.Output);
+                    logger.Error(installResult.Error);
+                    throw new Exception($"Could not install certificate at Firefox: exited with code {installResult.Code}");
+                }
             }
         }
     }
