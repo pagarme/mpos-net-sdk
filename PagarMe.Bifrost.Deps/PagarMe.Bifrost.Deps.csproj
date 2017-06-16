@@ -120,6 +120,9 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="bifrost.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="run-linux.sh">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
