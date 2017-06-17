@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>PagarMe.Bifrost.Deps</RootNamespace>
     <AssemblyName>PagarMe.Bifrost.Deps</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -30,6 +30,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\PagarMe.Bifrost\Properties\BifrostAssemblyInfo.cs">
+      <Link>Properties\BifrostAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -117,6 +120,9 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="bifrost.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="run-linux.sh">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

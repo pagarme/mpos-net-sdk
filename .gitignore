@@ -25,3 +25,5 @@ docs/build-libabecs/
 *.log
 docs/.goutputstream*
 PagarMe.Bifrost.Certificates/cert_path.txt
+
+PagarMe.Bifrost.Updates/*

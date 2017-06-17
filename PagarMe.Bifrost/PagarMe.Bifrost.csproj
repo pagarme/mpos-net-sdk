@@ -62,12 +62,17 @@
     <Compile Include="MposBridge.cs" />
     <Compile Include="Commands\ProcessPaymentRequest.cs" />
     <Compile Include="Commands\ProcessPaymentResponse.cs" />
+    <Compile Include="Properties\BifrostAssemblyInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="Commands\StatusResponse.cs" />
     <Compile Include="Providers\IProvider.cs" />
     <Compile Include="Providers\MposProvider.cs" />
     <Compile Include="Providers\InitializationOptions.cs" />
+    <Compile Include="Updates\Product.cs" />
+    <Compile Include="Updates\Request.cs" />
+    <Compile Include="Updates\Updater.cs" />
+    <Compile Include="Updates\WindowsUpdater.cs" />
     <Compile Include="WebSocket\BifrostBehavior.cs" />
     <Compile Include="WebSocket\SnakeCase.cs" />
   </ItemGroup>

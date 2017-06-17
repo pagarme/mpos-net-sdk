@@ -64,7 +64,7 @@ namespace PagarMe.Bifrost.Certificates.Generation
 
         internal static IdentityReference GetServiceUser()
         {
-            return new SecurityIdentifier(WellKnownSidType.NetworkServiceSid, null);
+            return new SecurityIdentifier(WellKnownSidType.LocalSystemSid, null);
         }
 
         internal static Boolean IsUnix
