@@ -43,6 +43,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\PagarMeAssemblyInfo.cs" />
     <Compile Include="StringExtension.cs" />
+    <Compile Include="TaskExtension.cs" />
     <Compile Include="Terminal.cs" />
   </ItemGroup>
   <ItemGroup>

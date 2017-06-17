@@ -8,7 +8,7 @@ namespace PagarMe.Bifrost.Service
     {
         private static void Main(String[] args)
         {
-            var updater = WindowsUpdater.CheckAndUpdate();
+            var updater = Updater.CheckAndUpdate(MposBridge.LockContexts);
 
             ServiceBase.Run(new BifrostService());
 
