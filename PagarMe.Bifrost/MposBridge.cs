@@ -10,6 +10,7 @@ using PagarMe.Generic;
 using PagarMe.Bifrost.Certificates.Generation;
 using System.Linq;
 using System.Threading.Tasks;
+using PagarMe.Bifrost.Updates;
 
 namespace PagarMe.Bifrost
 {
@@ -19,6 +20,8 @@ namespace PagarMe.Bifrost
 
         private static readonly Dictionary<string, Context> _contexts
             = new Dictionary<string, Context>();
+
+        private static Boolean contextsLocked = false;
 
         private readonly DeviceManager _deviceManager;
         private readonly Options _options;
@@ -114,6 +117,21 @@ namespace PagarMe.Bifrost
             {
                 await context.Close();
                 context.Dispose();
+            }
+        }
+
+        public static Boolean LockContexts()
+        {
+            lock (_contexts)
+            {
+                if (_contexts.Any(c => c.Value.IsInUse()))
+                {
+                    return false;
+                }
+
+                contextsLocked = true;
+
+                return true;
             }
         }
 

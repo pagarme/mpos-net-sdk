@@ -74,6 +74,7 @@
     <Compile Include="Providers\InitializationOptions.cs" />
     <Compile Include="Updates\Product.cs" />
     <Compile Include="Updates\Request.cs" />
+    <Compile Include="Updates\Updater.cs" />
     <Compile Include="Updates\WindowsUpdater.cs" />
     <Compile Include="WebSocket\BifrostBehavior.cs" />
     <Compile Include="WebSocket\SnakeCase.cs" />

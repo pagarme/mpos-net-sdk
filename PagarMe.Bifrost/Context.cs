@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using PagarMe.Bifrost.Commands;
 using PagarMe.Bifrost.Providers;
 using PagarMe.Mpos.Devices;
+using PagarMe.Bifrost.Updates;
 
 namespace PagarMe.Bifrost
 {
@@ -187,6 +188,12 @@ namespace PagarMe.Bifrost
         {
             _provider.Dispose();
             _provider = null;
+        }
+
+        internal Boolean IsInUse()
+        {
+            return CurrentOperation == PaymentRequest.Type.Process
+                || CurrentOperation == PaymentRequest.Type.Initialize;
         }
     }
 }

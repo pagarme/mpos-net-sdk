@@ -1,80 +1,56 @@
-﻿using NLog;
-using PagarMe.Generic;
+﻿using PagarMe.Generic;
 using System;
 using System.IO;
 using System.Reflection;
-using System.Threading.Tasks;
 
 namespace PagarMe.Bifrost.Updates
 {
-    public class WindowsUpdater
+    class WindowsUpdater : Updater
     {
         // Temporary address, will be defined when distribution is decided
         private const String Address = "http://localhost:2001";
 
-        private static RequestMaker request = new RequestMaker(Address);
-        private static Version currentVersion = Assembly.GetEntryAssembly().GetName().Version;
-        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+        private RequestMaker request = new RequestMaker(Address);
+        private Version currentVersion = Assembly.GetEntryAssembly().GetName().Version;
+        private String downloadedFile;
+        private String productCode;
 
-        public async static Task<Boolean> CheckAndUpdate()
+        protected override Boolean? Check()
         {
-            logger.Info("Update check starting");
+            var checkResult = request.GetObjectFromUrl<UpdateInfo>().WaitResult();
+            var newVersion = checkResult.LastVersion;
+            if (currentVersion == newVersion) return false;
 
-            var updated = false;
+            var filename = $"bifrost-installer-{newVersion}.msi";
+            downloadedFile = Path.Combine(logger.GetLogDirectoryPath(), filename);
 
-            try
-            {
-                updated = await checkAndUpdate();
-            }
-            catch (Exception e)
-            {
-                logger.Error(e);
-            }
+            var downloaded = 
+                request.DownloadBinaryFromUrl(downloadedFile, filename)
+                       .WaitResult();
 
-            return updated;
-        }
+            if (!downloaded) return null;
 
-        private async static Task<Boolean> checkAndUpdate()
-        {
-            var update = await request.GetObjectFromUrl<Update>();
-            var shouldUpgradeOrDowngrade = currentVersion != update.LastVersion;
-
-            if (!shouldUpgradeOrDowngrade)
-            {
-                logger.Info($"Bifrost up to date: {currentVersion}");
-                return false;
-            }
-
-            var filename = $"bifrost-installer-{update.LastVersion}.msi";
-            var filepath = Path.Combine(logger.GetLogDirectoryPath(), filename);
-            var downloaded = await request.DownloadBinaryFromUrl(filepath, filename);
-
-            if (!downloaded) return false;
-
-            return await Task.Run(() =>
-            {
-                return reinstall(filepath, update.LastVersion);
-            });
-        }
-
-        private static Boolean reinstall(String filepath, Version newVersion)
-        {
-            var code = Product.GetCode(filepath);
-            if (code == null) return false;
-
-            var succededUninstall = runOnMsi($"/x {code}", "uninstall");
-            if (!succededUninstall) return false;
-
-            var succededInstall = runOnMsi($"/i {filepath}", "install");
-            if (!succededInstall) return false;
-
-            logger.Info($"Finished upgrading.");
-            logger.Info($"New version: {newVersion}.");
+            productCode = Product.GetCode(downloadedFile);
+            if (productCode == null) return null;
 
             return true;
         }
 
-        private static bool runOnMsi(String command, String description)
+        protected override Boolean Update()
+        {
+            lock (this)
+            {
+                var succededUninstall = runOnMsi($"/x {productCode}", "uninstall");
+                if (!succededUninstall) return false;
+
+                var succededInstall = runOnMsi($"/i {downloadedFile}", "install");
+                if (!succededInstall) return false;
+
+                return true;
+            }
+        }
+
+        private bool runOnMsi(String command, String description)
         {
             logger.Info($"Starting {description}");
             var result = Terminal.Run("msiexec", command, "/quiet");
@@ -89,7 +65,7 @@ namespace PagarMe.Bifrost.Updates
             return result.Succedded;
         }
 
-        class Update
+        class UpdateInfo
         {
             public String LastVersionName { get; set; }
             public Version LastVersion => new Version(LastVersionName);

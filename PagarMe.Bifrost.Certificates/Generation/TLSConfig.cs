@@ -67,7 +67,7 @@ namespace PagarMe.Bifrost.Certificates.Generation
             return new SecurityIdentifier(WellKnownSidType.LocalSystemSid, null);
         }
 
-        internal static Boolean IsUnix
+        public static Boolean IsUnix
         {
             get { return Environment.OSVersion.Platform == PlatformID.Unix; }
         }
