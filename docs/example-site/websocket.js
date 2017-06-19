@@ -95,8 +95,8 @@ var WebSocketWrap = function (contextId) {
       context_id: this.contextId,
       finish: {
         success: true,
-        response_code: '0000',
-        emv_data: '000000000.0000'
+        response_code: response.response_code,
+        emv_data: response.emv_data
       }
     }
 

@@ -68,13 +68,14 @@ function handleResponse (response) {
       break
 
     case wsWrap.response.processed:
-      wsWrap.finish(responseJson)
+      const acquirerResponse = sendToAcquirer(responseJson);
+      wsWrap.finish(acquirerResponse)
       break
 
     case wsWrap.response.finished:
       showMessage("Pagamento feito com sucesso")
-	  break
-	  
+      break
+      
     case wsWrap.response.contextClosed:
       break
 
@@ -113,6 +114,14 @@ function getDevice (wsWrap, responseJson) {
   wsWrap.close()
 
   return null
+}
+
+function sendToAcquirer(response) {
+  // put here the communication with the acquirer
+  return {
+    response_code: '0000',
+    emv_data: '000000000.0000'
+  }
 }
 
 function getEndingMessage (wsWrap, responseJson) {
