@@ -1090,7 +1090,7 @@
         "UseSystemSearchPath" = "11:TRUE"
         "TargetPlatform" = "3:0"
         "PreBuildEvent" = "8:"
-        "PostBuildEvent" = "8:"
+        "PostBuildEvent" = "8:$(ProjectDir)copy-updates.bat $(ProjectDir) $(BuiltOuputPath)"
         "RunPostBuildEvent" = "3:0"
         }
         "Registry"
