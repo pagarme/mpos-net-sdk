@@ -43,6 +43,8 @@ namespace PagarMe.Bifrost.Certificates.Stores
         {
             logger.TryLogOnException(() =>
             {
+                logger.Info("Add certificates to Store");
+
                 addToOS(ca, StoreName.Root);
                 addToOS(tls, StoreName.My);
 
@@ -52,6 +54,8 @@ namespace PagarMe.Bifrost.Certificates.Stores
 
         private void addToOS(X509Certificate2 certificate, StoreName storeName)
         {
+            logger.Info($"Adding {certificate.Subject.CleanSubject()} to Windows Store {storeName}");
+
             var store = new X509Store(storeName, storeLocation);
             store.Open(OpenFlags.ReadWrite);
 
@@ -124,6 +128,7 @@ namespace PagarMe.Bifrost.Certificates.Stores
             var certDbs = Directory.GetFiles(mozillaPath, "*cert*.db", SearchOption.AllDirectories);
             foreach(var certDb in certDbs)
             {
+                logger.Info($"Adding {cert.Subject.CleanSubject()} to {certDb}");
                 var mozillaCertPath = Path.GetDirectoryName(certDb);
 
                 var subject = cert.Subject.CleanSubject();
