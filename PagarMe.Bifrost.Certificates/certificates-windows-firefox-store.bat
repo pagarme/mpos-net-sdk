@@ -1,4 +1,4 @@
 @echo off
 
-certutil.exe -d %1 -D -n Bifrost
-certutil.exe -d %1 -A -t "TCu,Cuw,Tuw" -n Bifrost -i %2\%3.crt
+certutil.exe -d %1 -D -n %3
+certutil.exe -d %1 -A -n %3 -i %2\%3.crt -t "%4"

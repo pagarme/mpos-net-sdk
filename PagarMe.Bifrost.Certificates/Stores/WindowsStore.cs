@@ -1,5 +1,4 @@
-﻿using PagarMe.Bifrost.Certificates.Generation;
-using PagarMe.Generic;
+﻿using PagarMe.Generic;
 using System;
 using System.IO;
 using System.Linq;
@@ -15,24 +14,29 @@ namespace PagarMe.Bifrost.Certificates.Stores
         {
             return logger.TryLogOnException(() =>
             {
-                var store = new X509Store(storeName, storeLocation);
-                store.Open(OpenFlags.ReadOnly);
-
-                var collection = store.Certificates
-                    .Find(X509FindType.FindBySubjectDistinguishedName, subject, false);
-
-                if (!String.IsNullOrEmpty(issuer))
-                {
-                    collection = collection
-                        .Find(X509FindType.FindByIssuerDistinguishedName, issuer, false);
-                }
-
-                var certificate = collection.Cast<X509Certificate2>().FirstOrDefault();
-
-                store.Close();
-
-                return certificate;
+                return getCertificate(subject, issuer, storeName);
             });
+        }
+
+        private static X509Certificate2 getCertificate(String subject, String issuer, StoreName storeName)
+        {
+            var store = new X509Store(storeName, storeLocation);
+            store.Open(OpenFlags.ReadOnly);
+
+            var collection = store.Certificates
+                .Find(X509FindType.FindBySubjectDistinguishedName, subject, false);
+
+            if (!String.IsNullOrEmpty(issuer))
+            {
+                collection = collection
+                    .Find(X509FindType.FindByIssuerDistinguishedName, issuer, false);
+            }
+
+            var certificate = collection.Cast<X509Certificate2>().FirstOrDefault();
+
+            store.Close();
+
+            return certificate;
         }
 
         public override void AddCertificate(X509Certificate2 ca, X509Certificate2 tls)
@@ -42,7 +46,7 @@ namespace PagarMe.Bifrost.Certificates.Stores
                 addToOS(ca, StoreName.Root);
                 addToOS(tls, StoreName.My);
 
-                addToFirefox(tls);
+                addChainToFirefox(ca, tls);
             });
         }
 
@@ -51,7 +55,7 @@ namespace PagarMe.Bifrost.Certificates.Stores
             var store = new X509Store(storeName, storeLocation);
             store.Open(OpenFlags.ReadWrite);
 
-            var oldCert = GetCertificate(certificate.Subject, certificate.Issuer, storeName);
+            var oldCert = getCertificate(certificate.Subject, certificate.Issuer, storeName);
 
             if (oldCert != null)
             {
@@ -63,28 +67,15 @@ namespace PagarMe.Bifrost.Certificates.Stores
             store.Close();
         }
 
-        private void addToFirefox(X509Certificate2 tls)
+        private void addChainToFirefox(X509Certificate2 ca, X509Certificate2 tls)
         {
-            logger.TryLogOnException(() =>
-            {
-                var storePath = logger.GetLogDirectoryPath();
+            copyCertutilHelperLib();
 
-                exportCertificate(storePath, tls);
-
-                copyMSVCR71();
-
-                installOnFireFox(storePath);
-            });
+            addToFirefox(ca, "TC,,");
+            addToFirefox(tls, "u,,");
         }
 
-        private static void exportCertificate(String storePath, X509Certificate2 tls)
-        {
-            var certPath = Path.Combine(storePath, $"{TLSConfig.Address}.crt");
-            var bytes = tls.Export(X509ContentType.Cert);
-            File.WriteAllBytes(certPath, bytes);
-        }
-
-        private static void copyMSVCR71()
+        private static void copyCertutilHelperLib()
         {
             var filename = "MSVCR71.DLL";
             var systemPath = Environment.GetFolderPath(Environment.SpecialFolder.System);
@@ -98,7 +89,30 @@ namespace PagarMe.Bifrost.Certificates.Stores
             }
         }
 
-        private static void installOnFireFox(String windowsStorePath)
+        private void addToFirefox(X509Certificate2 cert, String trust)
+        {
+            var storePath = logger.GetLogDirectoryPath();
+
+            try
+            {
+                exportCertificate(storePath, cert);
+                installOnFireFox(storePath, cert, trust);
+            }
+            finally
+            {
+                deleteExported(storePath, cert);
+            }
+        }
+
+        private static void exportCertificate(String storePath, X509Certificate2 cert)
+        {
+            var subject = cert.Subject.CleanSubject();
+            var certPath = Path.Combine(storePath, $"{subject}.crt");
+            var bytes = cert.Export(X509ContentType.Cert);
+            File.WriteAllBytes(certPath, bytes);
+        }
+
+        private static void installOnFireFox(String windowsStorePath, X509Certificate2 cert, String trust)
         {
             var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             var mozillaPath = Path.Combine(appData, "Mozilla");
@@ -112,8 +126,8 @@ namespace PagarMe.Bifrost.Certificates.Stores
             {
                 var mozillaCertPath = Path.GetDirectoryName(certDb);
 
-                var installResult = Terminal.Run(storeScriptPath, mozillaCertPath, windowsStorePath, TLSConfig.Address);
-
+                var subject = cert.Subject.CleanSubject();
+                var installResult = Terminal.Run(storeScriptPath, mozillaCertPath, windowsStorePath, subject, trust);
                 if (!installResult.Succedded)
                 {
                     logger.Error(installResult.Output);
@@ -121,6 +135,14 @@ namespace PagarMe.Bifrost.Certificates.Stores
                     throw new Exception($"Could not install certificate at Firefox: exited with code {installResult.Code}");
                 }
             }
+        }
+
+        private static void deleteExported(String storePath, X509Certificate2 cert)
+        {
+            var subject = cert.Subject.CleanSubject();
+            var certPath = Path.Combine(storePath, $"{subject}.crt");
+
+            if (File.Exists(certPath)) File.Delete(certPath);
         }
     }
 
