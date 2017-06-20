@@ -29,7 +29,7 @@ namespace PagarMe.Bifrost.Certificates.Generation
         private Int32 validYears;
         private Int32 keyStrength;
 
-        internal ComposedCertificate Generate(Boolean setPrivate, String subjectName, String issuerName, AsymmetricKeyParameter parentPrivate)
+        internal ComposedCertificate Generate(Type type, String subjectName, String issuerName, AsymmetricKeyParameter parentPrivate)
         {
             var randomGenerator = new CryptoApiRandomGenerator();
             var random = new SecureRandom(randomGenerator);
@@ -40,12 +40,19 @@ namespace PagarMe.Bifrost.Certificates.Generation
             setSubjectAndIssuer(generator, subjectName, issuerName);
             setValidity(generator);
 
+            if (type == Type.Root)
+            {
+                setCA(generator);
+            }
+
             var keyPair = setPublicKey(generator, random);
 
             var x509 = signAndMerge(generator, random, parentPrivate ?? keyPair.Private);
 
-            if (setPrivate)
+            if (type == Type.SSL)
+            {
                 setPrivateKey(x509, keyPair);
+            }
 
             return new ComposedCertificate(x509, keyPair.Private);
         }
@@ -75,6 +82,12 @@ namespace PagarMe.Bifrost.Certificates.Generation
             var notAfter = notBefore.AddYears(validYears);
             generator.SetNotBefore(notBefore);
             generator.SetNotAfter(notAfter);
+        }
+
+        private void setCA(X509V3CertificateGenerator generator)
+        {
+            var basicContraint = new BasicConstraints(true);
+            generator.AddExtension(X509Extensions.BasicConstraints, true, basicContraint);
         }
 
         private AsymmetricCipherKeyPair setPublicKey(X509V3CertificateGenerator generator, SecureRandom random)
@@ -156,6 +169,10 @@ namespace PagarMe.Bifrost.Certificates.Generation
             rsaProvider.ImportParameters(parameters);
         }
 
+        public enum Type
+        {
+            Root,
+            SSL,
+        }
     }
-
 }

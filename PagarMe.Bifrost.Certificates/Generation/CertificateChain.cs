@@ -2,6 +2,7 @@
 using PagarMe.Bifrost.Certificates.Stores;
 using System;
 using System.Security.Cryptography.X509Certificates;
+using certType = PagarMe.Bifrost.Certificates.Generation.CertificateGenerator.Type;
 
 namespace PagarMe.Bifrost.Certificates.Generation
 {
@@ -24,9 +25,9 @@ namespace PagarMe.Bifrost.Certificates.Generation
         public X509Certificate2 Generate(String subjectTls, String subjectCa)
         {
             logger.Info("Start generating certificates.");
-            var ca = getOrGenerate(false, subjectCa);
+            var ca = getOrGenerate(certType.Root, subjectCa);
             logger.Info("Root certificate generated.");
-            var tls = getOrGenerate(true, subjectTls, ca);
+            var tls = getOrGenerate(certType.SSL, subjectTls, ca);
             logger.Info("Tls certificate generated.");
 
             Store.Instance.AddCertificate(ca.X509, tls.X509);
@@ -34,13 +35,9 @@ namespace PagarMe.Bifrost.Certificates.Generation
             return tls.X509;
         }
 
-        private ComposedCertificate getOrGenerate(Boolean setPrivate, String subject, ComposedCertificate parent = null)
+        private ComposedCertificate getOrGenerate(certType certType, String subject, ComposedCertificate parent = null)
         {
-            var issuer = parent?.X509.Subject;
-
-            var certificate = certGen.Generate(setPrivate, subject, issuer, parent?.Private);
-
-            return certificate;
+            return certGen.Generate(certType, subject, parent?.X509?.Subject, parent?.Private);
         }
 
     }
