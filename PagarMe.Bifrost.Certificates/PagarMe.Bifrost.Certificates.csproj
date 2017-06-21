@@ -55,6 +55,7 @@
     <Compile Include="..\PagarMe.Bifrost\Properties\BifrostAssemblyInfo.cs">
       <Link>Properties\BifrostAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Generation\ServiceUser.cs" />
     <Compile Include="..\PagarMe.Generic\Properties\PagarMeAssemblyInfo.cs">
       <Link>Properties\PagarMeAssemblyInfo.cs</Link>
     </Compile>
@@ -66,6 +67,7 @@
     <Compile Include="Stores\Store.cs" />
     <Compile Include="Generation\TLSConfig.cs" />
     <Compile Include="Stores\UnixStore.cs" />
+    <Compile Include="Stores\WindowsFirefoxStore.cs" />
     <Compile Include="Stores\WindowsStore.cs" />
     <Compile Include="Stores\X509Certificate2Extension.cs" />
   </ItemGroup>

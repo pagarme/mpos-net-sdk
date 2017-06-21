@@ -144,7 +144,7 @@ namespace PagarMe.Bifrost.Certificates.Generation
                     .CspKeyContainerInfo.CryptoKeySecurity;
 
             var serviceUser = new CryptoKeyAccessRule(
-                TLSConfig.GetServiceUser(),
+                ServiceUser.Get(),
                 CryptoKeyRights.FullControl,
                 AccessControlType.Allow
             );
