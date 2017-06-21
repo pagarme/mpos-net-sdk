@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PagarMe.Generic;
+using System;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 
@@ -25,7 +26,7 @@ namespace PagarMe.Bifrost.Certificates.Generation
         {
             var certificate = certificateChain.Get(subjectTls, subjectCa);
 
-            if (IsUnix && certificate == null)
+            if (ProgramEnvironment.IsUnix && certificate == null)
             {
                 certificate = Generate();
             }
@@ -36,11 +37,6 @@ namespace PagarMe.Bifrost.Certificates.Generation
         internal static X509Certificate2 Generate()
         {
             return certificateChain.Generate(subjectTls, subjectCa);
-        }
-
-        public static Boolean IsUnix
-        {
-            get { return Environment.OSVersion.Platform == PlatformID.Unix; }
         }
 
     }

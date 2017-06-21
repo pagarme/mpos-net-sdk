@@ -11,7 +11,6 @@ namespace PagarMe.Bifrost.Updates
         private const String Address = "http://localhost:2001";
 
         private RequestMaker request = new RequestMaker(Address);
-        private Version currentVersion = Assembly.GetEntryAssembly().GetName().Version;
         private String downloadedFile;
         private String productCode;
 
@@ -19,7 +18,7 @@ namespace PagarMe.Bifrost.Updates
         {
             var checkResult = request.GetObjectFromUrl<UpdateInfo>().WaitResult();
             var newVersion = checkResult.LastVersion;
-            if (currentVersion == newVersion) return false;
+            if (ProgramEnvironment.CurrentVersion == newVersion) return false;
 
             var filename = $"bifrost-installer-{newVersion}.msi";
             downloadedFile = Path.Combine(logger.GetLogDirectoryPath(), filename);

@@ -1,5 +1,6 @@
 ﻿using NLog;
 using PagarMe.Bifrost.Certificates.Generation;
+using PagarMe.Generic;
 using System;
 using System.Threading.Tasks;
 
@@ -16,7 +17,7 @@ namespace PagarMe.Bifrost.Updates
 
         private static Updater getInstance()
         {
-            if (TLSConfig.IsUnix)
+            if (ProgramEnvironment.IsUnix)
             {
                 return null;
             }

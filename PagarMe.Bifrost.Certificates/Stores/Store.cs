@@ -1,5 +1,6 @@
 ﻿using NLog;
 using PagarMe.Bifrost.Certificates.Generation;
+using PagarMe.Generic;
 using System;
 using System.Security.Cryptography.X509Certificates;
 
@@ -14,7 +15,7 @@ namespace PagarMe.Bifrost.Certificates.Stores
 
         private static Store getInstance()
         {
-            if (TLSConfig.IsUnix)
+            if (ProgramEnvironment.IsUnix)
                 return new UnixStore();
 
             return new WindowsStore();
