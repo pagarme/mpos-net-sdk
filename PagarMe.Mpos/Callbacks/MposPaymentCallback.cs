@@ -1,5 +1,4 @@
 using PagarMe.Mpos.Helpers;
-using System;
 using System.Threading.Tasks;
 using static PagarMe.Mpos.Mpos;
 
