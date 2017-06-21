@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using PagarMe.Bifrost.Commands;
 using PagarMe.Bifrost.Providers;
 using PagarMe.Mpos.Devices;
-using PagarMe.Bifrost.Updates;
 
 namespace PagarMe.Bifrost
 {

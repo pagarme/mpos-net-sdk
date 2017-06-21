@@ -1,7 +1,6 @@
 ﻿using NLog;
 using PagarMe.Bifrost.Certificates.Generation;
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace PagarMe.Bifrost.Updates

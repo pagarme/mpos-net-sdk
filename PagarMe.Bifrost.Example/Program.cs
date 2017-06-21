@@ -1,5 +1,4 @@
 using System;
-using PagarMe.Bifrost;
 using CommandLine;
 using System.Threading;
 

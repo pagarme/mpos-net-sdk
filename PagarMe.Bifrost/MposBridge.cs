@@ -10,7 +10,6 @@ using PagarMe.Generic;
 using PagarMe.Bifrost.Certificates.Generation;
 using System.Linq;
 using System.Threading.Tasks;
-using PagarMe.Bifrost.Updates;
 
 namespace PagarMe.Bifrost
 {
