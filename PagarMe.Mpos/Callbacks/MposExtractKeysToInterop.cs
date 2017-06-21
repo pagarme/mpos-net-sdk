@@ -1,5 +1,4 @@
 using PagarMe.Mpos.Helpers;
-using System.Linq;
 using static PagarMe.Mpos.Mpos.Native;
 
 namespace PagarMe.Mpos.Callbacks

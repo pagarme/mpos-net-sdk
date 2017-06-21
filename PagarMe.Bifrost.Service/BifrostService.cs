@@ -2,7 +2,6 @@ using System.ServiceProcess;
 using CommandLine;
 using NLog;
 using PagarMe.Generic;
-using System;
 
 namespace PagarMe.Bifrost.Service
 {
