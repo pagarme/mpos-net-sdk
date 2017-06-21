@@ -124,7 +124,7 @@ namespace PagarMe.Bifrost.Certificates.Generation
                 Flags = CspProviderFlags.UseMachineKeyStore
             };
 
-            if (!TLSConfig.IsUnix)
+            if (ProgramEnvironment.IsWindows)
                 setServiceUserPermissions(cspParams);
 
             var rsaProvider = new RSACryptoServiceProvider(cspParams);
