@@ -1,6 +1,5 @@
 ﻿using PagarMe.Generic;
 using System;
-using System.IO;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 
@@ -48,7 +47,7 @@ namespace PagarMe.Bifrost.Certificates.Stores
                 addToOS(ca, StoreName.Root);
                 addToOS(tls, StoreName.My);
 
-                addChainToFirefox(ca, tls);
+                WindowsFirefoxStore.AddToFirefox(ca, tls);
             });
         }
 
@@ -70,86 +69,5 @@ namespace PagarMe.Bifrost.Certificates.Stores
 
             store.Close();
         }
-
-        private void addChainToFirefox(X509Certificate2 ca, X509Certificate2 tls)
-        {
-            copyCertutilHelperLib();
-
-            addToFirefox(ca, "TC,,");
-            addToFirefox(tls, "u,,");
-        }
-
-        private static void copyCertutilHelperLib()
-        {
-            var filename = "MSVCR71.DLL";
-            var systemPath = Environment.GetFolderPath(Environment.SpecialFolder.System);
-            var destination = Path.Combine(systemPath, filename);
-
-            if (!File.Exists(destination))
-            {
-                var msvcr71Path = Path.Combine(Terminal.AssemblyPath, filename);
-                File.Copy(msvcr71Path, destination);
-                logger.Info($"{filename} copied to {systemPath}");
-            }
-        }
-
-        private void addToFirefox(X509Certificate2 cert, String trust)
-        {
-            var storePath = logger.GetLogDirectoryPath();
-
-            try
-            {
-                exportCertificate(storePath, cert);
-                installOnFireFox(storePath, cert, trust);
-            }
-            finally
-            {
-                deleteExported(storePath, cert);
-            }
-        }
-
-        private static void exportCertificate(String storePath, X509Certificate2 cert)
-        {
-            var subject = cert.Subject.CleanSubject();
-            var certPath = Path.Combine(storePath, $"{subject}.crt");
-            var bytes = cert.Export(X509ContentType.Cert);
-            File.WriteAllBytes(certPath, bytes);
-        }
-
-        private static void installOnFireFox(String windowsStorePath, X509Certificate2 cert, String trust)
-        {
-            var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            var mozillaPath = Path.Combine(appData, "Mozilla");
-
-            if (!Directory.Exists(mozillaPath)) return;
-
-            var storeScriptPath = "certificates-windows-firefox-store.bat";
-
-            var certDbs = Directory.GetFiles(mozillaPath, "*cert*.db", SearchOption.AllDirectories);
-            foreach(var certDb in certDbs)
-            {
-                logger.Info($"Adding {cert.Subject.CleanSubject()} to {certDb}");
-                var mozillaCertPath = Path.GetDirectoryName(certDb);
-
-                var subject = cert.Subject.CleanSubject();
-                var installResult = Terminal.Run(storeScriptPath, mozillaCertPath, windowsStorePath, subject, trust);
-                if (!installResult.Succedded)
-                {
-                    logger.Error(installResult.Output);
-                    logger.Error(installResult.Error);
-                    throw new Exception($"Could not install certificate at Firefox: exited with code {installResult.Code}");
-                }
-            }
-        }
-
-        private static void deleteExported(String storePath, X509Certificate2 cert)
-        {
-            var subject = cert.Subject.CleanSubject();
-            var certPath = Path.Combine(storePath, $"{subject}.crt");
-
-            if (File.Exists(certPath)) File.Delete(certPath);
-        }
     }
-
-
 }
