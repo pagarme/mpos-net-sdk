@@ -17,7 +17,8 @@ namespace PagarMe.Bifrost.Updates
         protected override Boolean? Check()
         {
             var checkResult = request.GetObjectFromUrl<UpdateInfo>().WaitResult();
-            var newVersion = checkResult.LastVersion;
+            var newVersion = checkResult.LastVersion.ToString(3);
+
             if (ProgramEnvironment.CurrentVersion == newVersion) return false;
 
             var filename = $"bifrost-installer-{newVersion}.msi";

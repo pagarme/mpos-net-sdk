@@ -1,0 +1,15 @@
+﻿This program was made as a Helper for parts that InstallShield don't
+do. It fits the needs of Bifrost Setup, and should be modified to fit
+another installations.
+
+Accepted commands:
+    --help, -h:
+        Prints this help.
+
+    --update-setup-version, -u:
+        Update setup version, to windows program list show same
+        version as is registered on Assembly.
+
+    --publish-msi-json, -p
+        Publish on Updates project the msi with its version as name
+        and json to help service on auto-update.

@@ -1,4 +1,4 @@
-﻿"DeployProject"
+"DeployProject"
 {
 "VSVersion" = "3:800"
 "ProjectType" = "8:{978C614F-708E-4E1A-B201-565925725DBA}"
@@ -549,7 +549,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:PagarMe.Mpos, Version=1.0.6376.38369, Culture=neutral, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:PagarMe.Mpos, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
                     "_37801444C8976742ED5F1D2C5690E5EE"
@@ -580,7 +580,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:PagarMe.Bifrost, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:PagarMe.Bifrost, Version=0.0.5.0, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
                     "_3B3EA3C7DD6ADA6688E9B576E211AE0B"
@@ -879,7 +879,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:PagarMe.Bifrost.Certificates, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:PagarMe.Bifrost.Certificates, Version=0.0.5.0, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
                     "_F139F6BFE3EC9E68DD86D118E822A0E8"
@@ -1067,14 +1067,14 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Pagar.me Bifrost"
         "ProductCode" = "8:{D7F13C8F-ECAD-4788-A249-207B6B3F5C87}"
-        "PackageCode" = "8:{7FE44C59-C52E-4E7B-9C07-CDDDB361BB9A}"
+        "PackageCode" = "8:{5E8E225C-7897-4DCE-9D29-7173AE436FF2}"
         "UpgradeCode" = "8:{9DDF3086-BAC5-4BB4-ACCD-8F84C0EDA337}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:1.0.0"
+        "ProductVersion" = "8:0.0.5"
         "Manufacturer" = "8:Pagar.me"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
@@ -1089,8 +1089,8 @@
         "SearchPath" = "8:"
         "UseSystemSearchPath" = "11:TRUE"
         "TargetPlatform" = "3:0"
-        "PreBuildEvent" = "8:"
-        "PostBuildEvent" = "8:$(ProjectDir)copy-updates.bat $(ProjectDir) $(BuiltOuputPath)"
+        "PreBuildEvent" = "8:$(ProjectDir)..\\bin\\$(Configuration)\\PagarMe.Bifrost.Setup.Helper -u"
+        "PostBuildEvent" = "8:$(ProjectDir)..\\bin\\$(Configuration)\\PagarMe.Bifrost.Setup.Helper -p"
         "RunPostBuildEvent" = "3:0"
         }
         "Registry"
