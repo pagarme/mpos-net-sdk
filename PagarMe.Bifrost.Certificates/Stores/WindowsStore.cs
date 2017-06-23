@@ -11,7 +11,7 @@ namespace PagarMe.Bifrost.Certificates.Stores
 
         public override X509Certificate2 GetCertificate(String subject, String issuer, StoreName storeName)
         {
-            return logger.TryLogOnException(() =>
+            return Log.TryLogOnException(() =>
             {
                 return getCertificate(subject, issuer, storeName);
             });
@@ -40,9 +40,9 @@ namespace PagarMe.Bifrost.Certificates.Stores
 
         public override void AddCertificate(X509Certificate2 ca, X509Certificate2 tls)
         {
-            logger.TryLogOnException(() =>
+            Log.TryLogOnException(() =>
             {
-                logger.Info("Add certificates to Store");
+                Log.Me.Info("Add certificates to Store");
 
                 addToOS(ca, StoreName.Root);
                 addToOS(tls, StoreName.My);
@@ -53,7 +53,7 @@ namespace PagarMe.Bifrost.Certificates.Stores
 
         private void addToOS(X509Certificate2 certificate, StoreName storeName)
         {
-            logger.Info($"Adding {certificate.Subject.CleanSubject()} to Windows Store {storeName}");
+            Log.Me.Info($"Adding {certificate.Subject.CleanSubject()} to Windows Store {storeName}");
 
             var store = new X509Store(storeName, storeLocation);
             store.Open(OpenFlags.ReadWrite);

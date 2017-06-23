@@ -1,5 +1,5 @@
-﻿using NLog;
-using PagarMe.Bifrost.Certificates.Generation;
+﻿using PagarMe.Bifrost.Certificates.Generation;
+using PagarMe.Generic;
 using System;
 using System.Security.Principal;
 
@@ -7,8 +7,6 @@ namespace PagarMe.Bifrost.Certificates
 {
     class Program
     {
-        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
-
         static void Main(string[] args)
         {
             changeConsoleUi();
@@ -16,7 +14,7 @@ namespace PagarMe.Bifrost.Certificates
             if (!isAdministrator())
             {
                 var message = "Certificate not created: the certificate can only be set under administrator permissions";
-                logger.Error(message);
+                Log.Me.Error(message);
                 throw new Exception(message);
             }
 

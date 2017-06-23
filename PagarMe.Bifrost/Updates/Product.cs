@@ -1,4 +1,4 @@
-﻿using NLog;
+﻿using PagarMe.Generic;
 using System;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -7,8 +7,6 @@ namespace PagarMe.Bifrost.Updates
 {
     public class Product
     {
-        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
-
         public static String GetCode(String filename)
         {
             try
@@ -24,8 +22,8 @@ namespace PagarMe.Bifrost.Updates
             }
             catch (Exception e)
             {
-                logger.Error("Program registry may be not found:");
-                logger.Error(e);
+                Log.Me.Error("Program registry may be not found:");
+                Log.Me.Error(e);
                 return null;
             }
         }

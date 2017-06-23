@@ -1,6 +1,4 @@
-﻿using NLog;
-using PagarMe.Bifrost.Certificates.Generation;
-using PagarMe.Generic;
+﻿using PagarMe.Generic;
 using System;
 using System.Threading.Tasks;
 
@@ -8,8 +6,6 @@ namespace PagarMe.Bifrost.Updates
 {
     public abstract class Updater
     {
-        protected static readonly Logger logger = LogManager.GetCurrentClassLogger();
-
         static Updater()
         {
             instance = getInstance();
@@ -48,18 +44,18 @@ namespace PagarMe.Bifrost.Updates
                 {
                     lock (instance)
                     {
-                        logger.Info("Update check starting");
+                        Log.Me.Info("Update check starting");
                         var updateCheckResult = instance.Check();
 
                         if (!updateCheckResult.HasValue)
                         {
-                            logger.Warn("Update check exited with error");
+                            Log.Me.Warn("Update check exited with error");
                             return false;
                         }
 
                         if (!updateCheckResult.Value)
                         {
-                            logger.Info($"Bifrost up to date");
+                            Log.Me.Info($"Bifrost up to date");
                             return false;
                         }
 
@@ -69,7 +65,7 @@ namespace PagarMe.Bifrost.Updates
             }
             catch (Exception e)
             {
-                logger.Error(e);
+                Log.Me.Error(e);
                 return false;
             }
         }
@@ -83,17 +79,17 @@ namespace PagarMe.Bifrost.Updates
 
             lock (instance)
             {
-                logger.Info($"Start upgrading");
+                Log.Me.Info($"Start upgrading");
 
                 var upgraded = instance.Update();
 
                 if (upgraded)
                 {
-                    logger.Info($"Finished upgrading");
+                    Log.Me.Info($"Finished upgrading");
                 }
                 else
                 {
-                    logger.Error($"Failed on upgrading service. If the service stopped working, try to restart.");
+                    Log.Me.Error($"Failed on upgrading service. If the service stopped working, try to restart.");
                 }
             }
         }

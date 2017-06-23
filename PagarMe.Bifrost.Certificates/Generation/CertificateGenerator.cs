@@ -1,5 +1,4 @@
-﻿using NLog;
-using Org.BouncyCastle.Asn1.X509;
+﻿using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Generators;
 using Org.BouncyCastle.Crypto.Parameters;
@@ -133,8 +132,6 @@ namespace PagarMe.Bifrost.Certificates.Generation
 
             x509.PrivateKey = rsaProvider;
         }
-
-        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
         private static void setServiceUserPermissions(CspParameters cspParams)
         {

@@ -1,5 +1,4 @@
-﻿using NLog;
-using PagarMe.Generic;
+﻿using PagarMe.Generic;
 using System;
 using System.IO;
 using System.Security.AccessControl;
@@ -9,13 +8,11 @@ namespace PagarMe.Bifrost.Certificates.Generation
 {
     public class ServiceUser
     {
-        private static Logger logger = LogManager.GetCurrentClassLogger();
-
         internal static Boolean GrantAccess(String path)
         {
             if (!Directory.Exists(path))
             {
-                logger.Warn($"Could not grant access to {path}: directory do not exists");
+                Log.Me.Warn($"Could not grant access to {path}: directory do not exists");
                 return false;
             }
 
@@ -37,7 +34,7 @@ namespace PagarMe.Bifrost.Certificates.Generation
 
         internal static void GrantLogAccess()
         {
-            GrantAccess(logger.GetLogDirectoryPath());
+            GrantAccess(Log.GetLogDirectoryPath());
         }
 
         internal static IdentityReference Get()

@@ -15,7 +15,7 @@ namespace PagarMe.Bifrost.Certificates.Stores
 
         public override X509Certificate2 GetCertificate(String subject, String issuer, StoreName storeName)
         {
-            return logger.TryLogOnException(() =>
+            return Log.TryLogOnException(() =>
             {
                 if (!File.Exists(pfxPath)) return null;
                 return new X509Certificate2(pfxPath);
@@ -24,10 +24,10 @@ namespace PagarMe.Bifrost.Certificates.Stores
 
         public override void AddCertificate(X509Certificate2 ca, X509Certificate2 tls)
         {
-            logger.TryLogOnException(() =>
+            Log.TryLogOnException(() =>
             {
                 addCertficate(tls);
-                logger.Info("Finish generating");
+                Log.Me.Info("Finish generating");
             });
         }
 
@@ -42,8 +42,8 @@ namespace PagarMe.Bifrost.Certificates.Stores
             var installResult = Terminal.Run("sh", storeScriptPath, storePath, certName);
             if (!installResult.Succedded)
             {
-                logger.Error(installResult.Output);
-                logger.Error(installResult.Error);
+                Log.Me.Error(installResult.Output);
+                Log.Me.Error(installResult.Error);
                 throw new Exception($"Could not install certificate: bash exited with code {installResult}");
             }
 

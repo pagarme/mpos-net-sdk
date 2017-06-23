@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
-using NLog;
 using PagarMe.Bifrost.WebSocket;
+using PagarMe.Generic;
 using System;
 using System.IO;
 using System.Net;
@@ -15,7 +15,6 @@ namespace PagarMe.Bifrost.Updates
             this.mainUrl = mainUrl;
         }
 
-        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
         private readonly string mainUrl;
 
         public async Task<T> GetObjectFromUrl<T>(String path = null)
@@ -43,7 +42,7 @@ namespace PagarMe.Bifrost.Updates
 
             if (response.StatusCode != HttpStatusCode.OK)
             {
-                logger.Warn($"Update failed: {mainUrl}/{path} returned status code {response.StatusCode}");
+                Log.Me.Warn($"Update failed: {mainUrl}/{path} returned status code {response.StatusCode}");
                 return default(T);
             }
 
@@ -65,7 +64,7 @@ namespace PagarMe.Bifrost.Updates
                 }
                 catch (Exception e)
                 {
-                    logger.Error(e);
+                    Log.Me.Error(e);
                     return false;
                 }
             });

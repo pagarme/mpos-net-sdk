@@ -1,5 +1,4 @@
 using Newtonsoft.Json;
-using NLog;
 using PagarMe.Bifrost.Commands;
 using PagarMe.Generic;
 using System;
@@ -7,13 +6,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using WebSocketSharp;
 using WebSocketSharp.Server;
+using log = PagarMe.Generic.Log;
 
 namespace PagarMe.Bifrost.WebSocket
 {
     internal class BifrostBehavior : WebSocketBehavior
     {
-        private static readonly NLog.Logger logger = LogManager.GetCurrentClassLogger();
-
         private readonly MposBridge mposBridge;
 
         public BifrostBehavior(MposBridge mposBridge)
@@ -25,20 +23,20 @@ namespace PagarMe.Bifrost.WebSocket
 
         protected override void OnOpen()
         {
-            logger.Info("Socket Opened");
+            log.Me.Info("Socket Opened");
         }
 
         protected override void OnClose(CloseEventArgs e)
         {
-            logger.Info($"Socket Closed: [{e.Code}] {e.Reason}");
+            log.Me.Info($"Socket Closed: [{e.Code}] {e.Reason}");
         }
 
 
         protected override async void OnMessage(MessageEventArgs e)
         {
-            logger.Info("Request Handling");
+            log.Me.Info("Request Handling");
 
-            await logger.TryLogOnExceptionAsync(() => 
+            await log.TryLogOnExceptionAsync(() => 
             {
                 return handleMessage(e);
             });
@@ -54,13 +52,13 @@ namespace PagarMe.Bifrost.WebSocket
             if (context == null)
             {
                 var message = "Error on creating context";
-                logger.Info(message);
+                log.Me.Info(message);
                 response.ResponseType = PaymentResponse.Type.Error;
                 response.Error = message;
             }
             else
             {
-                logger.Info(request.RequestType);
+                log.Me.Info(request.RequestType);
                 await handleRequest(context, request, response);
             }
 
@@ -201,8 +199,8 @@ namespace PagarMe.Bifrost.WebSocket
 
         protected override void OnError(WebSocketSharp.ErrorEventArgs e)
         {
-            logger.Error(e.Message);
-            logger.Error(e.Exception);
+            log.Me.Error(e.Message);
+            log.Me.Error(e.Exception);
             onError(e.Message);
         }
 
@@ -230,7 +228,7 @@ namespace PagarMe.Bifrost.WebSocket
             }
             else
             {
-                logger.Warn($"Could not send response of {response.ResponseType}, websocket connection not opened.");
+                log.Me.Warn($"Could not send response of {response.ResponseType}, websocket connection not opened.");
             }
         }
 

@@ -1,7 +1,6 @@
 ﻿using PagarMe.Generic;
 using System;
 using System.IO;
-using System.Reflection;
 
 namespace PagarMe.Bifrost.Updates
 {
@@ -22,7 +21,7 @@ namespace PagarMe.Bifrost.Updates
             if (ProgramEnvironment.CurrentVersion == newVersion) return false;
 
             var filename = $"bifrost-installer-{newVersion}.msi";
-            downloadedFile = Path.Combine(logger.GetLogDirectoryPath(), filename);
+            downloadedFile = Path.Combine(Log.GetLogDirectoryPath(), filename);
 
             var downloaded = 
                 request.DownloadBinaryFromUrl(downloadedFile, filename)
@@ -52,14 +51,14 @@ namespace PagarMe.Bifrost.Updates
 
         private bool runOnMsi(String command, String description)
         {
-            logger.Info($"Starting {description}");
+            Log.Me.Info($"Starting {description}");
             var result = Terminal.Run("msiexec", command, "/quiet");
 
             if (!result.Succedded)
             {
-                logger.Warn(result.Output);
-                logger.Warn(result.Error);
-                logger.Warn($"Error: {description} process exited with code {result.Code}");
+                Log.Me.Warn(result.Output);
+                Log.Me.Warn(result.Error);
+                Log.Me.Warn($"Error: {description} process exited with code {result.Code}");
             }
 
             return result.Succedded;

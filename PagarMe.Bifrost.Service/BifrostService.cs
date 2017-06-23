@@ -1,14 +1,11 @@
 using System.ServiceProcess;
 using CommandLine;
-using NLog;
 using PagarMe.Generic;
 
 namespace PagarMe.Bifrost.Service
 {
     public partial class BifrostService : ServiceBase
     {
-        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
-
         private MposBridge _bridge;
 
         public BifrostService()
@@ -18,7 +15,7 @@ namespace PagarMe.Bifrost.Service
 
         protected override void OnStart(string[] args)
         {
-            logger.TryLogOnException(() =>
+            Log.TryLogOnException(() =>
             {
                 var options = new Options();
                 var isValid = Parser.Default.ParseArgumentsStrict(args, options);
@@ -26,8 +23,8 @@ namespace PagarMe.Bifrost.Service
 
                 _bridge = new MposBridge(options);
 
-                logger.Info("Bifrost Service Bridge");
-                logger.Info("Starting server");
+                Log.Me.Info("Bifrost Service Bridge");
+                Log.Me.Info("Starting server");
                 _bridge.Start();
             });
         }
@@ -37,9 +34,9 @@ namespace PagarMe.Bifrost.Service
             if (_bridge == null)
                 return;
 
-            logger.TryLogOnException(() =>
+            Log.TryLogOnException(() =>
             {
-                logger.Info("Stopping server");
+                Log.Me.Info("Stopping server");
                 _bridge.Stop();
             });
         }

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
-using NLog;
 using PagarMe.Bifrost.Providers;
 using PagarMe.Bifrost.WebSocket;
 using PagarMe.Mpos.Devices;
@@ -15,8 +14,6 @@ namespace PagarMe.Bifrost
 {
     public class MposBridge : IDisposable
     {
-        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
-
         private static readonly Dictionary<string, Context> _contexts
             = new Dictionary<string, Context>();
 
@@ -34,7 +31,7 @@ namespace PagarMe.Bifrost
         public MposBridge(Options options)
         {
             _options = options;
-            _deviceManager = new DeviceManager(logger.TryLogOnException);
+            _deviceManager = new DeviceManager(Log.TryLogOnException);
         }
 
 
@@ -51,7 +48,7 @@ namespace PagarMe.Bifrost
             _server.SslConfiguration.ClientCertificateValidationCallback = TLSConfig.ClientValidate;
 
             _server.KeepClean = false;
-            _server.Log.File = logger.GetLogFilePath();
+            _server.Log.File = Log.GetLogFilePath();
 
             _server.AddWebSocketService("/mpos", () => new BifrostBehavior(this));
             _server.Start();
