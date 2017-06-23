@@ -39,12 +39,12 @@ namespace PagarMe.Bifrost
 
         internal PaymentRequest.Type CurrentOperation { get; set; }
 
-        public async Task Initialize(InitializeRequest request, Action<Int32> onError)
+        public async Task<Boolean> Initialize(InitializeRequest request, Action<Int32> onError)
         {
             lock (this)
             {
                 if (initialized)
-                    return;
+                    return false;
 
                 initialized = true;
             }
@@ -77,6 +77,8 @@ namespace PagarMe.Bifrost
             {
                 _lock.Release(1);
             }
+
+            return true;
         }
 
         public Task<StatusResponse> GetStatus()
