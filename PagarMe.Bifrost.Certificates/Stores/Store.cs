@@ -1,6 +1,4 @@
-﻿using NLog;
-using PagarMe.Bifrost.Certificates.Generation;
-using PagarMe.Generic;
+﻿using PagarMe.Generic;
 using System;
 using System.Security.Cryptography.X509Certificates;
 
@@ -20,8 +18,6 @@ namespace PagarMe.Bifrost.Certificates.Stores
 
             return new WindowsStore();
         }
-
-        protected static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
         public static Store Instance { get; private set; }
 

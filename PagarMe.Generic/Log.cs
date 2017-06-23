@@ -6,9 +6,11 @@ using System.Threading.Tasks;
 
 namespace PagarMe.Generic
 {
-    public static class LoggerExtension
+    public static class Log
     {
-        public static void TryLogOnException(this Logger logger, Action action)
+        public static Logger Me = LogManager.GetCurrentClassLogger();
+
+        public static void TryLogOnException(Action action)
         {
             try
             {
@@ -16,12 +18,12 @@ namespace PagarMe.Generic
             }
             catch (Exception e)
             {
-                tryLog(logger, e);
+                tryLog(e);
                 throw;
             }
         }
 
-        public static T TryLogOnException<T>(this Logger logger, Func<T> action)
+        public static T TryLogOnException<T>(Func<T> action)
         {
             try
             {
@@ -29,12 +31,12 @@ namespace PagarMe.Generic
             }
             catch (Exception e)
             {
-                tryLog(logger, e);
+                tryLog(e);
                 throw;
             }
         }
 
-        public static async Task TryLogOnExceptionAsync(this Logger logger, Func<Task> action)
+        public static async Task TryLogOnExceptionAsync(Func<Task> action)
         {
             try
             {
@@ -42,12 +44,12 @@ namespace PagarMe.Generic
             }
             catch (Exception e)
             {
-                tryLog(logger, e);
+                tryLog(e);
                 throw;
             }
         }
 
-        private static void tryLog(Logger logger, Exception exception)
+        private static void tryLog(Exception exception)
         {
             try
             {
@@ -58,13 +60,13 @@ namespace PagarMe.Generic
                 {
                     foreach (var childException in aggregateException.InnerExceptions)
                     {
-                        tryLog(logger, childException);
+                        tryLog(childException);
                     }
                 }
                 else
                 {
-                    logger.Error(exception);
-                    tryLog(logger, exception.InnerException);
+                    Me.Error(exception);
+                    tryLog(exception.InnerException);
                 }
             }
             catch
@@ -73,22 +75,22 @@ namespace PagarMe.Generic
             }
         }
 
-        public static String GetLogFilePath(this Logger logger)
+        public static String GetLogFilePath()
         {
-            var relativeFileName = logger.getLogFullPath();
+            var relativeFileName = getLogFullPath();
             return Path.GetFullPath(relativeFileName);
         }
 
-        public static String GetLogDirectoryPath(this Logger logger)
+        public static String GetLogDirectoryPath()
         {
-            var relativeFileName = logger.getLogFullPath();
+            var relativeFileName = getLogFullPath();
             return Path.GetDirectoryName(relativeFileName);
         }
 
-        private static string getLogFullPath(this Logger logger)
+        private static string getLogFullPath()
         {
             var fileTarget =
-                logger.Factory.Configuration
+                Me.Factory.Configuration
                     .FindTargetByName<FileTarget>("file");
 
             var logEventInfo = new LogEventInfo { TimeStamp = DateTime.Now };

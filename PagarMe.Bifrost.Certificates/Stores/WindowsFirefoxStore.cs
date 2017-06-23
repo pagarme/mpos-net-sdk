@@ -1,5 +1,4 @@
-﻿using NLog;
-using PagarMe.Bifrost.Certificates.Generation;
+﻿using PagarMe.Bifrost.Certificates.Generation;
 using PagarMe.Generic;
 using System;
 using System.IO;
@@ -9,8 +8,7 @@ namespace PagarMe.Bifrost.Certificates.Stores
 {
     class WindowsFirefoxStore
     {
-        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
-        private static readonly String dataPath = logger.GetLogDirectoryPath();
+        private static readonly String dataPath = Log.GetLogDirectoryPath();
 
         public static void AddToFirefox(X509Certificate2 ca, X509Certificate2 tls)
         {
@@ -33,7 +31,7 @@ namespace PagarMe.Bifrost.Certificates.Stores
             {
                 var mozillaCachedPath = File.ReadAllText(mozillaPathCache);
                 if (Directory.Exists(mozillaCachedPath)) return mozillaCachedPath;
-                logger.Warn($"Data path {mozillaCachedPath} not found");
+                Log.Me.Warn($"Data path {mozillaCachedPath} not found");
             }
 
             var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
@@ -46,8 +44,8 @@ namespace PagarMe.Bifrost.Certificates.Stores
                 return mozillaPath;
             }
 
-            logger.Warn($"Data path {mozillaPath} not found");
-            logger.Warn($"Skipped installing certificates at Firefox");
+            Log.Me.Warn($"Data path {mozillaPath} not found");
+            Log.Me.Warn($"Skipped installing certificates at Firefox");
             return null;
         }
 
@@ -61,7 +59,7 @@ namespace PagarMe.Bifrost.Certificates.Stores
             {
                 var msvcr71Path = Path.Combine(Terminal.AssemblyPath, filename);
                 File.Copy(msvcr71Path, destination);
-                logger.Info($"{filename} copied to {systemPath}");
+                Log.Me.Info($"{filename} copied to {systemPath}");
             }
         }
 
@@ -94,14 +92,14 @@ namespace PagarMe.Bifrost.Certificates.Stores
             var certDbs = Directory.GetFiles(mozillaPath, "*cert*.db", SearchOption.AllDirectories);
             foreach (var certDb in certDbs)
             {
-                logger.Info($"Adding {cert.Subject.CleanSubject()} to {certDb}");
+                Log.Me.Info($"Adding {cert.Subject.CleanSubject()} to {certDb}");
 
                 var mozillaCertPath = Path.GetDirectoryName(certDb);
                 var installResult = Terminal.Run(addScriptPath, mozillaCertPath, dataPath, subject, trust);
                 if (!installResult.Succedded)
                 {
-                    logger.Error(installResult.Output);
-                    logger.Error(installResult.Error);
+                    Log.Me.Error(installResult.Output);
+                    Log.Me.Error(installResult.Error);
                     throw new Exception($"Could not install certificate at Firefox: exited with code {installResult.Code}");
                 }
             }
