@@ -159,9 +159,11 @@ namespace PagarMe.Bifrost.WebSocket
                 return;
             }
 
-            await context.Initialize(initialize, onError);
+            var initialized = await context.Initialize(initialize, onError);
 
-            response.ResponseType = PaymentResponse.Type.Initialized;
+            response.ResponseType = initialized
+                ? PaymentResponse.Type.Initialized
+                : PaymentResponse.Type.AlreadyInitialized;
         }
 
         private async Task status(Context context, PaymentResponse response)
