@@ -35,19 +35,24 @@ namespace PagarMe.Bifrost
         }
 
 
-        public void Start()
+        public void Start(Boolean ssl = true)
         {
             var addresses = Dns.GetHostAddresses(Options.BindAddress);
-            _server = new WebSocketServer(addresses[0], _options.BindPort, true);
+            _server = new WebSocketServer(addresses[0], _options.BindPort, ssl);
 
             TLSConfig.Address = Options.BindAddress;
-            _server.SslConfiguration.ServerCertificate = TLSConfig.Get();
 
-            _server.SslConfiguration.CheckCertificateRevocation = false;
-            _server.SslConfiguration.ClientCertificateRequired = false;
-            _server.SslConfiguration.ClientCertificateValidationCallback = TLSConfig.ClientValidate;
+            if (ssl)
+            {
+                _server.SslConfiguration.ServerCertificate = TLSConfig.Get();
 
-            _server.KeepClean = false;
+                _server.SslConfiguration.CheckCertificateRevocation = false;
+                _server.SslConfiguration.ClientCertificateRequired = false;
+                _server.SslConfiguration.ClientCertificateValidationCallback = TLSConfig.ClientValidate;
+
+                _server.KeepClean = false;
+            }
+
             _server.Log.File = Log.GetLogFilePath();
 
             _server.AddWebSocketService("/mpos", () => new BifrostBehavior(this));
