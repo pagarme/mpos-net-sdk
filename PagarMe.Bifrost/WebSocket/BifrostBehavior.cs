@@ -219,6 +219,8 @@ namespace PagarMe.Bifrost.WebSocket
                 Error = message
             };
 
+            log.Me.Error(message);
+
             send(response);
         }
 
