@@ -24,7 +24,7 @@ namespace PagarMe.Bifrost.Providers
 
             onError = options.OnError;
 
-            return _mpos.Initialize();
+            return Task.Run(_mpos.Initialize);
         }
 
         private void errored(object sender, int error)

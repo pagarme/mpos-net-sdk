@@ -62,7 +62,7 @@ var WebSocketWrap = function (contextId) {
     this.parent.sendMessage(request)
   }
 
-  this.initialize = function (encryptionKey, deviceId, baudRate, simpleInitialize) {
+  this.initialize = function (encryptionKey, deviceId, baudRate, simpleInitialize, timeoutMilliseconds) {
     const request = {
       request_type: this.request.initialize,
       context_id: this.contextId,
@@ -71,6 +71,7 @@ var WebSocketWrap = function (contextId) {
         encryption_key: encryptionKey,
         baud_rate: baudRate,
         simple_initialize: simpleInitialize,
+        timeout_milliseconds: timeoutMilliseconds,
       }
     }
 

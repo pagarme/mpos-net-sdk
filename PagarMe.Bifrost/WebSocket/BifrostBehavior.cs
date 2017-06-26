@@ -1,6 +1,5 @@
 using Newtonsoft.Json;
 using PagarMe.Bifrost.Commands;
-using PagarMe.Generic;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -161,9 +160,17 @@ namespace PagarMe.Bifrost.WebSocket
 
             var initialized = await context.Initialize(initialize, onError);
 
-            response.ResponseType = initialized
-                ? PaymentResponse.Type.Initialized
-                : PaymentResponse.Type.AlreadyInitialized;
+            if (initialized.HasValue)
+            {
+                response.ResponseType = initialized.Value
+                    ? PaymentResponse.Type.Initialized
+                    : PaymentResponse.Type.AlreadyInitialized;
+            }
+            else
+            {
+                response.ResponseType = PaymentResponse.Type.Error;
+                response.Error = "Could not initialize device. Perhaps it's not the right port.";
+            }
         }
 
         private async Task status(Context context, PaymentResponse response)

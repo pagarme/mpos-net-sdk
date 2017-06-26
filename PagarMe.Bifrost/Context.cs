@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using PagarMe.Bifrost.Commands;
 using PagarMe.Bifrost.Providers;
 using PagarMe.Mpos.Devices;
+using PagarMe.Generic;
 
 namespace PagarMe.Bifrost
 {
@@ -35,35 +36,29 @@ namespace PagarMe.Bifrost
             return Task.FromResult(devices);
         }
 
-        private Boolean initialized = false;
-
         internal PaymentRequest.Type CurrentOperation { get; set; }
 
-        public async Task<Boolean> Initialize(InitializeRequest request, Action<Int32> onError)
+        public async Task<Boolean?> Initialize(InitializeRequest request, Action<Int32> onError)
         {
-            lock (this)
-            {
-                if (initialized)
-                    return false;
-
-                initialized = true;
-            }
-
             await _lock.WaitAsync();
+
+            if (_status == ContextStatus.Ready)
+                return false;
 
             try
             {
                 var device = _bridge.DeviceManager.GetById(request.DeviceId);
                 var dataPath = ensureDataPath(device, request.EncryptionKey);
 
-                await _provider.Open(new InitializationOptions
+                var completedInit = await _provider.Open(new InitializationOptions
                 {
                     Device = device,
                     EncryptionKey = request.EncryptionKey,
                     StoragePath = dataPath,
                     BaudRate = request.BaudRate,
                     OnError = onError
-                });
+                }).SetTimeout(request.TimeoutMilliseconds);
+                if (!completedInit) return null;
 
                 if (!request.SimpleInitialize)
                 {
