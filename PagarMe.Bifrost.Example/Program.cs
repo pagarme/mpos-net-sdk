@@ -22,7 +22,7 @@ namespace PagarMe.Bifrost.Example
             var running = true;
             Console.CancelKeyPress += (sender, e) => running = false;
 
-            bridge.Start();
+            bridge.Start(false);
 
             while (running)
                 Thread.Yield();

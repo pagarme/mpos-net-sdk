@@ -30,7 +30,8 @@ var WebSocketWrap = function (contextId) {
 
   this.call = function (onopen, onmessage) {
     if ('WebSocket' in window) {
-      this.ws = new WebSocket('wss://localhost:2000/mpos')
+      const protocol = window.location.href.startsWith('https') ? 'wss' : 'ws'
+      this.ws = new WebSocket(protocol + '://localhost:2000/mpos')
 
       this.ws.parent = this
       this.ws.onopen = onopen
@@ -48,7 +49,7 @@ var WebSocketWrap = function (contextId) {
   }
 
   this.error = function () {
-    showMessage('Endereço "' + this.url + '" não encontrado ou desconectou')
+    showMessage('Endereço "' + this.url + '" não encontrado ou desconectado. Verifique se o serviço está rodando e se o protocolo usado é o correto.')
     this.close()
   }
 
