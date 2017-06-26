@@ -1,4 +1,5 @@
 using PagarMe.Bifrost.Updates;
+using PagarMe.Generic;
 using System;
 using System.ServiceProcess;
 
@@ -8,11 +9,14 @@ namespace PagarMe.Bifrost.Service
     {
         private static void Main(String[] args)
         {
-            var updater = Updater.CheckAndUpdate(MposBridge.LockContexts);
+            Log.TryLogOnException(() =>
+            {
+                var updater = Updater.CheckAndUpdate(MposBridge.LockContexts);
 
-            ServiceBase.Run(new BifrostService());
+                ServiceBase.Run(new BifrostService());
 
-            updater.Wait();
+                updater.Wait();
+            });
         }
     }
 }
