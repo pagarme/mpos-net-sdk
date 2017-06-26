@@ -35,10 +35,14 @@ namespace PagarMe.Mpos.Devices
         public Stream Open(Int32 baudRate)
         {
             if (_port == null)
+            {
                 _port = new SerialPort(Port, baudRate, Parity.None, 8, StopBits.One);
+            }
 
             if (!_port.IsOpen)
+            {
                 _port.Open();
+            }
 
             return _port.BaseStream;
         }

@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+using System;
+using System.Threading.Tasks;
 
 namespace PagarMe.Generic
 {
@@ -8,6 +9,12 @@ namespace PagarMe.Generic
         {
             task.Wait();
             return task.Result;
+        }
+
+        public static async Task<Boolean> SetTimeout(this Task task, Int32 timeout)
+        {
+            var firstFinished = await Task.WhenAny(task, Task.Delay(timeout));
+            return firstFinished == task;
         }
     }
 }

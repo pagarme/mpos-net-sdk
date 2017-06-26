@@ -117,15 +117,22 @@ function testConfig () {
   }
 
   const baudRate = getById('baud-rate').value
-
+  
   if (!baudRate) {
     showMessage('Taxa de transmissão inválida')
+    return
+  }
+  
+  const timeout = getById('timeout-milliseconds').value
+
+  if (isNaN(timeout)) {
+    showMessage('Tempo limite inválido')
     return
   }
 
   for(let d = 0; d < devices.length; d++) {
     if (devices[d].port === devicePort) {
-      wsWrap.initialize('', devices[d].id, baudRate, true)
+      wsWrap.initialize('', devices[d].id, baudRate, true, timeout)
     }
   }
 
