@@ -1,8 +1,8 @@
-var devicePort = getLocal('device-port')
+var deviceName = getLocal('device-name')
 var baudRate = getLocal('baud-rate')
 
 function init () {
-  getById('device-port').value = devicePort
+  getById('device-name').value = deviceName
   getById('baud-rate').value = baudRate
 }
 
@@ -103,12 +103,12 @@ function getDevice (wsWrap, responseJson) {
   const devices = responseJson.device_list
 
   for(let d = 0; d < devices.length; d++) {
-    if (devices[d].port === devicePort) {
+    if (devices[d].name === deviceName) {
       return devices[d].id
     }
   }
 
-  showMessage('Porta ' + devicePort + ' não encontrada')
+  showMessage('Dispositivo ' + deviceName + ' não encontrado')
 
   wsWrap.ws.close()
   wsWrap.close()

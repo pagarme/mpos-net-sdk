@@ -117,8 +117,8 @@
                 </p>
 
                 <p>
-                  <label for="device-port">Porta do dispositivo:</label>
-                  <input type="text" name="device-port" id="device-port" disabled />
+                  <label for="device-name">Dispositivo:</label>
+                  <input type="text" name="device-name" id="device-name" disabled />
                   <br /><small><a href="config.html">configurar</a></small>
                 </p>
 
@@ -154,7 +154,7 @@
               O sistema é composto por duas partes: o <strong>Browser com a aplicação client</strong> (como por exemplo esta página) e o serviço rodando na máquina host que irá basicamente expor o device de mPOS em um endpoint de <strong>WebSocket</strong>.
             </p>
             <p>
-              Você deverá chamar o serviço no client-side enviando o <strong>id do contexto</strong>, <strong>porta do dispositivo</strong>, <strong>encryption key do Pagar.me</strong>, <strong>taxa de transmissão</strong>.
+              Você deverá chamar o serviço no client-side enviando o <strong>id do contexto</strong>, <strong>dispositivo</strong>, <strong>encryption key do Pagar.me</strong>, <strong>taxa de transmissão</strong>.
             </p>
             <p>
               Sugerimos você analisar o <strong>código fonte</strong> deste projeto, principalmente o arquivo <strong>websocket.js</strong> e realizar testes com o formulário abaixo.

@@ -7,7 +7,7 @@ function init () {
   const contextId = getById('context-id').value
   wsWrap = new WebSocketWrap(contextId)
 
-  getPortList()
+  getDeviceList()
 }
 
 function setIfNull (name) {
@@ -18,7 +18,7 @@ function setIfNull (name) {
   }
 }
 
-function getPortList () {
+function getDeviceList () {
   wsWrap.call(wsWrap.listDevices, handleResponse)
 }
 
@@ -55,27 +55,27 @@ function handleResponse (response) {
 
 function populateDeviceList (responseJson) {
   devices = responseJson.device_list
-  const devicePortSelect = getById('device-port')
+  const deviceNameSelect = getById('device-name')
 
   if (devices.length === 0) {
-    devicePortSelect.innerHTML = '<option value="">---</option>'
-    showMessage('Não foram encontradas portas')
+    deviceNameSelect.innerHTML = '<option value="">---</option>'
+    showMessage('Não foram encontrados dispositivos')
     toggleButton("test", false)
     toggleButton("save", false)
     return
   }
 
-  devicePortSelect.innerHTML = '<option value="">-- Selecione --</option>'
-  const chosenPort = getLocal('device-port')
+  deviceNameSelect.innerHTML = '<option value="">-- Selecione --</option>'
+  const chosenDevice = getLocal('device-name')
 
   for(let d = 0; d < devices.length; d++) {
-    const selected = chosenPort === devices[d].port ? 'selected' : ''
+    const selected = chosenDevice === devices[d].name ? 'selected' : ''
 
-    devicePortSelect.innerHTML +=
-      '<option value="' + devices[d].port + '"'
+    deviceNameSelect.innerHTML +=
+      '<option value="' + devices[d].name + '"'
         + selected +
       '>'
-        + devices[d].port +
+        + devices[d].name +
       '</option>'
   }
 
@@ -109,10 +109,10 @@ function testConfig () {
     return
   }
 
-  const devicePort = getSelected(getById('device-port'))
+  const deviceName = getSelected(getById('device-name'))
 
-  if (!devicePort) {
-    showMessage('Porta inválida')
+  if (!deviceName) {
+    showMessage('Dispositivo inválido')
     return
   }
 
@@ -131,19 +131,19 @@ function testConfig () {
   }
 
   for(let d = 0; d < devices.length; d++) {
-    if (devices[d].port === devicePort) {
+    if (devices[d].name === deviceName) {
       wsWrap.initialize('', devices[d].id, baudRate, true, timeout)
     }
   }
 
   if (!devices) {
-    showMessage('Porta ' + devicePort + ' não encontrada')
+    showMessage('Dispositivo ' + deviceName + ' não encontrado')
   }
 }
 
 function saveAndFinish () {
   wsWrap.closeContext()
-  setLocal('device-port', getSelected(getById('device-port')))
+  setLocal('device-name', getSelected(getById('device-name')))
   setLocal('baud-rate', getById('baud-rate').value)
   toggleButton("test", false)
   toggleButton("save", false)
