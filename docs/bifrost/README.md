@@ -4,32 +4,32 @@ A websocket endpoint is provided on `/mpos`.
 
 # Protocol
 
-All messages are encoded in JSON. All request messages have the following parameter:**
+All messages are encoded in JSON. All request messages have the following parameter:
 
-**contextId:** The id of [context](architecture.md#context).
+- **context_id:** The id of [context](architecture.md#context).
 
-**requestType:** Request type. A request can be a step of processing the transaction, initialize or close mpos connection, display message on mpos, or a request for current mpos status.
+- **request_type:** Request type. A request can be a step of processing the transaction, initialize or close mpos connection, display message on mpos, or a request for current mpos status.
 
-All responses contains the following parameters:**
+All responses contains the following parameters:
 
-**contextId:** The id of [context](architecture.md#context) which this response belongs.
+- **context_id:** The id of [context](architecture.md#context) which this response belongs.
 
-**responseType:** Type of the response, which can be success response, error on process or unknown command, in case of request type unknown.
+- **request_type:** Type of the response, which can be success response, error on process or unknown command, in case of request type unknown.
 
-**error:** The error message if any ocurred. `responseType` will be 9.
+- **error:** The error message if any ocurred. `request_type` will be 9.
 
 In this documentation only request/response examples will be provided. For information on actual parameters, check [this](command.md).
 
 ## List Devices
 
-**RequestType:** `1` or `listDevices`
+**request_type:** `1` or `listDevices`
 
 ### Request
 
 ```json
 {
-	"RequestType": 1,
-	"ContextId": "42"
+	"request_type": 1,
+	"context_id": "42"
 }
 ```
 
@@ -37,29 +37,30 @@ In this documentation only request/response examples will be provided. For infor
 
 ```json
 {
-	"ResponseType": 1,
-	"DeviceList": [{
-		"Port": "COM3",
-		"Id": "01234567-89AB-CDEF-FEDC-BA9876543210",
-		"Name": "Serial Device (COM3)",
+	"request_type": 1,
+	"context_id": "42",
+	"device_list": [{
+		"port": "COM3",
+		"id": "01234567-89AB-CDEF-FEDC-BA9876543210",
+		"name": "Serial Device (COM3)",
 	}]
 }
 ```
 
 ## Initialize
 
-**RequestType:** `2` or `initialize`
+**request_type:** `2` or `initialize`
 
 ### Request
 
 ```json
 {
-	"RequestType": 2,
-	"ContextId": "42",
-	"Initialize": {
-		"DeviceId": "01234567-89AB-CDEF-FEDC-BA9876543210",
-		"EncryptionKey": "ek_test_f9cws0bU9700VqWE4UDuBlKLbvX4IO",
-		"BaudRate": "115200"
+	"request_type": 2,
+	"context_id": "42",
+	"initialize": {
+		"device_id": "01234567-89AB-CDEF-FEDC-BA9876543210",
+		"encryption_key": "ek_test_f9cws0bU9700VqWE4UDuBlKLbvX4IO",
+		"baud_rate": "115200"
 	}
 }
 ```
@@ -69,7 +70,8 @@ In this documentation only request/response examples will be provided. For infor
 Initialized:
 ```json
 {
-	"ResponseType": 2
+	"request_type": 2,
+	"context_id": "42"
 }
 ```
 
@@ -78,23 +80,23 @@ or
 Already Initialized:
 ```json
 {
-	"ResponseType": 3
+	"request_type": 3,
+	"context_id": "42"
 }
 ```
 
 ## Process Payment
 
-**RequestType:** `4` or `process`
+**request_type:** `4` or `process`
 
 ### Request
 
 ```json
 {
-	"RequestType": 4,
-	"ContextId": "42",
-	"Process": {
-		"Amount": 100,
-		"MagstripePaymentMethod": "Debit"
+	"request_type": 4,
+	"context_id": "42",
+	"process": {
+		"amount": 100
 	}
 }
 ```
@@ -103,31 +105,32 @@ Already Initialized:
 
 ```json
 {
-	"ResponseType":4,
-	"Process": {
-		"CardHash": "sdljfh38o4o(¨&(*$@YR*(&YU",
-		"Status": 0,
-		"PaymentMethod": 1,
-		"CardHolderName": "Douglas",
-		"IsOnlinePin": false
+	"request_type": 4,
+	"context_id": "42",
+	"process": {
+		"card_hash": "sdljfh38o4o(¨&(*$@YR*(&YU",
+		"status": 0,
+		"payment_method": 1,
+		"card_holder_name": "Douglas",
+		"is_online_pin": false
 	}
 }
 ```
 
 ## Finish Payment
 
-**RequestType:** `5` or `finish`
+**request_type:** `5` or `finish`
 
 ### Request
 
 ```json
 {
-	"RequestType": 5,
-	"ContextId": "42",
-	"Finish": {
-		"Success": true,
-		"ResponseCode": "0000",
-		"EmvData": "000000000.0000"
+	"request_type": 5,
+	"context_id": "42",
+	"finish": {
+		"success": true,
+		"response_code": "0000",
+		"emv_data": "000000000.0000"
 	}
 }
 ```
@@ -136,22 +139,23 @@ Already Initialized:
 
 ```json
 {
-	"ResponseType": 5
+	"request_type": 5,
+	"context_id": "42"
 }
 ```
 
 ## Display Message
 
-**RequestType:** `6` or `displayMessage`
+**request_type:** `6` or `displayMessage`
 
 ### Request
 
 ```json
 {
-	"RequestType": 6,
-	"ContextId": "42",
-	"DisplayMessage": {
-		"Message": "PagarMe"
+	"request_type": 6,
+	"context_id": "42",
+	"display_message": {
+		"message": "PagarMe"
 	}
 }
 ```
@@ -160,20 +164,21 @@ Already Initialized:
 
 ```json
 {
-	"ResponseType": 6
+	"request_type": 6,
+	"context_id": "42"
 }
 ```
 
 ## Status
 
-**RequestType:** `7` or `status`
+**request_type:** `7` or `status`
 
 ### Request
 
 ```json
 {
-	"RequestType": 7,
-	"ContextId": "42"
+	"request_type": 7,
+	"context_id": "42"
 }
 ```
 
@@ -181,25 +186,26 @@ Already Initialized:
 
 ```json
 {
-	"ResponseType": 7,
-	"Status": {
-		"Status": 1,
-		"ConnectedDeviceId": "01234567-89AB-CDEF-FEDC-BA9876543210",
-		"AvailableDevices": 2
+	"request_type": 7,
+	"context_id": "42",
+	"status": {
+		"status": 1,
+		"connected_device_id": "01234567-89AB-CDEF-FEDC-BA9876543210",
+		"available_devices": 2
 	}
 }
 ```
 
 ## Close
 
-**RequestType:** `8` or `close`
+**request_type:** `8` or `close`
 
 ### Request
 
 ```json
 {
-	"RequestType": 8,
-	"ContextId": "42"
+	"request_type": 8,
+	"context_id": "42"
 }
 ```
 
@@ -207,7 +213,8 @@ Already Initialized:
 
 ```json
 {
-	"ResponseType": 8
+	"request_type": 8,
+	"context_id": "42"
 }
 ```
 
