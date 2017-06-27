@@ -107,7 +107,7 @@ namespace PagarMe.Mpos
         {
             var source = new TaskCompletionSource<PaymentResult>();
             var tableCallback = MposTablesLoadedPaymentCallback.Callback(this, amount, applications, magstripePaymentMethod, source);
-            var versionCallback = MposGetTableVersionCallback.Callback(this, tableCallback, amount, applications, magstripePaymentMethod, source);
+            var versionCallback = MposGetTableVersionCallback.Callback(this, tableCallback, amount, magstripePaymentMethod, source);
 
             var tableVersionError = Native.GetTableVersion(_nativeMpos, versionCallback);
             if (tableVersionError != Native.Error.Ok)

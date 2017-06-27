@@ -1,6 +1,5 @@
 using PagarMe.Mpos.Helpers;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using static PagarMe.Mpos.Mpos;
@@ -9,7 +8,7 @@ namespace PagarMe.Mpos.Callbacks
 {
     class MposGetTableVersionCallback
     {
-        public static Native.MposGetTableVersionCallbackDelegate Callback(Mpos mpos, Native.MposTablesLoadedCallbackDelegate tableCallback, int amount, IEnumerable<EmvApplication> applications, PaymentMethod magstripePaymentMethod, TaskCompletionSource<PaymentResult> source)
+        public static Native.MposGetTableVersionCallbackDelegate Callback(Mpos mpos, Native.MposTablesLoadedCallbackDelegate tableCallback, int amount, PaymentMethod magstripePaymentMethod, TaskCompletionSource<PaymentResult> source)
         {
             return GCHelper.ManualFree<Native.MposGetTableVersionCallbackDelegate>(releaseGC =>
             {
