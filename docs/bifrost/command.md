@@ -42,8 +42,6 @@ An array with all available devices is returned. Each device may contain the fol
 
 **name:** Device name.
 
-**port:** Device port.
-
 ## Initialize
 
 The first message to be sent is the initialize command.
