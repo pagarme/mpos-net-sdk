@@ -34,7 +34,7 @@ The library exposes all needed interfaces directly.
 
 ## Bifrost
 
-Currently the bridge exposes mPOS devices on an websocket endpoint. You can check its documentation [here](docs/bifrost/websocket.md).
+Currently the bridge exposes mPOS devices on an websocket endpoint. You can check its documentation [here](docs/bifrost/).
 
 In the future, SOAP/WCF and REST implementations are expected.
 
