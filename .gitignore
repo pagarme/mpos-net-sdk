@@ -19,9 +19,9 @@ PagarMe.AutomatedTests/App.config
 # OSX
 .DS_Store
 *.orig
-docs/example-site/web.config
-docs/service/*
-docs/build-libabecs/
+docs/bifrost/example-site/web.config
+docs/bifrost/service/*
+docs/mpos/build-libabecs/
 *.log
 docs/.goutputstream*
 PagarMe.Bifrost.Certificates/cert_path.txt
