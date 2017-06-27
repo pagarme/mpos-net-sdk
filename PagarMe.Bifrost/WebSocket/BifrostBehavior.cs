@@ -44,7 +44,7 @@ namespace PagarMe.Bifrost.WebSocket
         private async Task handleMessage(MessageEventArgs e)
         {
             var request = JsonConvert.DeserializeObject<PaymentRequest>(e.Data, SnakeCase.Settings);
-            var response = new PaymentResponse();
+            var response = new PaymentResponse { ContextId = request.ContextId };
 
             var context = mposBridge.GetContext(request.ContextId);
 
@@ -206,7 +206,7 @@ namespace PagarMe.Bifrost.WebSocket
         }
 
 
-        protected override void OnError(WebSocketSharp.ErrorEventArgs e)
+        protected override void OnError(ErrorEventArgs e)
         {
             log.Me.Error(e.Message);
             log.Me.Error(e.Exception);
