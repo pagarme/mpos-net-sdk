@@ -10,7 +10,8 @@ namespace PagarMe.Generic
     {
         public static Logger Me = LogManager.GetCurrentClassLogger();
 
-        public static void TryLogOnException(Action action)
+        public static void TryLogOnException(Action action) { TryLogOnException(action, null); }
+        public static void TryLogOnException(Action action, Action<Exception> processInsteadThrow)
         {
             try
             {
@@ -18,12 +19,12 @@ namespace PagarMe.Generic
             }
             catch (Exception e)
             {
-                tryLog(e);
-                throw;
+                handle(e, processInsteadThrow);
             }
         }
 
-        public static T TryLogOnException<T>(Func<T> action)
+        public static T TryLogOnException<T>(Func<T> action) { return TryLogOnException(action, null); }
+        public static T TryLogOnException<T>(Func<T> action, Func<Exception, T> processInsteadThrow)
         {
             try
             {
@@ -31,12 +32,12 @@ namespace PagarMe.Generic
             }
             catch (Exception e)
             {
-                tryLog(e);
-                throw;
+                return handle(e, processInsteadThrow);
             }
         }
 
-        public static async Task TryLogOnExceptionAsync(Func<Task> action)
+        public static async Task TryLogOnExceptionAsync(Func<Task> action) { await TryLogOnExceptionAsync(action, null); }
+        public static async Task TryLogOnExceptionAsync(Func<Task> action, Action<Exception> processInsteadThrow)
         {
             try
             {
@@ -44,9 +45,22 @@ namespace PagarMe.Generic
             }
             catch (Exception e)
             {
-                tryLog(e);
-                throw;
+                handle(e, processInsteadThrow);
             }
+        }
+
+        private static void handle(Exception exception, Action<Exception> processInsteadThrow)
+        {
+            tryLog(exception);
+            if (processInsteadThrow == null) throw exception;
+            processInsteadThrow(exception);
+        }
+
+        private static T handle<T>(Exception exception, Func<Exception, T> processInsteadThrow)
+        {
+            tryLog(exception);
+            if (processInsteadThrow == null) throw exception;
+            return processInsteadThrow(exception);
         }
 
         private static void tryLog(Exception exception)
