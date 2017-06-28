@@ -23,5 +23,10 @@ namespace PagarMe.Bifrost.Commands
             Status = 7,
             CloseContext = 8,
         }
+
+        public PaymentResponse GenerateResponse()
+        {
+            return new PaymentResponse { ContextId = ContextId };
+        }
     }
 }

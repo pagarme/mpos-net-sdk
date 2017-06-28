@@ -25,28 +25,43 @@ namespace PagarMe.Bifrost.WebSocket
             log.Me.Info("Socket Opened");
         }
 
-        protected override void OnClose(CloseEventArgs e)
+        protected override void OnClose(CloseEventArgs args)
         {
-            log.Me.Info($"Socket Closed: [{e.Code}] {e.Reason}");
+            log.Me.Info($"Socket Closed: [{args.Code}] {args.Reason}");
         }
 
 
-        protected override async void OnMessage(MessageEventArgs e)
+        protected override async void OnMessage(MessageEventArgs args)
         {
             log.Me.Info("Request Handling");
 
-            await log.TryLogOnExceptionAsync(() => 
+            var request = new PaymentRequest();
+
+            await log.TryLogOnExceptionAsync(() =>
             {
-                return handleMessage(e);
+                request = JsonConvert.DeserializeObject<PaymentRequest>(args.Data, SnakeCase.Settings);
+                return handleMessage(request);
+            },
+            (e) => processError(e, request));
+        }
+
+        private void processError(Exception exception, PaymentRequest request)
+        {
+            log.TryLogOnException(() =>
+            {
+                var response = request.GenerateResponse();
+
+                response.ResponseType = PaymentResponse.Type.Error;
+                response.Error = $"An error has occured with the [{request.RequestType}] request. See the log and contact the support.";
+
+                send(response);
             });
         }
 
-        private async Task handleMessage(MessageEventArgs e)
+        private async Task handleMessage(PaymentRequest request)
         {
-            var request = JsonConvert.DeserializeObject<PaymentRequest>(e.Data, SnakeCase.Settings);
-            var response = new PaymentResponse { ContextId = request.ContextId };
-
             var context = mposBridge.GetContext(request.ContextId);
+            var response = request.GenerateResponse();
 
             if (context == null)
             {
