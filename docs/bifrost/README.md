@@ -189,7 +189,7 @@ Already Initialized:
 	"request_type": 7,
 	"context_id": "42",
 	"status": {
-		"status": 1,
+		"code": 1,
 		"connected_device_id": "01234567-89AB-CDEF-FEDC-BA9876543210",
 		"available_devices": 2
 	}
