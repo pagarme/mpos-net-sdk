@@ -82,7 +82,7 @@ namespace PagarMe.Bifrost
 
             var response = new StatusResponse
             {
-                Status = _status,
+                Code = _status,
                 AvailableDevices = devices.Length
             };
 

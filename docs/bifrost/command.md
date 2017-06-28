@@ -123,7 +123,7 @@ Checks the bridge status.
 
 ### Response
 
-- **status.status:** Current bridge status, possible values are:
+- **status.code:** Current bridge status code, possible values are:
     - **0**: *uninitialized*
     - **1**: *ready*
     - **2**: *in use*
