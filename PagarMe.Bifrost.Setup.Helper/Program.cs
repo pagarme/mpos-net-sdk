@@ -54,21 +54,21 @@ namespace PagarMe.Bifrost.Setup.Helper
         {
             var currentVersion = getCurrentVersion();
 
-            var setupName = "PagarMe.Bifrost.Setup";
-            var setupPath = $@"{mainDir}{setupName}\{setupName}.vdproj";
-            var setupContent = File.ReadAllLines(setupPath);
+            var projName = "PagarMe.Bifrost.Windows";
+            var projPath = $@"{mainDir}{projName}\{projName}.vdproj";
+            var projContent = File.ReadAllLines(projPath);
             var rewrite = false;
             
-            for (var l = 0; l < setupContent.Length; l++)
+            for (var l = 0; l < projContent.Length; l++)
             {
-                if (setupContent[l].Contains(@"""ProductVersion"""))
+                if (projContent[l].Contains(@"""ProductVersion"""))
                 {
                     var pattern = @"(\d+\.\d+\.\d+)";
-                    var newLine = Regex.Replace(setupContent[l], pattern, currentVersion);
+                    var newLine = Regex.Replace(projContent[l], pattern, currentVersion);
 
-                    if (setupContent[l] != newLine)
+                    if (projContent[l] != newLine)
                     {
-                        setupContent[l] = newLine;
+                        projContent[l] = newLine;
                         rewrite = true;
                     }
                 }
@@ -76,7 +76,7 @@ namespace PagarMe.Bifrost.Setup.Helper
 
             if (rewrite)
             {
-                File.WriteAllLines(setupPath, setupContent);
+                File.WriteAllLines(projPath, projContent);
             }
         }
 
@@ -86,7 +86,7 @@ namespace PagarMe.Bifrost.Setup.Helper
 
             var updatesPath = $@"{mainDir}PagarMe.Bifrost.Updates\";
 
-            var originMsi = $@"{mainDir}bin\Debug\Setup\BifrostInstaller.msi";
+            var originMsi = $@"{mainDir}bin\Debug\Windows\BifrostInstaller.msi";
             var msiDestination = $"{updatesPath}bifrost-installer-{currentVersion}.msi";
             File.Copy(originMsi, msiDestination, true);
 

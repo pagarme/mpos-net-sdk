@@ -15,7 +15,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PagarMe.Bifrost.Server", "P
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PagarMe.Bifrost.Example", "PagarMe.Bifrost.Example\PagarMe.Bifrost.Example.csproj", "{9AE62913-7199-4F87-9DD2-F34496DCD09F}"
 EndProject
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "PagarMe.Bifrost.Setup", "PagarMe.Bifrost.Setup\PagarMe.Bifrost.Setup.vdproj", "{AA68B3AF-6A8A-44E7-8992-D033D66A77CE}"
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "PagarMe.Bifrost.Windows", "PagarMe.Bifrost.Windows\PagarMe.Bifrost.Windows.vdproj", "{AA68B3AF-6A8A-44E7-8992-D033D66A77CE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PagarMe.Generic", "PagarMe.Generic\PagarMe.Generic.csproj", "{0B590C92-A6FB-4AF2-A275-05042EB8F4A1}"
 EndProject
