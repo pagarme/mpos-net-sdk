@@ -73,7 +73,6 @@
     <Compile Include="Callbacks\MposPaymentCallback.cs" />
     <Compile Include="Mpos.NativeConverter.cs" />
     <Compile Include="Mpos.cs" />
-    <Compile Include="PaymentFlags.cs" />
     <Compile Include="PaymentResult.cs" />
     <Compile Include="PaymentStatus.cs" />
     <Compile Include="MposException.cs" />
