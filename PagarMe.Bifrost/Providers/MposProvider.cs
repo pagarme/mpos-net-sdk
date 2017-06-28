@@ -79,10 +79,10 @@ namespace PagarMe.Bifrost.Providers
 
         public void Dispose()
         {
-            _mpos.Dispose();
+            _mpos?.Dispose();
             _mpos = null;
 
-            device.Close();
+            device?.Close();
         }
     }
 }
