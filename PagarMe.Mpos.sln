@@ -21,9 +21,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PagarMe.Generic", "PagarMe.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PagarMe.Bifrost.Certificates", "PagarMe.Bifrost.Certificates\PagarMe.Bifrost.Certificates.csproj", "{751E182C-306A-4D2B-9FE6-98D09CD53753}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PagarMe.Bifrost.Deps", "PagarMe.Bifrost.Deps\PagarMe.Bifrost.Deps.csproj", "{E754C05E-A8C7-414D-8EA3-D99052B31188}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PagarMe.Bifrost.Windows.Deps", "PagarMe.Bifrost.Windows.Deps\PagarMe.Bifrost.Windows.Deps.csproj", "{E754C05E-A8C7-414D-8EA3-D99052B31188}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PagarMe.Bifrost.Setup.Helper", "PagarMe.Bifrost.Setup.Helper\PagarMe.Bifrost.Setup.Helper.csproj", "{B6ADDA66-8F63-49CA-B68F-549D1AB45769}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PagarMe.Bifrost.Linux.Deps", "PagarMe.Bifrost.Linux.Deps\PagarMe.Bifrost.Linux.Deps.csproj", "{657AA86A-BD48-4E8B-9807-6F8F74704ED1}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "PagarMe.Bifrost.Linux", "PagarMe.Bifrost.Linux\PagarMe.Bifrost.Linux.vdproj", "{DB404607-864E-42EA-B5FD-9FD93DCCA6BB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -166,6 +170,30 @@ Global
 		{B6ADDA66-8F63-49CA-B68F-549D1AB45769}.Release|x64.Build.0 = Release|Any CPU
 		{B6ADDA66-8F63-49CA-B68F-549D1AB45769}.Release|x86.ActiveCfg = Release|Any CPU
 		{B6ADDA66-8F63-49CA-B68F-549D1AB45769}.Release|x86.Build.0 = Release|Any CPU
+		{657AA86A-BD48-4E8B-9807-6F8F74704ED1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{657AA86A-BD48-4E8B-9807-6F8F74704ED1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{657AA86A-BD48-4E8B-9807-6F8F74704ED1}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{657AA86A-BD48-4E8B-9807-6F8F74704ED1}.Debug|x64.Build.0 = Debug|Any CPU
+		{657AA86A-BD48-4E8B-9807-6F8F74704ED1}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{657AA86A-BD48-4E8B-9807-6F8F74704ED1}.Debug|x86.Build.0 = Debug|Any CPU
+		{657AA86A-BD48-4E8B-9807-6F8F74704ED1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{657AA86A-BD48-4E8B-9807-6F8F74704ED1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{657AA86A-BD48-4E8B-9807-6F8F74704ED1}.Release|x64.ActiveCfg = Release|Any CPU
+		{657AA86A-BD48-4E8B-9807-6F8F74704ED1}.Release|x64.Build.0 = Release|Any CPU
+		{657AA86A-BD48-4E8B-9807-6F8F74704ED1}.Release|x86.ActiveCfg = Release|Any CPU
+		{657AA86A-BD48-4E8B-9807-6F8F74704ED1}.Release|x86.Build.0 = Release|Any CPU
+		{DB404607-864E-42EA-B5FD-9FD93DCCA6BB}.Debug|Any CPU.ActiveCfg = Debug
+		{DB404607-864E-42EA-B5FD-9FD93DCCA6BB}.Debug|Any CPU.Build.0 = Debug
+		{DB404607-864E-42EA-B5FD-9FD93DCCA6BB}.Debug|x64.ActiveCfg = Debug
+		{DB404607-864E-42EA-B5FD-9FD93DCCA6BB}.Debug|x64.Build.0 = Debug
+		{DB404607-864E-42EA-B5FD-9FD93DCCA6BB}.Debug|x86.ActiveCfg = Debug
+		{DB404607-864E-42EA-B5FD-9FD93DCCA6BB}.Debug|x86.Build.0 = Debug
+		{DB404607-864E-42EA-B5FD-9FD93DCCA6BB}.Release|Any CPU.ActiveCfg = Release
+		{DB404607-864E-42EA-B5FD-9FD93DCCA6BB}.Release|Any CPU.Build.0 = Release
+		{DB404607-864E-42EA-B5FD-9FD93DCCA6BB}.Release|x64.ActiveCfg = Release
+		{DB404607-864E-42EA-B5FD-9FD93DCCA6BB}.Release|x64.Build.0 = Release
+		{DB404607-864E-42EA-B5FD-9FD93DCCA6BB}.Release|x86.ActiveCfg = Release
+		{DB404607-864E-42EA-B5FD-9FD93DCCA6BB}.Release|x86.Build.0 = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
