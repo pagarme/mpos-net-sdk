@@ -38,6 +38,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -52,10 +53,14 @@
     <Compile Include="..\PagarMe.Generic\Properties\PagarMeAssemblyInfo.cs">
       <Link>Properties\PagarMeAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="InstallerContents.cs" />
+    <Compile Include="ProgramVersion.cs" />
+    <Compile Include="SetupVersion.cs" />
     <Content Include="bifrost.ico" />
     <Content Include="help-setup-helper.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Compile Include="Help.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

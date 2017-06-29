@@ -10,6 +10,13 @@ Accepted commands:
         Update setup version, to windows program list show same
         version as is registered on Assembly.
 
-    --publish-msi-json, -p
-        Publish on Updates project the msi with its version as name
-        and json to help service on auto-update.
+    --publish-msi-json, -p:
+        Publish on Updates project the installer with its version as
+        name and json to help service on auto-update. This option requires
+        OS.
+
+    --linux, -l:
+        Linux option for updating version or publishing files.
+
+    --windows, -w:
+        Windows option for updating version or publishing files.

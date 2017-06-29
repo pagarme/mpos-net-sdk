@@ -15,7 +15,11 @@ namespace PagarMe.Bifrost.Updates
 
         protected override Boolean? Check()
         {
-            var checkResult = request.GetObjectFromUrl<UpdateInfo>().WaitResult();
+            var checkResult = 
+                request.GetObjectFromUrl<UpdateInfo>
+                    ("update-windows.json")
+                    .WaitResult();
+
             var newVersion = checkResult.LastVersion.ToString(3);
 
             if (ProgramEnvironment.CurrentVersion == newVersion) return false;

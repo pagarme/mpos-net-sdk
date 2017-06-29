@@ -1089,8 +1089,8 @@
         "SearchPath" = "8:"
         "UseSystemSearchPath" = "11:TRUE"
         "TargetPlatform" = "3:0"
-        "PreBuildEvent" = "8:$(ProjectDir)..\\bin\\$(Configuration)\\PagarMe.Bifrost.Setup.Helper -u -l"
-        "PostBuildEvent" = "8:$(ProjectDir)..\\bin\\$(Configuration)\\PagarMe.Bifrost.Setup.Helper -p -l"
+        "PreBuildEvent" = "8:$(ProjectDir)..\\bin\\$(Configuration)\\PagarMe.Bifrost.Setup.Helper -u --linux"
+        "PostBuildEvent" = "8:$(ProjectDir)..\\bin\\$(Configuration)\\PagarMe.Bifrost.Setup.Helper -p --linux"
         "RunPostBuildEvent" = "3:0"
         }
         "Registry"
