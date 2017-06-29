@@ -15,17 +15,17 @@ namespace PagarMe.Bifrost.Setup.Helper
             {
                 case "-h":
                 case "--help":
-                    printHelp();
+                    Help.Print();
                     break;
 
                 case "-u":
                 case "--update-setup-version":
-                    updateSetupVersion();
+                    runByOS(args, SetupVersion.UpdateLinux, SetupVersion.UpdateWindows);
                     break;
 
                 case "-p":
                 case "--publish-msi-json":
-                    publishMsiAndJson();
+                    runByOS(args, InstallerContents.PublishLinux, InstallerContents.PublishWindows);
                     break;
 
                 default:
@@ -33,77 +33,28 @@ namespace PagarMe.Bifrost.Setup.Helper
             }
         }
 
-        private const String mainDir = @"..\..\..\";
-
-        private static void printHelp()
+        private static void runByOS(String[] args, Action linux, Action windows)
         {
-            var helpFilePath = "help-setup-helper.txt";
-
-            if (!File.Exists(helpFilePath))
+            if (args.Length < 2)
             {
-                Console.WriteLine("Help file missing!");
-                return;
+                throw new ArgumentException($"OS required. See help (-h).");
             }
 
-            File.ReadAllLines(helpFilePath)
-                .ToList()
-                .ForEach(Console.WriteLine);
-        }
-
-        private static void updateSetupVersion()
-        {
-            var currentVersion = getCurrentVersion();
-
-            var projName = "PagarMe.Bifrost.Windows";
-            var projPath = $@"{mainDir}{projName}\{projName}.vdproj";
-            var projContent = File.ReadAllLines(projPath);
-            var rewrite = false;
-            
-            for (var l = 0; l < projContent.Length; l++)
+            switch (args[1]?.ToLower())
             {
-                if (projContent[l].Contains(@"""ProductVersion"""))
-                {
-                    var pattern = @"(\d+\.\d+\.\d+)";
-                    var newLine = Regex.Replace(projContent[l], pattern, currentVersion);
+                case "-l":
+                case "--linux":
+                    linux();
+                    break;
 
-                    if (projContent[l] != newLine)
-                    {
-                        projContent[l] = newLine;
-                        rewrite = true;
-                    }
-                }
+                case "-w":
+                case "--windows":
+                    windows();
+                    break;
+
+                default:
+                    throw new ArgumentException($"Unrecognized argument {args[1]}. See help (-h).");
             }
-
-            if (rewrite)
-            {
-                File.WriteAllLines(projPath, projContent);
-            }
-        }
-
-        private static void publishMsiAndJson()
-        {
-            var currentVersion = getCurrentVersion();
-
-            var updatesPath = $@"{mainDir}PagarMe.Bifrost.Updates\";
-
-            var originMsi = $@"{mainDir}bin\Debug\Windows\BifrostInstaller.msi";
-            var msiDestination = $"{updatesPath}bifrost-installer-{currentVersion}.msi";
-            File.Copy(originMsi, msiDestination, true);
-
-            var jsonPath = $"{updatesPath}update.json";
-            var json = $@"{{ ""last_version_name"": ""{currentVersion}"" }}";
-            File.WriteAllText(jsonPath, json);
-        }
-
-        private static String getCurrentVersion()
-        {
-            var assemblyInfoPath = $@"{mainDir}PagarMe.Bifrost\Properties\BifrostAssemblyInfo.cs";
-            var assemblyInfoContent = File.ReadAllText(assemblyInfoPath);
-
-            var regexVersion = new Regex(@"AssemblyVersion\(""(\d+.\d+.\d+)");
-            var version = regexVersion.Match(assemblyInfoContent).Groups[1].Value;
-
-            return version;
         }
     }
 }
