@@ -20,6 +20,9 @@ namespace PagarMe.Bifrost
         [Option('d', "data-path", Required = false, HelpText = "Database path", DefaultValue = "<appdata>")]
         public string DataPath { get; set; }
 
+        [Option('u', "update-address", Required = false, HelpText = "Address check for updates", DefaultValue = "http://localhost:2001")]
+        public string UpdateAddress { get; set; }
+        
         public Boolean ParsedSuccessfully { get; private set; }
 
         private Options() { }

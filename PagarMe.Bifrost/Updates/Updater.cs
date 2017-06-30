@@ -21,12 +21,14 @@ namespace PagarMe.Bifrost.Updates
             return new WindowsUpdater();
         }
 
-        public static async Task CheckAndUpdate(Func<Boolean> lockCoreOperations)
+        public static async Task CheckAndUpdate(Func<Boolean> lockCoreOperations, Options options)
         {
             if (instance == null)
             {
                 return;
             }
+
+            UpdateAddress = options.UpdateAddress;
 
             var hasUpdate = await check();
 
@@ -95,6 +97,7 @@ namespace PagarMe.Bifrost.Updates
         }
 
         private static Updater instance;
+        protected static String UpdateAddress;
 
         protected abstract Boolean? Check();
         protected abstract Boolean Update();
