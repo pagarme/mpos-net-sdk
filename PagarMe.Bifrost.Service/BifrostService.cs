@@ -1,15 +1,16 @@
 using System.ServiceProcess;
-using CommandLine;
 using PagarMe.Generic;
 
 namespace PagarMe.Bifrost.Service
 {
     public partial class BifrostService : ServiceBase
     {
+        private readonly Options options;
         private MposBridge _bridge;
 
-        public BifrostService()
+        public BifrostService(Options options)
         {
+            this.options = options;
             InitializeComponent();
         }
 
@@ -17,10 +18,6 @@ namespace PagarMe.Bifrost.Service
         {
             Log.TryLogOnException(() =>
             {
-                var options = new Options();
-                var isValid = Parser.Default.ParseArgumentsStrict(args, options);
-                options.EnsureDefaults();
-
                 _bridge = new MposBridge(options);
 
                 Log.Me.Info("Bifrost Service Bridge");
