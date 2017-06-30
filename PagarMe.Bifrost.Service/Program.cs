@@ -11,9 +11,10 @@ namespace PagarMe.Bifrost.Service
         {
             Log.TryLogOnException(() =>
             {
-                var updater = Updater.CheckAndUpdate(MposBridge.LockContexts);
-
                 var options = Options.Get(args);
+
+                var updater = Updater.CheckAndUpdate(MposBridge.LockContexts, options);
+
                 ServiceBase.Run(new BifrostService(options));
 
                 updater.Wait();

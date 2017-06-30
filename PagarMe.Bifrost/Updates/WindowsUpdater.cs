@@ -6,15 +6,13 @@ namespace PagarMe.Bifrost.Updates
 {
     class WindowsUpdater : Updater
     {
-        // Temporary address, will be defined when distribution is decided
-        private const String Address = "http://localhost:2001";
-
-        private RequestMaker request = new RequestMaker(Address);
         private String downloadedFile;
         private String productCode;
 
         protected override Boolean? Check()
         {
+            var request = new RequestMaker(UpdateAddress);
+
             var checkResult = 
                 request.GetObjectFromUrl<UpdateInfo>
                     ("update-windows.json")
