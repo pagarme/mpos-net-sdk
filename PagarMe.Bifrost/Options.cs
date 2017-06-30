@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using CommandLine;
+using PagarMe.Generic;
 
 namespace PagarMe.Bifrost
 {
@@ -19,7 +20,27 @@ namespace PagarMe.Bifrost
         [Option('d', "data-path", Required = false, HelpText = "Database path", DefaultValue = "<appdata>")]
         public string DataPath { get; set; }
 
-        public void EnsureDefaults()
+        public Boolean ParsedSuccessfully { get; private set; }
+
+        private Options() { }
+
+        public static Options Get(String[] args)
+        {
+            var options = new Options();
+
+            options.ParsedSuccessfully = Parser.Default.ParseArgumentsStrict(args, options);
+
+            if (!options.ParsedSuccessfully)
+            {
+                Log.Me.Warn("Could not get parameters. Verify parameters passed.");
+            }
+
+            options.EnsureDefaults();
+
+            return options;
+        }
+
+        private void EnsureDefaults()
         {
             if (DataPath == null || DataPath == "<appdata>")
                 DataPath = Path.Combine(

@@ -13,7 +13,8 @@ namespace PagarMe.Bifrost.Service
             {
                 var updater = Updater.CheckAndUpdate(MposBridge.LockContexts);
 
-                ServiceBase.Run(new BifrostService());
+                var options = Options.Get(args);
+                ServiceBase.Run(new BifrostService(options));
 
                 updater.Wait();
             });

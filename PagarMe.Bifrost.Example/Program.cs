@@ -1,5 +1,4 @@
 using System;
-using CommandLine;
 using System.Threading;
 
 namespace PagarMe.Bifrost.Example
@@ -10,11 +9,9 @@ namespace PagarMe.Bifrost.Example
 
         private static int Main(string[] args)
         {
-            options = new Options();
-            var isValid = Parser.Default.ParseArgumentsStrict(args, options);
-            options.EnsureDefaults();
+            options = Options.Get(args);
 
-            if (!isValid)
+            if (!options.ParsedSuccessfully)
                 return 1;
 
             var bridge = new MposBridge(options);
