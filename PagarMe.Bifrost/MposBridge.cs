@@ -14,66 +14,66 @@ namespace PagarMe.Bifrost
 {
     public class MposBridge : IDisposable
     {
-        private static readonly Dictionary<string, Context> _contexts
+        private static readonly Dictionary<string, Context> contexts
             = new Dictionary<string, Context>();
 
         private static Boolean contextsLocked = false;
 
-        private readonly DeviceManager _deviceManager;
-        private readonly Options _options;
+        private readonly DeviceManager deviceManager;
+        private readonly Options options;
 
-        private WebSocketServer _server;
+        private WebSocketServer server;
 
-        public Options Options { get { return _options; } }
+        public Options Options { get { return options; } }
 
-        public DeviceManager DeviceManager { get { return _deviceManager; } }
+        public DeviceManager DeviceManager { get { return deviceManager; } }
 
         public MposBridge(Options options)
         {
-            _options = options;
-            _deviceManager = new DeviceManager(Log.TryLogOnException);
+            this.options = options;
+            deviceManager = new DeviceManager(Log.TryLogOnException);
         }
 
 
         public void Start(Boolean ssl = true)
         {
             var addresses = Dns.GetHostAddresses(Options.BindAddress);
-            _server = new WebSocketServer(addresses[0], _options.BindPort, ssl);
+            server = new WebSocketServer(addresses[0], options.BindPort, ssl);
 
             TLSConfig.Address = Options.BindAddress;
 
             if (ssl)
             {
-                _server.SslConfiguration.ServerCertificate = TLSConfig.Get();
+                server.SslConfiguration.ServerCertificate = TLSConfig.Get();
 
-                _server.SslConfiguration.CheckCertificateRevocation = false;
-                _server.SslConfiguration.ClientCertificateRequired = false;
-                _server.SslConfiguration.ClientCertificateValidationCallback = TLSConfig.ClientValidate;
+                server.SslConfiguration.CheckCertificateRevocation = false;
+                server.SslConfiguration.ClientCertificateRequired = false;
+                server.SslConfiguration.ClientCertificateValidationCallback = TLSConfig.ClientValidate;
 
-                _server.KeepClean = false;
+                server.KeepClean = false;
             }
 
-            _server.Log.File = Log.GetLogFilePath();
+            server.Log.File = Log.GetLogFilePath();
 
-            _server.AddWebSocketService("/mpos", () => new BifrostBehavior(this));
-            _server.Start();
+            server.AddWebSocketService("/mpos", () => new BifrostBehavior(this));
+            server.Start();
         }
 
         public void Stop()
         {
-            _server.Stop();
+            server.Stop();
         }
 
         public void Dispose()
         {
-            _deviceManager.Dispose();
+            deviceManager.Dispose();
         }
 
         public String GetDeviceContextName(String deviceId)
         {
-            lock (_contexts)
+            lock (contexts)
             {
-                return _contexts
+                return contexts
                     .Where(c => c.Value != null && c.Value.DeviceId == deviceId)
                     .Select(c => c.Key)
                     .SingleOrDefault();
@@ -86,14 +86,14 @@ namespace PagarMe.Bifrost
 
             Context context;
 
-            lock (_contexts)
+            lock (contexts)
             {
-                if (!_contexts.TryGetValue(name, out context))
+                if (!contexts.TryGetValue(name, out context))
                 {
                     var provider = new MposProvider();
 
                     context = new Context(this, provider);
-                    _contexts[name] = context;
+                    contexts[name] = context;
                 }
             }
 
@@ -105,12 +105,12 @@ namespace PagarMe.Bifrost
             name = normalize(name);
             Context context = null;
 
-            lock (_contexts)
+            lock (contexts)
             {
-                if (_contexts.ContainsKey(name))
+                if (contexts.ContainsKey(name))
                 {
-                    context = _contexts[name];
-                    _contexts.Remove(name);
+                    context = contexts[name];
+                    contexts.Remove(name);
                 }
             }
 
@@ -123,9 +123,9 @@ namespace PagarMe.Bifrost
 
         public static Boolean LockContexts()
         {
-            lock (_contexts)
+            lock (contexts)
             {
-                if (_contexts.Any(c => c.Value.IsInUse()))
+                if (contexts.Any(c => c.Value.IsInUse()))
                 {
                     return false;
                 }

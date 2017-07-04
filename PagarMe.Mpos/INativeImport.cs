@@ -17,7 +17,7 @@ namespace PagarMe.Mpos
             RiskManagement[] riskManagementList, int riskManagementListLength, int magstripePaymentMethod,
             MposPaymentCallbackDelegate paymentCallback);
 
-        Error UpdateTables(IntPtr mpos, string version, bool force_update, 
+        Error UpdateTables(IntPtr mpos, string version, bool forceUpdate, 
             MposTablesLoadedCallbackDelegate callback, params IList[] data);
 
         Error FinishTransaction(IntPtr mpos, TransactionStatus status, int arc, string emv,
