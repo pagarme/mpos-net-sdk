@@ -110,7 +110,7 @@ namespace PagarMe.Bifrost.Certificates.Stores
             var subject = cert.Subject.CleanSubject();
             var certPath = Path.Combine(dataPath, $"{subject}.crt");
 
-            if (File.Exists(certPath)) File.Delete(certPath);
+            FileExtension.DeleteIfExists(certPath);
         }
     }
 }
