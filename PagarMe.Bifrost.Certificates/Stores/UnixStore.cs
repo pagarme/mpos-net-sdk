@@ -44,7 +44,7 @@ namespace PagarMe.Bifrost.Certificates.Stores
             {
                 Log.Me.Error(installResult.Output);
                 Log.Me.Error(installResult.Error);
-                throw new Exception($"Could not install certificate: bash exited with code {installResult}");
+                throw new Exception($"Could not install certificate: bash exited with code {installResult.Code}");
             }
 
             File.Delete(crtPath);
