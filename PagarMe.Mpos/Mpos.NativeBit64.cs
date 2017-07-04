@@ -38,12 +38,12 @@ namespace PagarMe.Mpos
             }
 
             [DllImport(mpos, EntryPoint = "mpos_update_tables", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-            public static extern Error UpdateTablesExtern(IntPtr mpos, IntPtr data, int count, string version, bool force_update, MposTablesLoadedCallbackDelegate callback);
-            public Error UpdateTables(IntPtr mpos, string version, bool force_update, MposTablesLoadedCallbackDelegate callback, IList[] dataList)
+            public static extern Error UpdateTablesExtern(IntPtr mpos, IntPtr data, int count, string version, bool forceUpdate, MposTablesLoadedCallbackDelegate callback);
+            public Error UpdateTables(IntPtr mpos, string version, bool forceUpdate, MposTablesLoadedCallbackDelegate callback, IList[] dataList)
             {
                 return Convert(dataList, (data, count) =>
                 {
-                    return UpdateTablesExtern(mpos, data, count, version, force_update, callback);
+                    return UpdateTablesExtern(mpos, data, count, version, forceUpdate, callback);
                 });
             }
 
