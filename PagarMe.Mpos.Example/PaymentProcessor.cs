@@ -7,20 +7,20 @@ namespace PagarMe.Mpos.Example
 {
     public class PaymentProcessor
     {
-        private readonly Mpos _mpos;
-        private readonly SerialPort _port;
+        private readonly Mpos mpos;
+        private readonly SerialPort port;
 
         public PaymentProcessor(string device)
         {
-            _port = new SerialPort(device, Config.BaudRate, Parity.None, 8, StopBits.One);
-            _port.Open();
+            port = new SerialPort(device, Config.BaudRate, Parity.None, 8, StopBits.One);
+            port.Open();
 
-            _mpos = new Mpos(_port.BaseStream, Config.EncryptionKey, Config.SqlitePath);
-            _mpos.NotificationReceived += (sender, e) => Console.WriteLine("Status: {0}", e);
-            _mpos.TableUpdated += (sender, e) => Console.WriteLine("LOADED: {0}", e);
-            _mpos.Errored += (sender, e) => Console.WriteLine("I GOT ERROR {0}", e);
-            _mpos.PaymentProcessed += (sender, e) => Console.WriteLine("HEY CARD HASH " + e.CardHash);
-            _mpos.FinishedTransaction += (sender, e) => Console.WriteLine("FINISHED TRANSACTION!");
+            mpos = new Mpos(port.BaseStream, Config.EncryptionKey, Config.SqlitePath);
+            mpos.NotificationReceived += (sender, e) => Console.WriteLine("Status: {0}", e);
+            mpos.TableUpdated += (sender, e) => Console.WriteLine("LOADED: {0}", e);
+            mpos.Errored += (sender, e) => Console.WriteLine("I GOT ERROR {0}", e);
+            mpos.PaymentProcessed += (sender, e) => Console.WriteLine("HEY CARD HASH " + e.CardHash);
+            mpos.FinishedTransaction += (sender, e) => Console.WriteLine("FINISHED TRANSACTION!");
 
             PagarMeService.DefaultEncryptionKey = Config.EncryptionKey;
             PagarMeService.DefaultApiKey = Config.ApiKey;
@@ -28,19 +28,19 @@ namespace PagarMe.Mpos.Example
 
         public async Task Initialize()
         {
-            await _mpos.Initialize();
+            await mpos.Initialize();
 
             Console.WriteLine("Asking for tables to be synchronized...");
-            await _mpos.SynchronizeTables(true);
+            await mpos.SynchronizeTables(true);
             Console.WriteLine("SynchronizeTables called.");
         }
 
         public async Task Pay(int amount)
         {
-            var result = await _mpos.ProcessPayment(amount, null, PaymentMethod.Debit);
+            var result = await mpos.ProcessPayment(amount, null, PaymentMethod.Debit);
             Console.WriteLine("CARD HASH = " + result.CardHash);
 
-            await _mpos.Close();
+            await mpos.Close();
             Console.WriteLine("CLOSED!");
 
             var transaction = new Transaction
@@ -60,8 +60,8 @@ namespace PagarMe.Mpos.Example
             var obj = transaction["card_emv_response"];
             var response = obj == null ? null : obj.ToString();
 
-            await _mpos.FinishTransaction(true, x, (string) obj);
-            await _mpos.Close();
+            await mpos.FinishTransaction(true, x, (string) obj);
+            await mpos.Close();
         }
     }
 }
