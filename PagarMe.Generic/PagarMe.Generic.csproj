@@ -39,6 +39,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Config.cs" />
+    <Compile Include="FileExtension.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="ProgramEnvironment.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
