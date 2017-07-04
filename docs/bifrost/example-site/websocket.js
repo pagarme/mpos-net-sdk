@@ -30,8 +30,7 @@ var WebSocketWrap = function (contextId) {
 
   this.call = function (onopen, onmessage) {
     if ('WebSocket' in window) {
-      const protocol = window.location.href.startsWith('https') ? 'wss' : 'ws'
-      this.ws = new WebSocket(protocol + '://localhost:2000/mpos')
+      this.ws = new WebSocket('wss://localhost:2000/mpos')
 
       this.ws.parent = this
       this.ws.onopen = onopen
