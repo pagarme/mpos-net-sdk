@@ -388,7 +388,7 @@ namespace PagarMe.Mpos
             public static Error UpdateTables(Mpos mpos, MposTablesLoadedCallbackDelegate tableCallback, Aid[] aidList, Capk[] capkList)
             {
                 return Dll.UpdateTables(
-                    mpos._nativeMpos, mpos.TMSStorage.GetGlobalVersion(), true, 
+                    mpos.nativeMpos, mpos.TMSStorage.GetGlobalVersion(), true, 
                     tableCallback, aidList, capkList
                 );
             }

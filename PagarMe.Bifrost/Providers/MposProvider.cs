@@ -9,7 +9,7 @@ namespace PagarMe.Bifrost.Providers
 {
     public class MposProvider : IProvider
     {
-        private mpos _mpos;
+        private mpos mpos;
         private IDevice device;
         private Action<Int32> onError;
 
@@ -18,13 +18,13 @@ namespace PagarMe.Bifrost.Providers
             device = options.Device;
             var stream = device.Open(options.BaudRate);
 
-            _mpos = new mpos(stream, options.EncryptionKey, options.StoragePath);
+            mpos = new mpos(stream, options.EncryptionKey, options.StoragePath);
 
-            _mpos.Errored += errored;
+            mpos.Errored += errored;
 
             onError = options.OnError;
 
-            return Task.Run(_mpos.Initialize);
+            return Task.Run(mpos.Initialize);
         }
 
         private void errored(object sender, int error)
@@ -35,12 +35,12 @@ namespace PagarMe.Bifrost.Providers
 
         public Task SynchronizeTables(bool force)
         {
-            return _mpos.SynchronizeTables(force);
+            return mpos.SynchronizeTables(force);
         }
 
         public Task DisplayMessage(string message)
         {
-            return Task.Run(() => _mpos.Display(message));
+            return Task.Run(() => mpos.Display(message));
         }
 
         public async Task<ProcessPaymentResponse> ProcessPayment(ProcessPaymentRequest request)
@@ -50,7 +50,7 @@ namespace PagarMe.Bifrost.Providers
             if (paymentMethod == 0)
                 paymentMethod = PaymentMethod.Credit;
 
-            var response = await _mpos.ProcessPayment(request.Amount, request.Applications,
+            var response = await mpos.ProcessPayment(request.Amount, request.Applications,
                                                       paymentMethod);
 
             return new ProcessPaymentResponse
@@ -61,12 +61,12 @@ namespace PagarMe.Bifrost.Providers
 
         public Task FinishPayment(FinishPaymentRequest request)
         {
-            return _mpos.FinishTransaction(request.Success, request.ResponseCode, request.EmvData);
+            return mpos.FinishTransaction(request.Success, request.ResponseCode, request.EmvData);
         }
 
         public Task CancelOperation()
         {
-            _mpos.Cancel();
+            mpos.Cancel();
 
             return Task.FromResult(0);
         }
@@ -74,13 +74,13 @@ namespace PagarMe.Bifrost.Providers
 
         public async Task Close()
         {
-            await _mpos.Close();
+            await mpos.Close();
         }
 
         public void Dispose()
         {
-            _mpos?.Dispose();
-            _mpos = null;
+            mpos?.Dispose();
+            mpos = null;
 
             device?.Close();
         }

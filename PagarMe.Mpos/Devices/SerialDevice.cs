@@ -6,7 +6,7 @@ namespace PagarMe.Mpos.Devices
 {
     internal class SerialDevice : IDevice
     {
-        private SerialPort _port;
+        private SerialPort port;
 
         public String Port { get; set; }
 
@@ -34,27 +34,27 @@ namespace PagarMe.Mpos.Devices
         
         public Stream Open(Int32 baudRate)
         {
-            if (_port == null)
+            if (port == null)
             {
-                _port = new SerialPort(Port, baudRate, Parity.None, 8, StopBits.One);
+                port = new SerialPort(Port, baudRate, Parity.None, 8, StopBits.One);
             }
 
-            if (!_port.IsOpen)
+            if (!port.IsOpen)
             {
-                _port.Open();
+                port.Open();
             }
 
-            return _port.BaseStream;
+            return port.BaseStream;
         }
 
         public void Close()
         {
-            _port.Close();
+            port.Close();
         }
 
         public void Dispose()
         {
-            _port.Dispose();
+            port.Dispose();
         }
     }
 }

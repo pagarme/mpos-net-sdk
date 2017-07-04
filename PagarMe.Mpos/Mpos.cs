@@ -10,9 +10,9 @@ namespace PagarMe.Mpos
 {
     public partial class Mpos : IDisposable
     {
-        protected internal readonly IntPtr _nativeMpos;
+        protected internal readonly IntPtr nativeMpos;
 
-        private AbecsStream _stream;
+        private AbecsStream stream;
 
         private readonly Native.MposNotificationCallbackDelegate NotificationPin;
         private readonly Native.MposOperationCompletedCallbackDelegate OperationPin;
@@ -25,16 +25,16 @@ namespace PagarMe.Mpos
             NotificationPin = HandleNotificationCallback;
             OperationPin = HandleOperationCompletedCallback;
 
-            _stream = stream;
+            this.stream = stream;
             EncryptionKey = encryptionKey;
             StoragePath = storagePath;
-            _nativeMpos = Native.Create(stream, NotificationPin, OperationPin);
+            nativeMpos = Native.Create(stream, NotificationPin, OperationPin);
             TMSStorage = new TMSStorage(storagePath, encryptionKey);
         }
 
         public Stream BaseStream
         {
-            get { return _stream.BaseStream; }
+            get { return stream.BaseStream; }
         }
 
         public string EncryptionKey { get; }
@@ -80,7 +80,7 @@ namespace PagarMe.Mpos
 
             var callback = MposInitializedCallback.Callback(this, source);
 
-            var error = Native.Initialize(_nativeMpos, callback);
+            var error = Native.Initialize(nativeMpos, callback);
 
             if (error != Native.Error.Ok)
                 throw new MposException(error);
@@ -95,7 +95,7 @@ namespace PagarMe.Mpos
             var source = new TaskCompletionSource<bool>();
             var keysCallback = MposExtractKeysCallback.Callback(this, forceUpdate, source);
 
-            var keysError = Native.ExtractKeys(_nativeMpos, keysCallback);
+            var keysError = Native.ExtractKeys(nativeMpos, keysCallback);
             if (keysError != Native.Error.Ok) throw new MposException(keysError);
 
             return source.Task;
@@ -109,7 +109,7 @@ namespace PagarMe.Mpos
             var tableCallback = MposTablesLoadedPaymentCallback.Callback(this, amount, applications, magstripePaymentMethod, source);
             var versionCallback = MposGetTableVersionCallback.Callback(this, tableCallback, amount, magstripePaymentMethod, source);
 
-            var tableVersionError = Native.GetTableVersion(_nativeMpos, versionCallback);
+            var tableVersionError = Native.GetTableVersion(nativeMpos, versionCallback);
             if (tableVersionError != Native.Error.Ok)
                 throw new MposException(tableVersionError);
 
@@ -142,7 +142,7 @@ namespace PagarMe.Mpos
 
             var callback = MposFinishTransactionCallback.Callback(this, source);
 
-            var error = Native.FinishTransaction(_nativeMpos, status, responseCode, emvData, length, callback);
+            var error = Native.FinishTransaction(nativeMpos, status, responseCode, emvData, length, callback);
 
             if (error != Native.Error.Ok)
                 throw new MposException(error);
@@ -153,7 +153,7 @@ namespace PagarMe.Mpos
 
         public void Display(string text)
         {
-            var error = Native.Display(_nativeMpos, text);
+            var error = Native.Display(nativeMpos, text);
 
             if (error != Native.Error.Ok)
                 throw new MposException(error);
@@ -161,7 +161,7 @@ namespace PagarMe.Mpos
 
         public void Cancel()
         {
-            Native.Cancel(_nativeMpos);
+            Native.Cancel(nativeMpos);
         }
 
         public Task Close()
@@ -169,7 +169,7 @@ namespace PagarMe.Mpos
             var source = new TaskCompletionSource<bool>();
             var callback = MposClosedCallback.Callback(this, source);
 
-            var error = Native.Close(_nativeMpos, "", callback);
+            var error = Native.Close(nativeMpos, "", callback);
 
             if (error != Native.Error.Ok)
                 throw new MposException(error);
@@ -180,14 +180,14 @@ namespace PagarMe.Mpos
         protected virtual void Dispose(bool disposing)
         {
             if (disposing)
-                if (_stream != null)
+                if (stream != null)
                 {
-                    _stream.Dispose();
-                    _stream = null;
+                    stream.Dispose();
+                    stream = null;
                 }
 
-            if (_nativeMpos != IntPtr.Zero)
-                Native.Free(_nativeMpos);
+            if (nativeMpos != IntPtr.Zero)
+                Native.Free(nativeMpos);
         }
 
         internal protected virtual void OnInitialized(int error)

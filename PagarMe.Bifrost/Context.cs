@@ -13,26 +13,26 @@ namespace PagarMe.Bifrost
 {
     public class Context : IDisposable
     {
-        private readonly MposBridge _bridge;
-        private readonly SemaphoreSlim _lock;
-        private IProvider _provider;
-        private IDevice _device;
+        private readonly MposBridge bridge;
+        private readonly SemaphoreSlim locker;
+        private IProvider provider;
+        private IDevice device;
 
-        private ContextStatus _status;
+        private ContextStatus status;
 
-        internal String DeviceId => _device?.Id;
+        internal String DeviceId => device?.Id;
 
         public Context(MposBridge bridge, IProvider provider)
         {
-            _bridge = bridge;
-            _provider = provider;
-            _lock = new SemaphoreSlim(1, 1);
-            _status = ContextStatus.Uninitialized;
+            this.bridge = bridge;
+            this.provider = provider;
+            locker = new SemaphoreSlim(1, 1);
+            status = ContextStatus.Uninitialized;
         }
 
         public Task<IDevice[]> ListDevices()
         {
-            var devices = _bridge.DeviceManager.FindAvailableDevices();
+            var devices = bridge.DeviceManager.FindAvailableDevices();
             return Task.FromResult(devices);
         }
 
@@ -40,17 +40,17 @@ namespace PagarMe.Bifrost
 
         public async Task<Boolean?> Initialize(InitializeRequest request, Action<Int32> onError)
         {
-            await _lock.WaitAsync();
+            await locker.WaitAsync();
 
-            if (_status == ContextStatus.Ready)
+            if (status == ContextStatus.Ready)
                 return false;
 
             try
             {
-                var device = _bridge.DeviceManager.GetById(request.DeviceId);
+                var device = bridge.DeviceManager.GetById(request.DeviceId);
                 var dataPath = ensureDataPath(device, request.EncryptionKey);
 
-                var completedInit = await _provider.Open(new InitializationOptions
+                var completedInit = await provider.Open(new InitializationOptions
                 {
                     Device = device,
                     EncryptionKey = request.EncryptionKey,
@@ -62,15 +62,15 @@ namespace PagarMe.Bifrost
 
                 if (!request.SimpleInitialize)
                 {
-                    await _provider.SynchronizeTables(false);
+                    await provider.SynchronizeTables(false);
                 }
 
-                _device = device;
-                _status = ContextStatus.Ready;
+                this.device = device;
+                status = ContextStatus.Ready;
             }
             finally
             {
-                _lock.Release(1);
+                locker.Release(1);
             }
 
             return true;
@@ -78,17 +78,17 @@ namespace PagarMe.Bifrost
 
         public Task<StatusResponse> GetStatus()
         {
-            var devices = _bridge.DeviceManager.FindAvailableDevices();
+            var devices = bridge.DeviceManager.FindAvailableDevices();
 
             var response = new StatusResponse
             {
-                Code = _status,
+                Code = status,
                 AvailableDevices = devices.Length
             };
 
-            if (_device != null)
+            if (device != null)
             {
-                response.ConnectedDeviceId = _device.Id;
+                response.ConnectedDeviceId = device.Id;
             }
 
             return Task.FromResult(response);
@@ -96,55 +96,55 @@ namespace PagarMe.Bifrost
 
         public async Task DisplayMessage(DisplayMessageRequest request)
         {
-            await _lock.WaitAsync();
+            await locker.WaitAsync();
 
             try
             {
-                await _provider.DisplayMessage(request?.Message ?? String.Empty);
+                await provider.DisplayMessage(request?.Message ?? String.Empty);
             }
             finally
             {
-                _lock.Release(1);
+                locker.Release(1);
             }
         }
 
         public async Task<ProcessPaymentResponse> ProcessPayment(ProcessPaymentRequest request)
         {
-            await _lock.WaitAsync();
+            await locker.WaitAsync();
 
-            if (_status != ContextStatus.Ready)
+            if (status != ContextStatus.Ready)
                 throw new InvalidOperationException("Another operation is in progress");
 
             try
             {
-                _status = ContextStatus.InUse;
+                status = ContextStatus.InUse;
 
-                return await _provider.ProcessPayment(request);
+                return await provider.ProcessPayment(request);
             }
             finally
             {
-                _status = ContextStatus.Ready;
-                _lock.Release(1);
+                status = ContextStatus.Ready;
+                locker.Release(1);
             }
         }
 
         public async Task FinishPayment(FinishPaymentRequest request)
         {
-            await _lock.WaitAsync();
+            await locker.WaitAsync();
 
-            if (_status != ContextStatus.Ready)
+            if (status != ContextStatus.Ready)
                 throw new InvalidOperationException("Another operation is in progress");
 
             try
             {
-                _status = ContextStatus.InUse;
+                status = ContextStatus.InUse;
 
-                await _provider.FinishPayment(request);
+                await provider.FinishPayment(request);
             }
             finally
             {
-                _status = ContextStatus.Ready;
-                _lock.Release(1);
+                status = ContextStatus.Ready;
+                locker.Release(1);
             }
         }
 
@@ -159,7 +159,7 @@ namespace PagarMe.Bifrost
             var hashData = Encoding.UTF8.GetBytes(hashText);
             var hash = SHA256.Create().ComputeHash(hashData);
 
-            var path = Path.Combine(_bridge.Options.DataPath, BitConverter.ToString(hash)) + Path.DirectorySeparatorChar;
+            var path = Path.Combine(bridge.Options.DataPath, BitConverter.ToString(hash)) + Path.DirectorySeparatorChar;
 
             Directory.CreateDirectory(path);
 
@@ -170,20 +170,20 @@ namespace PagarMe.Bifrost
         {
             try
             {
-                await _provider.Close();
+                await provider.Close();
             }
             catch
             {
                 // Doesn't matter, we're resetting anyway
             }
 
-            _status = ContextStatus.Uninitialized;
+            status = ContextStatus.Uninitialized;
         }
 
         public void Dispose()
         {
-            _provider.Dispose();
-            _provider = null;
+            provider.Dispose();
+            provider = null;
         }
 
         internal Boolean IsInUse()

@@ -43,7 +43,7 @@ namespace PagarMe.Mpos.Callbacks
             foreach (var entry in mpos.TMSStorage.GetRiskManagementRows())
                 riskProfiles.Add(new Native.RiskManagement(entry));
 
-            var error = Native.ProcessPayment(mpos._nativeMpos, amount, rawApplications.ToArray(), rawApplications.Count,
+            var error = Native.ProcessPayment(mpos.nativeMpos, amount, rawApplications.ToArray(), rawApplications.Count,
                 acquirers.ToArray(), acquirers.Count, riskProfiles.ToArray(), riskProfiles.Count,
                 (int)magstripePaymentMethod, callback);
 

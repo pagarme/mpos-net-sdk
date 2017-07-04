@@ -23,13 +23,13 @@ namespace PagarMe.Mpos.Abecs
             InternalError = 21
         }
 
-        private readonly CancellationTokenSource _cancellationToken;
+        private readonly CancellationTokenSource cancellationToken;
         private readonly Native.StreamCloseDelegate ClosePin;
 
         private readonly Native.StreamOpenDelegate OpenPin;
         private readonly Native.StreamWriteDelegate WritePin;
-        private Boolean _open;
-        private Boolean _available;
+        private Boolean open;
+        private Boolean available;
 
         public AbecsStream(Stream baseStream)
         {
@@ -38,13 +38,13 @@ namespace PagarMe.Mpos.Abecs
             ClosePin = Close;
 
             BaseStream = baseStream;
-            _cancellationToken = new CancellationTokenSource();
+            cancellationToken = new CancellationTokenSource();
             NativeStream = Native.Allocate();
             NativeStream->Open = OpenPin;
             NativeStream->Write = WritePin;
             NativeStream->Close = ClosePin;
 
-            _available = true;
+            available = true;
         }
 
         public Stream BaseStream { get; }
@@ -63,7 +63,7 @@ namespace PagarMe.Mpos.Abecs
 
         public Error Open(Native* stream)
         {
-            if (_open)
+            if (open)
                 return Error.OkError;
 
             BeginRead();
@@ -84,11 +84,11 @@ namespace PagarMe.Mpos.Abecs
 
         public Error Close(Native* stream)
         {
-            if (!_open)
+            if (!open)
                 return Error.OkError;
 
-            _open = false;
-            _cancellationToken.Cancel();
+            open = false;
+            cancellationToken.Cancel();
 
             return Error.Ok;
         }
@@ -101,12 +101,12 @@ namespace PagarMe.Mpos.Abecs
                 NativeStream = null;
             }
 
-            _available = false;
+            available = false;
         }
 
         private void BeginRead()
         {
-            if (!_available)
+            if (!available)
                 return;
 
             var buffer = new byte[2048];
@@ -116,7 +116,7 @@ namespace PagarMe.Mpos.Abecs
                 NativeStream->DataReceived(NativeStream, buffer, t.Result);
                 BeginRead();
 
-            }, _cancellationToken.Token);
+            }, cancellationToken.Token);
         }
 
         [StructLayout(LayoutKind.Sequential)]

@@ -6,7 +6,7 @@ namespace PagarMe.Bifrost.Service
     public partial class BifrostService : ServiceBase
     {
         private readonly Options options;
-        private MposBridge _bridge;
+        private MposBridge bridge;
 
         public BifrostService(Options options)
         {
@@ -18,23 +18,23 @@ namespace PagarMe.Bifrost.Service
         {
             Log.TryLogOnException(() =>
             {
-                _bridge = new MposBridge(options);
+                bridge = new MposBridge(options);
 
                 Log.Me.Info("Bifrost Service Bridge");
                 Log.Me.Info("Starting server");
-                _bridge.Start();
+                bridge.Start();
             });
         }
 
         protected override void OnStop()
         {
-            if (_bridge == null)
+            if (bridge == null)
                 return;
 
             Log.TryLogOnException(() =>
             {
                 Log.Me.Info("Stopping server");
-                _bridge.Stop();
+                bridge.Stop();
             });
         }
     }

@@ -36,7 +36,7 @@ namespace PagarMe.Mpos.Callbacks
             }
             else
             {
-                tableCallback(mpos._nativeMpos, 0, false);
+                tableCallback(mpos.nativeMpos, 0, false);
             }
 
             return Native.Error.Ok;
