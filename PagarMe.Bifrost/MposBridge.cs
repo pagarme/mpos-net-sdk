@@ -82,6 +82,8 @@ namespace PagarMe.Bifrost
 
         public Context GetContext(string name)
         {
+            if (contextsLocked) return null;
+
             name = normalize(name);
 
             Context context;
