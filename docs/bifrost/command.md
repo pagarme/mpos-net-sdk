@@ -86,6 +86,7 @@ Captures payment information and returns information about it:
     - **0**: *accepted*
     - **1**: *rejected*
     - **2**: *errored*
+    - **3**: *canceled*
 
 - **process.card_hash:** Card hash to be used when creating the transaction.
 
@@ -96,6 +97,8 @@ Captures payment information and returns information about it:
     - **2**: *debit card*
 
 - **process.is_online_pin:** Password check online or saved on the card.
+
+- **process.error_code:** Code of error reported by mpos.
 
 ## Finish Payment
 
