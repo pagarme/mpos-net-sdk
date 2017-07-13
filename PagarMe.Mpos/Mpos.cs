@@ -242,7 +242,7 @@ namespace PagarMe.Mpos
             }
             else
             {
-                result.BuildErrored();
+                result.BuildErrored(error);
             }
 
             return result;

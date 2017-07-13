@@ -12,6 +12,8 @@ namespace PagarMe.Mpos
         [StructLayout(LayoutKind.Sequential)]
         internal struct Native
         {
+            public const Int32 ST_CANCEL = 13;
+
             internal enum Error
             {
                 ConnError = -1,
