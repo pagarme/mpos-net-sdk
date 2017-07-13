@@ -10,6 +10,7 @@ namespace PagarMe.Mpos
     {
         public string CardHash { get; private set; }
         public PaymentStatus Status { get; private set; }
+        public Int32? ErrorCode { get; private set; }
         public PaymentMethod PaymentMethod { get; private set; }
         public string CardHolderName { get; private set; }
         public bool IsOnlinePin { get; private set; }
@@ -64,9 +65,13 @@ namespace PagarMe.Mpos
             }
         }
 
-        internal void BuildErrored()
+        internal void BuildErrored(Int32 error)
         {
-            Status = PaymentStatus.Errored;
+            Status = error == Native.ST_CANCEL 
+                ? PaymentStatus.Canceled 
+                : PaymentStatus.Errored;
+
+            ErrorCode = error;
         }
 
         internal async Task BuildAccepted(string encryptionKey)

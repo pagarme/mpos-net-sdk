@@ -8,6 +8,10 @@ namespace PagarMe.Mpos.Helpers
 {
     class PtrHelper
     {
+        public static T DerefOrDefault<T>(IntPtr pointer)
+        {
+            return pointer == IntPtr.Zero ? default(T) : Deref<T>(pointer);
+        }
 
         public static T Deref<T>(IntPtr pointer)
         {

@@ -29,7 +29,7 @@ namespace PagarMe.Mpos.Callbacks
             if (err != 0)
             {
                 var result = new PaymentResult();
-                result.BuildErrored();
+                result.BuildErrored(err);
                 source.SetResult(result);
 
                 mpos.OnPaymentProcessed(null, err);
