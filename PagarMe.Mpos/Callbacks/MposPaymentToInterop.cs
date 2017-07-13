@@ -11,7 +11,7 @@ namespace PagarMe.Mpos.Callbacks
         {
             releaseGC();
 
-            var info = PtrHelper.Deref<PaymentInfo>(infoPointer);
+            var info = PtrHelper.DerefOrDefault<PaymentInfo>(infoPointer);
             return callback(mpos, error, info);
         };
     }

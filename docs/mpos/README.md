@@ -163,6 +163,7 @@ Sinaliza se a operação foi feita com checagem de senha online ou no cartão.
 * `Accepted`: O pagamento foi aceito.
 * `Rejected`: O pagamento foi rejeitado.
 * `Errored`: Houve um erro no processamento do pagamento.
+* `Canceled`: Operação cancelada na máquina.
 
 ### PaymentMethod
 
