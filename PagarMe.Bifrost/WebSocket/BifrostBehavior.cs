@@ -197,9 +197,18 @@ namespace PagarMe.Bifrost.WebSocket
 
         private async Task process(Context context, PaymentRequest request, PaymentResponse response)
         {
-            var result = await context.ProcessPayment(request.Process);
-            response.Process = result.Result;
-            response.ResponseType = PaymentResponse.Type.Processed;
+            var process = await context.ProcessPayment(request.Process);
+            response.Process = process.Result;
+
+            if (process.Result.Status == Mpos.PaymentStatus.Accepted)
+            {
+                response.ResponseType = PaymentResponse.Type.Processed;
+            }
+            else
+            {
+                response.ResponseType = PaymentResponse.Type.Error;
+                response.Error = $"Transaction {process.Result.Status}";
+            }
         }
 
         private async Task finish(Context context, PaymentRequest request, PaymentResponse response)
