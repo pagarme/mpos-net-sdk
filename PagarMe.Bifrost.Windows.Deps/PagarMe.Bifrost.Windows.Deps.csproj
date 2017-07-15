@@ -60,6 +60,12 @@
       <Link>tms64.dll</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="..\deps\vc_redist.x64.exe">
+      <Link>vc_redist.x64.exe</Link>
+    </Content>
+    <Content Include="..\deps\vc_redist.x86.exe">
+      <Link>vc_redist.x86.exe</Link>
+    </Content>
     <Content Include="..\deps\windows-firefox\certutil.exe">
       <Link>certutil.exe</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
