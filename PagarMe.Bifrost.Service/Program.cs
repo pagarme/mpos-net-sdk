@@ -1,3 +1,4 @@
+using PagarMe.Bifrost.CPP;
 using PagarMe.Bifrost.Updates;
 using PagarMe.Generic;
 using System;
@@ -13,10 +14,12 @@ namespace PagarMe.Bifrost.Service
             {
                 var options = Options.Get(args);
 
+                var runtime = Runtime4Windows.InstallIfNotFound();
                 var updater = Updater.CheckAndUpdate(MposBridge.LockContexts, options);
 
                 ServiceBase.Run(new BifrostService(options));
 
+                runtime.Wait();
                 updater.Wait();
             });
         }

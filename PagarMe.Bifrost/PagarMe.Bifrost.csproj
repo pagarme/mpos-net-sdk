@@ -54,6 +54,7 @@
     <Compile Include="..\PagarMe.Generic\Properties\PagarMeAssemblyInfo.cs">
       <Link>Properties\PagarMeAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="C++\Runtime4Windows.cs" />
     <Compile Include="Commands\PaymentRequest.cs" />
     <Compile Include="Commands\PaymentResponse.cs" />
     <Compile Include="Commands\TypeExtension.cs" />
