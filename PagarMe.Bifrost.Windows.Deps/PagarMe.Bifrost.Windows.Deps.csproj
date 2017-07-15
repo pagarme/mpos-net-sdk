@@ -7,8 +7,8 @@
     <ProjectGuid>{E754C05E-A8C7-414D-8EA3-D99052B31188}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>PagarMe.Bifrost.Deps</RootNamespace>
-    <AssemblyName>PagarMe.Bifrost.Deps</AssemblyName>
+    <RootNamespace>PagarMe.Bifrost.Windows.Deps</RootNamespace>
+    <AssemblyName>PagarMe.Bifrost.Windows.Deps</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
