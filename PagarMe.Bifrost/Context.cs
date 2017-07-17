@@ -40,10 +40,10 @@ namespace PagarMe.Bifrost
 
         public async Task<Boolean?> Initialize(InitializeRequest request, Action<Int32> onError)
         {
-            await locker.WaitAsync();
-
             if (status == ContextStatus.Ready)
                 return false;
+
+            await locker.WaitAsync();
 
             try
             {
