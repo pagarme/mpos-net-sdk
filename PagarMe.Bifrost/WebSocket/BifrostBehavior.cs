@@ -255,6 +255,8 @@ namespace PagarMe.Bifrost.WebSocket
 
         private void send(PaymentResponse response)
         {
+            log.Me.Info(response.ResponseType);
+
             if (State == WebSocketState.Open)
             {
                 Send(JsonConvert.SerializeObject(response, SnakeCase.Settings));
