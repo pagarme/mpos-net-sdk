@@ -33,8 +33,6 @@ namespace PagarMe.Bifrost.WebSocket
 
         protected override async void OnMessage(MessageEventArgs args)
         {
-            log.Me.Info("Request Handling");
-
             var request = new PaymentRequest();
 
             await log.TryLogOnExceptionAsync(() =>
