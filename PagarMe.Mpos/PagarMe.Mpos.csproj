@@ -49,9 +49,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\PagarMe.Generic\Properties\PagarMeAssemblyInfo.cs">
-      <Link>Properties\PagarMeAssemblyInfo.cs</Link>
-    </Compile>
     <Compile Include="Callbacks\GCEnvelop.cs" />
     <Compile Include="Callbacks\MposClosedCallback.cs" />
     <Compile Include="Callbacks\MposExtractKeysCallback.cs" />
