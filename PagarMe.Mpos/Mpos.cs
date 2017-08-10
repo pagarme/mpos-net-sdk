@@ -29,7 +29,7 @@ namespace PagarMe.Mpos
             EncryptionKey = encryptionKey;
             StoragePath = storagePath;
             nativeMpos = Native.Create(stream, NotificationPin, OperationPin);
-            TMSStorage = new TMSStorage(storagePath, encryptionKey);
+            TMSStorage = new TMSStorage(storagePath);
         }
 
         public Stream BaseStream

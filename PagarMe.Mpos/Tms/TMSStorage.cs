@@ -91,7 +91,7 @@ namespace PagarMe.Mpos
 	{
 		private SQLiteConnection db;	
 
-		public TMSStorage(string path, string encryptionKey) {
+		public TMSStorage(string path) {
 			db = new SQLiteConnection(path + "pagarme_mpos.sqlite");
 			db.CreateTable<ApplicationEntry>();
 			db.CreateTable<AcquirerEntry>();
