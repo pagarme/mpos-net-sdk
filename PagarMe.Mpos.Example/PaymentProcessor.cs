@@ -43,24 +43,32 @@ namespace PagarMe.Mpos.Example
             await mpos.Close();
             Console.WriteLine("CLOSED!");
 
-            var transaction = new Transaction
+            if (result.Status == PaymentStatus.Accepted)
             {
-                CardHash = result.CardHash,
-                Amount = amount,
-                ShouldCapture = false
-            };
+                var transaction = new Transaction
+                {
+                    CardHash = result.CardHash,
+                    Amount = amount,
+                    ShouldCapture = false
+                };
 
-            await transaction.SaveAsync();
-            Console.WriteLine("TRANSACTION ID = " + transaction.Id);
+                await transaction.SaveAsync();
+                Console.WriteLine("TRANSACTION ID = " + transaction.Id);
 
-            Console.WriteLine(transaction);
-            Console.WriteLine("Transaction ARC = " + transaction.AcquirerResponseCode + ", Id = " + transaction.Id);
-            Console.WriteLine("ACQUIRER RESPONSE CODE = " + transaction.AcquirerResponseCode);
-            var x = int.Parse(transaction.AcquirerResponseCode);
-            var obj = transaction["card_emv_response"];
-            var response = obj == null ? null : obj.ToString();
+                Console.WriteLine(transaction);
+                Console.WriteLine("Transaction ARC = " + transaction.AcquirerResponseCode + ", Id = " + transaction.Id);
+                Console.WriteLine("ACQUIRER RESPONSE CODE = " + transaction.AcquirerResponseCode);
+                var responseCode = int.Parse(transaction.AcquirerResponseCode);
+                var emvResponse = transaction["card_emv_response"];
+                var response = emvResponse?.ToString();
 
-            await mpos.FinishTransaction(true, x, (string) obj);
+                await mpos.FinishTransaction(true, responseCode, response);
+            }
+            else if (result.Status != PaymentStatus.Canceled)
+            {
+                await mpos.FinishTransaction(false, 0, null);
+            }
+
             await mpos.Close();
         }
     }
