@@ -9,6 +9,7 @@ packages
 *.msi
 *.dylib
 *.dll
+*.a
 
 PagarMe.Mpos.Example/App.config
 *.csproj.user
