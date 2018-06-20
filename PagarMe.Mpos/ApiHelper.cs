@@ -23,26 +23,36 @@ namespace PagarMe.Mpos
 
         public static string ApiEndpoint { get; set; }
 
-        private static HttpWebRequest CreateRequest(string method, string path, string auth)
+        private static async Task<String> createRequest(String method, String path, String auth)
         {
-            var request = WebRequest.Create(ApiEndpoint + path);
+            return await TLS.RunWithTLS12(async () =>
+            {
+                var request = (HttpWebRequest) WebRequest.Create(ApiEndpoint + path);
 
-            request.Method = method;
+                request.Method = method;
 
-            if (auth != null)
-                request.Headers.Add("Authorization",
-                    "Basic " + Convert.ToBase64String(Encoding.ASCII.GetBytes(auth + ":x")));
+                if (auth != null)
+                    request.Headers.Add("Authorization",
+                        "Basic " + Convert.ToBase64String(Encoding.ASCII.GetBytes(auth + ":x")));
 
-            return (HttpWebRequest) request;
+                var response = await request.GetResponseAsync();
+
+                using (var stream = response.GetResponseStream())
+                {
+                    if (stream == null) return null;
+
+                    using (var reader = new StreamReader(stream, Encoding.UTF8))
+                    {
+                        return reader.ReadToEnd();
+                    }
+                }
+            });
         }
 
         private static async Task<Tuple<string, string>> GetCardHashKey(string encryptionKey)
         {
-            var response =
-                (HttpWebResponse)
-                await CreateRequest("GET", "/transactions/card_hash_key", encryptionKey).GetResponseAsync();
+            var json = await createRequest("GET", "/transactions/card_hash_key", encryptionKey);
 
-            var json = new StreamReader(response.GetResponseStream(), Encoding.UTF8).ReadToEnd();
             var result = JsonConvert.DeserializeObject<dynamic>(json);
 
             return new Tuple<string, string>(result.id.ToString(), result.public_key.ToString());
@@ -100,15 +110,16 @@ namespace PagarMe.Mpos
             return EncryptWith(hashParameters.Item1, hashParameters.Item2, data);
         }
 
-        public static async Task<string> GetTerminalTables(string encryptionKey, string checksum, int[] dukptKeys)
+        public static async Task<String> GetTerminalTables(string encryptionKey, string checksum, int[] dukptKeys)
         {
-            var request = CreateRequest("GET",
-                "/terminal/updates?checksum=" + WebUtility.UrlEncode(checksum) + "&dukpt_keys=[" +
-                string.Join(",", dukptKeys) + "]", encryptionKey);
+            var dukptKeysString = string.Join(",", dukptKeys);
+            checksum = WebUtility.UrlEncode(checksum);
+
+            var path = $"/terminal/updates?checksum={checksum}&dukpt_keys=[{dukptKeysString}]";
+
             try
             {
-                var response = (HttpWebResponse) await request.GetResponseAsync();
-                return new StreamReader(response.GetResponseStream(), Encoding.UTF8).ReadToEnd();
+                return await createRequest("GET", path, encryptionKey);
             }
             catch (WebException ex)
             {
