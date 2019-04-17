@@ -108,7 +108,6 @@ namespace PagarMe.Mpos
                 }
             }
 
-            parameters.ForEach(Console.WriteLine);
             var urlEncoded =
                 parameters.Select(x => new Tuple<string, string>(x.Item1, Uri.EscapeDataString(x.Item2)))
                     .Select(x => x.Item1 + "=" + x.Item2)
