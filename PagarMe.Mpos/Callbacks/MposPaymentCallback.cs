@@ -1,16 +1,17 @@
-using PagarMe.Mpos.Helpers;
 using System.Threading.Tasks;
-using static PagarMe.Mpos.Mpos;
+using PagarMe.Mpos.Entities;
+using PagarMe.Mpos.Natives;
+using static PagarMe.Mpos.Natives.Native;
 
 namespace PagarMe.Mpos.Callbacks
 {
     class MposPaymentCallback
     {
-        private Native.PaymentInfo info;
+        private PaymentInfo info;
 
-        public static Native.MposPaymentCallbackDelegate Callback(Mpos mpos, TaskCompletionSource<PaymentResult> source)
+        public static MposPaymentCallbackDelegate Callback(Mpos mpos, TaskCompletionSource<PaymentResult> source)
         {
-            return GCHelper.ManualFree<Native.MposPaymentCallbackDelegate>(releaseGC =>
+            return GCHelper.ManualFree<MposPaymentCallbackDelegate>(releaseGC =>
             {
                 return (mposPtr, err, info) =>
                 {
@@ -24,7 +25,7 @@ namespace PagarMe.Mpos.Callbacks
             });
         }
 
-        private Native.Error handleResult(Mpos mpos, TaskCompletionSource<PaymentResult> source, int err)
+        private Error handleResult(Mpos mpos, TaskCompletionSource<PaymentResult> source, int err)
         {
             if (err != 0)
             {
@@ -33,7 +34,7 @@ namespace PagarMe.Mpos.Callbacks
                 source.SetResult(result);
 
                 mpos.OnPaymentProcessed(null, err);
-                return Native.Error.Ok;
+                return Error.Ok;
             }
 
             mpos.HandlePaymentCallback(err, info).ContinueWith(t =>
@@ -44,7 +45,7 @@ namespace PagarMe.Mpos.Callbacks
                 mpos.OnPaymentProcessed(t.Result, err);
             });
 
-            return Native.Error.Ok;
+            return Error.Ok;
         }
     }
 }

@@ -1,5 +1,6 @@
-using PagarMe.Mpos.Helpers;
-using static PagarMe.Mpos.Mpos.Native;
+using PagarMe.Mpos.Entities;
+using PagarMe.Mpos.Natives;
+using static PagarMe.Mpos.Natives.Native;
 
 namespace PagarMe.Mpos.Callbacks
 {

@@ -1,7 +1,9 @@
-using PagarMe.Mpos.Helpers;
 using System;
 using System.Threading.Tasks;
-using static PagarMe.Mpos.Mpos;
+using PagarMe.Mpos.Api;
+using PagarMe.Mpos.Entities;
+using PagarMe.Mpos.Natives;
+using static PagarMe.Mpos.Natives.Native;
 
 namespace PagarMe.Mpos.Callbacks
 {
@@ -9,9 +11,9 @@ namespace PagarMe.Mpos.Callbacks
     {
         private int[] keyList;
 
-        public static Native.MposExtractKeysCallbackDelegate Callback(Mpos mpos, bool forceUpdate, TaskCompletionSource<bool> source)
+        public static MposExtractKeysCallbackDelegate Callback(Mpos mpos, bool forceUpdate, TaskCompletionSource<bool> source)
         {
-            return GCHelper.ManualFree<Native.MposExtractKeysCallbackDelegate>(releaseGC =>
+            return GCHelper.ManualFree<MposExtractKeysCallbackDelegate>(releaseGC =>
             {
                 return (mposPtr, err, keyList) =>
                 {
@@ -26,7 +28,7 @@ namespace PagarMe.Mpos.Callbacks
             });
         }
 
-        private Native.Error processTables(Mpos mpos, bool forceUpdate, TaskCompletionSource<bool> source)
+        private Error processTables(Mpos mpos, bool forceUpdate, TaskCompletionSource<bool> source)
         {
             var tmsCallback = TmsStoreCallback.Callback(mpos, forceUpdate, source);
 
@@ -43,8 +45,8 @@ namespace PagarMe.Mpos.Callbacks
                     {
                         try
                         {
-                            var error = Native.TmsGetTables(t.Result, t.Result.Length, tmsCallback, IntPtr.Zero);
-                            if (error != Native.Error.Ok) throw new MposException(error);
+                            var error = TmsGetTables(t.Result, t.Result.Length, tmsCallback, IntPtr.Zero);
+                            if (error != Error.Ok) throw new MposException(error);
                         }
                         catch(Exception e)
                         {
@@ -60,7 +62,7 @@ namespace PagarMe.Mpos.Callbacks
                     }
                 });
 
-            return Native.Error.Ok;
+            return Error.Ok;
         }
     }
 }

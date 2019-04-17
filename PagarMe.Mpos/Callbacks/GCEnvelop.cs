@@ -1,5 +1,5 @@
-using PagarMe.Mpos.Helpers;
 using System;
+using PagarMe.Mpos.Natives;
 
 namespace PagarMe.Mpos.Callbacks
 {

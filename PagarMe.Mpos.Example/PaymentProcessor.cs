@@ -2,6 +2,7 @@ using System;
 using System.IO.Ports;
 using System.Threading.Tasks;
 using PagarMe.Generic;
+using PagarMe.Mpos.Entities;
 
 namespace PagarMe.Mpos.Example
 {
@@ -37,7 +38,7 @@ namespace PagarMe.Mpos.Example
 
         public async Task Pay(int amount)
         {
-            var result = await mpos.ProcessPayment(amount, null, PaymentMethod.Debit);
+            var result = await mpos.ProcessPayment(amount, null, Entities.PaymentMethod.Debit);
             Console.WriteLine("CARD HASH = " + result.CardHash);
 
             if (result.Status == PaymentStatus.Accepted)

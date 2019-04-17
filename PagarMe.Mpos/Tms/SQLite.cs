@@ -27,23 +27,22 @@
 #define USE_NEW_REFLECTION_API
 #endif
 
-using System;
-using System.Diagnostics;
 #if !USE_SQLITEPCL_RAW
-using System.Runtime.InteropServices;
 #endif
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Threading;
 #if NO_CONCURRENT
 using ConcurrentStringDictionary = System.Collections.Generic.Dictionary<string, object>;
 using SQLite.Extensions;
 #else
 using ConcurrentStringDictionary = System.Collections.Concurrent.ConcurrentDictionary<string, object>;
 #endif
-using System.Reflection;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Threading;
-
 #if USE_CSHARP_SQLITE
 using Sqlite3 = Community.CsharpSqlite.Sqlite3;
 using Sqlite3DatabaseHandle = Community.CsharpSqlite.Sqlite3.sqlite3;
@@ -63,7 +62,7 @@ using Sqlite3Statement = System.IntPtr;
 
 #pragma warning disable 1591 // XML Doc Comments
 
-namespace SQLite
+namespace PagarMe.Mpos.Tms
 {
 public class SQLiteException : Exception
 {
@@ -94,7 +93,7 @@ protected NotNullConstraintViolationException (SQLite3.Result r, string message,
 : base (r, message)
 {
 if (mapping != null && obj != null) {
-this.Columns = from c in mapping.Columns
+Columns = from c in mapping.Columns
 where c.IsNullable == false && c.GetValue (obj) == null
 select c;
 }
@@ -148,7 +147,7 @@ private bool _open;
 private TimeSpan _busyTimeout;
 private Dictionary<string, TableMapping> _mappings = null;
 private Dictionary<string, TableMapping> _tables = null;
-private System.Diagnostics.Stopwatch _sw;
+private Stopwatch _sw;
 private long _elapsedMilliseconds = 0;
 
 private int _transactionDepth = 0;
@@ -1380,7 +1379,7 @@ public int Insert (object obj, string extra, Type objType)
 		try {
 			count = insertCmd.ExecuteNonQuery (vals);
 		} catch (SQLiteException ex) {
-			if (SQLite3.ExtendedErrCode (this.Handle) == SQLite3.ExtendedResult.ConstraintNotNull) {
+			if (SQLite3.ExtendedErrCode (Handle) == SQLite3.ExtendedResult.ConstraintNotNull) {
 				throw NotNullConstraintViolationException.New (ex.Result, ex.Message, map, obj);
 			}
 			throw;
@@ -1460,7 +1459,7 @@ public int Update (object obj, Type objType)
 	}
 	catch (SQLiteException ex) {
 
-		if (ex.Result == SQLite3.Result.Constraint && SQLite3.ExtendedErrCode (this.Handle) == SQLite3.ExtendedResult.ConstraintNotNull) {
+		if (ex.Result == SQLite3.Result.Constraint && SQLite3.ExtendedErrCode (Handle) == SQLite3.ExtendedResult.ConstraintNotNull) {
 			throw NotNullConstraintViolationException.New (ex, map, obj);
 		}
 
@@ -2904,7 +2903,7 @@ public class TableQuery<T> : BaseTableQuery, IEnumerable<T>
 				//
 				// Work special magic for enumerables
 				//
-				if (val != null && val is System.Collections.IEnumerable && !(val is string) && !(val is System.Collections.Generic.IEnumerable<byte>)) {
+				if (val != null && val is System.Collections.IEnumerable && !(val is string) && !(val is IEnumerable<byte>)) {
 					var sb = new System.Text.StringBuilder();
 					sb.Append("(");
 					var head = "";
@@ -3227,7 +3226,7 @@ public static class SQLite3
                     byte[] queryBytes = System.Text.UTF8Encoding.UTF8.GetBytes (query);
                     var r = Prepare2 (db, queryBytes, queryBytes.Length, out stmt, IntPtr.Zero);
 #else
-                    var r = Prepare2 (db, query, System.Text.UTF8Encoding.UTF8.GetByteCount (query), out stmt, IntPtr.Zero);
+                    var r = Prepare2 (db, query, System.Text.Encoding.UTF8.GetByteCount (query), out stmt, IntPtr.Zero);
 #endif
             if (r != Result.OK)
             {
@@ -3384,7 +3383,7 @@ public static class SQLite3
 
                 public static string ColumnString (IntPtr stmt, int index)
                 {
-                    return Marshal.PtrToStringUni (SQLite3.ColumnText16 (stmt, index));
+                    return Marshal.PtrToStringUni (ColumnText16 (stmt, index));
                 }
 
                 public static byte[] ColumnByteArray (IntPtr stmt, int index)

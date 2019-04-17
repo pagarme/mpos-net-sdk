@@ -1,22 +1,23 @@
-using PagarMe.Mpos.Helpers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using static PagarMe.Mpos.Mpos;
+using PagarMe.Mpos.Entities;
+using PagarMe.Mpos.Natives;
+using static PagarMe.Mpos.Natives.Native;
 
 namespace PagarMe.Mpos.Callbacks
 {
     class TmsStoreCallback
     {
-        private IList<Native.Capk> capkList;
-        private IList<Native.Aid> aidList;
-        private IList<Native.Application> appList;
-        private IList<Native.RiskManagement> riskProfileList;
-        private IList<Native.Acquirer> acquirerList;
+        private IList<Capk> capkList;
+        private IList<Aid> aidList;
+        private IList<Application> appList;
+        private IList<RiskManagement> riskProfileList;
+        private IList<Acquirer> acquirerList;
 
-        public static Native.TmsStoreCallbackDelegate Callback(Mpos mpos, bool forceUpdate, TaskCompletionSource<bool> source)
+        public static TmsStoreCallbackDelegate Callback(Mpos mpos, bool forceUpdate, TaskCompletionSource<bool> source)
         {
-            return GCHelper.ManualFree<Native.TmsStoreCallbackDelegate>(releaseGC =>
+            return GCHelper.ManualFree<TmsStoreCallbackDelegate>(releaseGC =>
             {
                 return (version, capkList, aidList, appList, riskProfileList, acquirerList, userData) =>
                 {
@@ -36,7 +37,7 @@ namespace PagarMe.Mpos.Callbacks
             });
         }
 
-        private Native.Error insertDataIntoStorage(Mpos mpos, bool forceUpdate, 
+        private Error insertDataIntoStorage(Mpos mpos, bool forceUpdate, 
                 TaskCompletionSource<bool> source, string version)
         {
             var callback = MposTablesLoadedSynchronizeTablesCallback.Callback(mpos, source);
@@ -83,14 +84,12 @@ namespace PagarMe.Mpos.Callbacks
                     acquirer.SessionKey);
             }
 
-            var updateError = Native.UpdateTables(mpos, callback, aidList.ToArray(), capkList.ToArray());
+            var updateError = UpdateTables(mpos, callback, aidList.ToArray(), capkList.ToArray());
 
-            if (updateError != Native.Error.Ok)
+            if (updateError != Error.Ok)
                 throw new MposException(updateError);
 
             return updateError;
         }
-
-
     }
 }

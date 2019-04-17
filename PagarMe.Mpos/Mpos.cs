@@ -5,22 +5,26 @@ using System.Text;
 using System.Threading.Tasks;
 using PagarMe.Mpos.Abecs;
 using PagarMe.Mpos.Callbacks;
+using PagarMe.Mpos.Entities;
+using PagarMe.Mpos.Natives;
+using PagarMe.Mpos.Tms;
+using static PagarMe.Mpos.Natives.Native;
 
 namespace PagarMe.Mpos
 {
-    public partial class Mpos : IDisposable
+    public class Mpos : IDisposable
     {
         protected internal readonly IntPtr nativeMpos;
 
         private AbecsStream stream;
 
-        private readonly Native.MposNotificationCallbackDelegate NotificationPin;
-        private readonly Native.MposOperationCompletedCallbackDelegate OperationPin;
+        private readonly MposNotificationCallbackDelegate NotificationPin;
+        private readonly MposOperationCompletedCallbackDelegate OperationPin;
 
         public Mpos(Stream stream, string encryptionKey, string storagePath)
             : this(new AbecsStream(stream), encryptionKey, storagePath) { }
 
-        private unsafe Mpos(AbecsStream stream, string encryptionKey, string storagePath)
+        private Mpos(AbecsStream stream, string encryptionKey, string storagePath)
         {
             NotificationPin = HandleNotificationCallback;
             OperationPin = HandleOperationCompletedCallback;
@@ -28,16 +32,13 @@ namespace PagarMe.Mpos
             this.stream = stream;
             EncryptionKey = encryptionKey;
             StoragePath = storagePath;
-            nativeMpos = Native.Create(stream, NotificationPin, OperationPin);
+            nativeMpos = Create(stream, NotificationPin, OperationPin);
             TMSStorage = new TMSStorage(storagePath);
         }
 
-        public Stream BaseStream
-        {
-            get { return stream.BaseStream; }
-        }
+        public Stream BaseStream => stream.BaseStream;
 
-        public string EncryptionKey { get; }
+	    public string EncryptionKey { get; }
         public string StoragePath { get; }
         public TMSStorage TMSStorage { get; }
 
@@ -82,7 +83,7 @@ namespace PagarMe.Mpos
 
             var error = Native.Initialize(nativeMpos, callback);
 
-            if (error != Native.Error.Ok)
+            if (error != Error.Ok)
                 throw new MposException(error);
 
             return source.Task;
@@ -95,8 +96,8 @@ namespace PagarMe.Mpos
             var source = new TaskCompletionSource<bool>();
             var keysCallback = MposExtractKeysCallback.Callback(this, forceUpdate, source);
 
-            var keysError = Native.ExtractKeys(nativeMpos, keysCallback);
-            if (keysError != Native.Error.Ok) throw new MposException(keysError);
+            var keysError = ExtractKeys(nativeMpos, keysCallback);
+            if (keysError != Error.Ok) throw new MposException(keysError);
 
             return source.Task;
         }
@@ -109,8 +110,8 @@ namespace PagarMe.Mpos
             var tableCallback = MposTablesLoadedPaymentCallback.Callback(this, amount, applications, magstripePaymentMethod, source);
             var versionCallback = MposGetTableVersionCallback.Callback(this, tableCallback, amount, magstripePaymentMethod, source);
 
-            var tableVersionError = Native.GetTableVersion(nativeMpos, versionCallback);
-            if (tableVersionError != Native.Error.Ok)
+            var tableVersionError = GetTableVersion(nativeMpos, versionCallback);
+            if (tableVersionError != Error.Ok)
                 throw new MposException(tableVersionError);
 
             return source.Task;
@@ -120,12 +121,12 @@ namespace PagarMe.Mpos
         {
             var source = new TaskCompletionSource<bool>();
 
-            Native.TransactionStatus status;
+            TransactionStatus status;
             int length;
 
             if (!success)
             {
-                status = Native.TransactionStatus.Error;
+                status = TransactionStatus.Error;
                 emvData = "";
                 length = 0;
                 responseCode = 0;
@@ -135,16 +136,16 @@ namespace PagarMe.Mpos
                 length = emvData == null ? 0 : emvData.Length;
 
                 if (responseCode < 1000)
-                    status = responseCode == 0 ? Native.TransactionStatus.Ok : Native.TransactionStatus.NonZero;
+                    status = responseCode == 0 ? TransactionStatus.Ok : TransactionStatus.NonZero;
                 else
-                    status = Native.TransactionStatus.Error;
+                    status = TransactionStatus.Error;
             }
 
             var callback = MposFinishTransactionCallback.Callback(this, source);
 
             var error = Native.FinishTransaction(nativeMpos, status, responseCode, emvData, length, callback);
 
-            if (error != Native.Error.Ok)
+            if (error != Error.Ok)
                 throw new MposException(error);
 
             return source.Task;
@@ -155,13 +156,13 @@ namespace PagarMe.Mpos
         {
             var error = Native.Display(nativeMpos, text);
 
-            if (error != Native.Error.Ok)
+            if (error != Error.Ok)
                 throw new MposException(error);
         }
 
         public void Cancel()
         {
-            Native.Cancel(nativeMpos);
+	        Native.Cancel(nativeMpos);
         }
 
         public Task Close()
@@ -171,7 +172,7 @@ namespace PagarMe.Mpos
 
             var error = Native.Close(nativeMpos, "", callback);
 
-            if (error != Native.Error.Ok)
+            if (error != Error.Ok)
                 throw new MposException(error);
 
             return source.Task;
@@ -187,10 +188,10 @@ namespace PagarMe.Mpos
                 }
 
             if (nativeMpos != IntPtr.Zero)
-                Native.Free(nativeMpos);
+                Free(nativeMpos);
         }
 
-        internal protected virtual void OnInitialized(int error)
+        protected internal virtual void OnInitialized(int error)
         {
             if (error != 0)
                 Errored(this, error);
@@ -231,7 +232,7 @@ namespace PagarMe.Mpos
                 FinishedTransaction(this, new EventArgs());
         }
 
-        internal async Task<PaymentResult> HandlePaymentCallback(int error, Native.PaymentInfo info)
+        internal async Task<PaymentResult> HandlePaymentCallback(int error, PaymentInfo info)
         {
             var result = new PaymentResult();
 

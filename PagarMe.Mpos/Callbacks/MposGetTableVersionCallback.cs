@@ -1,16 +1,17 @@
-using PagarMe.Mpos.Helpers;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using static PagarMe.Mpos.Mpos;
+using PagarMe.Mpos.Entities;
+using PagarMe.Mpos.Natives;
+using static PagarMe.Mpos.Natives.Native;
 
 namespace PagarMe.Mpos.Callbacks
 {
     class MposGetTableVersionCallback
     {
-        public static Native.MposGetTableVersionCallbackDelegate Callback(Mpos mpos, Native.MposTablesLoadedCallbackDelegate tableCallback, int amount, PaymentMethod magstripePaymentMethod, TaskCompletionSource<PaymentResult> source)
+        public static MposGetTableVersionCallbackDelegate Callback(Mpos mpos, MposTablesLoadedCallbackDelegate tableCallback, int amount, PaymentMethod magstripePaymentMethod, TaskCompletionSource<PaymentResult> source)
         {
-            return GCHelper.ManualFree<Native.MposGetTableVersionCallbackDelegate>(releaseGC =>
+            return GCHelper.ManualFree<MposGetTableVersionCallbackDelegate>(releaseGC =>
             {
                 return (mposPtr, err, version) =>
                 {
@@ -20,18 +21,18 @@ namespace PagarMe.Mpos.Callbacks
             });
         }
 
-        private static Native.Error callback(Mpos mpos, Native.MposTablesLoadedCallbackDelegate tableCallback, String version)
+        private static Error callback(Mpos mpos, MposTablesLoadedCallbackDelegate tableCallback, String version)
         {
             if (!mpos.TMSStorage.GetGlobalVersion().StartsWith(version))
             {
                 var aidEntries = mpos.TMSStorage.GetAidRows();
                 var capkEntries = mpos.TMSStorage.GetCapkRows();
 
-                var aidList = aidEntries.Select(a => new Native.Aid(a)).ToArray();
-                var capkList = capkEntries.Select(c => new Native.Capk(c)).ToArray();
-                var updateError = Native.UpdateTables(mpos, tableCallback, aidList, capkList);
+                var aidList = aidEntries.Select(a => new Aid(a)).ToArray();
+                var capkList = capkEntries.Select(c => new Capk(c)).ToArray();
+                var updateError = UpdateTables(mpos, tableCallback, aidList, capkList);
 
-                if (updateError != Native.Error.Ok)
+                if (updateError != Error.Ok)
                     throw new MposException(updateError);
             }
             else
@@ -39,7 +40,7 @@ namespace PagarMe.Mpos.Callbacks
                 tableCallback(mpos.nativeMpos, 0, false);
             }
 
-            return Native.Error.Ok;
+            return Error.Ok;
         }
 
     }

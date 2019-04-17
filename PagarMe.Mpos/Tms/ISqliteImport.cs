@@ -1,50 +1,49 @@
 using System;
 using System.Runtime.InteropServices;
-using static SQLite.SQLite3;
 
-namespace SQLite
+namespace PagarMe.Mpos.Tms
 {
     internal interface ISqliteImport
     {
         int Threadsafe();
 
-        Result Open([MarshalAs(UnmanagedType.LPStr)] string filename, out IntPtr db);
+        SQLite3.Result Open([MarshalAs(UnmanagedType.LPStr)] string filename, out IntPtr db);
 
-        Result Open([MarshalAs(UnmanagedType.LPStr)] string filename, out IntPtr db, int flags, IntPtr zvfs);
+        SQLite3.Result Open([MarshalAs(UnmanagedType.LPStr)] string filename, out IntPtr db, int flags, IntPtr zvfs);
 
-        Result Open(byte[] filename, out IntPtr db, int flags, IntPtr zvfs);
+        SQLite3.Result Open(byte[] filename, out IntPtr db, int flags, IntPtr zvfs);
 
-        Result Open16([MarshalAs(UnmanagedType.LPWStr)] string filename, out IntPtr db);
+        SQLite3.Result Open16([MarshalAs(UnmanagedType.LPWStr)] string filename, out IntPtr db);
 
-        Result EnableLoadExtension(IntPtr db, int onoff);
+        SQLite3.Result EnableLoadExtension(IntPtr db, int onoff);
 
-        Result Close(IntPtr db);
+        SQLite3.Result Close(IntPtr db);
 
-        Result Close2(IntPtr db);
+        SQLite3.Result Close2(IntPtr db);
 
-        Result Initialize();
+        SQLite3.Result Initialize();
 
-        Result Shutdown();
+        SQLite3.Result Shutdown();
 
-        Result Config(ConfigOption option);
+        SQLite3.Result Config(SQLite3.ConfigOption option);
 
         int SetDirectory(uint directoryType, string directoryPath);
 
-        Result BusyTimeout(IntPtr db, int milliseconds);
+        SQLite3.Result BusyTimeout(IntPtr db, int milliseconds);
 
         int Changes(IntPtr db);
 
-        Result Prepare2(IntPtr db, [MarshalAs(UnmanagedType.LPStr)] string sql, int numBytes, out IntPtr stmt, IntPtr pzTail);
+        SQLite3.Result Prepare2(IntPtr db, [MarshalAs(UnmanagedType.LPStr)] string sql, int numBytes, out IntPtr stmt, IntPtr pzTail);
 
 #if NETFX_CORE
         Result Prepare2 (IntPtr db, byte[] queryBytes, int numBytes, out IntPtr stmt, IntPtr pzTail);
 #endif
 
-        Result Step(IntPtr stmt);
+        SQLite3.Result Step(IntPtr stmt);
 
-        Result Reset(IntPtr stmt);
+        SQLite3.Result Reset(IntPtr stmt);
 
-        Result Finalize(IntPtr stmt);
+        SQLite3.Result Finalize(IntPtr stmt);
 
         long LastInsertRowid(IntPtr db);
 
@@ -70,7 +69,7 @@ namespace SQLite
 
         IntPtr ColumnName16Internal(IntPtr stmt, int index);
 
-        ColType ColumnType(IntPtr stmt, int index);
+        SQLite3.ColType ColumnType(IntPtr stmt, int index);
 
         int ColumnInt(IntPtr stmt, int index);
 
@@ -86,7 +85,7 @@ namespace SQLite
 
         int ColumnBytes(IntPtr stmt, int index);
 
-        ExtendedResult ExtendedErrCode(IntPtr db);
+        SQLite3.ExtendedResult ExtendedErrCode(IntPtr db);
 
         int LibVersionNumber();
 
