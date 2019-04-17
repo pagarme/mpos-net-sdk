@@ -1,9 +1,8 @@
 using System;
 using System.Linq;
 using System.Text;
-using SQLite;
 
-namespace PagarMe.Mpos
+namespace PagarMe.Mpos.Tms
 {	
 	public class ApplicationEntry {
 		public int PaymentMethod { get; set; }

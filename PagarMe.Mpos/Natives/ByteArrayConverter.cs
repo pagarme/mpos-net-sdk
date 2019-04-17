@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace PagarMe.Mpos
+namespace PagarMe.Mpos.Natives
 {
     internal class ByteArrayConverter : JsonConverter
     {

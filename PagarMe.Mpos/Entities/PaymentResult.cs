@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using PagarMe.Mpos.Api;
+using PagarMe.Mpos.Natives;
 using static PagarMe.Mpos.Mpos;
 
-namespace PagarMe.Mpos
+namespace PagarMe.Mpos.Entities
 {
     public class PaymentResult
     {
@@ -31,12 +33,12 @@ namespace PagarMe.Mpos
         private string pin;
         private string pinKek;
 
-        internal void Fill(Native.PaymentInfo info)
+        internal void Fill(PaymentInfo info)
         {
-            captureMethod = info.CaptureMethod == Native.CaptureMethod.EMV
+            captureMethod = info.CaptureMethod == CaptureMethod.EMV
                                 ? CaptureMethod.EMV
                                 : CaptureMethod.Magstripe;
-            status = info.Decision == Native.Decision.Refused ? PaymentStatus.Rejected : PaymentStatus.Accepted;
+            status = info.Decision == Decision.Refused ? PaymentStatus.Rejected : PaymentStatus.Accepted;
             paymentMethod = (PaymentMethod)info.ApplicationType;
             emv = captureMethod == CaptureMethod.EMV ? GetString(info.EmvData, info.EmvDataLength) : null;
             pan = GetString(info.Pan, info.PanLength);
@@ -67,7 +69,7 @@ namespace PagarMe.Mpos
 
         internal void BuildErrored(Int32 error)
         {
-            Status = error == Native.ST_CANCEL 
+            Status = error == Native.ST_CANCEL
                 ? PaymentStatus.Canceled 
                 : PaymentStatus.Errored;
 

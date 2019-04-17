@@ -11,7 +11,7 @@ using Org.BouncyCastle.Crypto.Encodings;
 using Org.BouncyCastle.Crypto.Engines;
 using Org.BouncyCastle.OpenSsl;
 
-namespace PagarMe.Mpos
+namespace PagarMe.Mpos.Api
 {
     internal static class ApiHelper
     {

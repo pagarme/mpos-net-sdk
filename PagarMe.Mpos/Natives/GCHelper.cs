@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace PagarMe.Mpos.Helpers
+namespace PagarMe.Mpos.Natives
 {
     class GCHelper
     {

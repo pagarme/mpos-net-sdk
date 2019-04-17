@@ -2,7 +2,7 @@
 using System.Net;
 using System.Threading.Tasks;
 
-namespace PagarMe.Mpos
+namespace PagarMe.Mpos.Api
 {
     public class TLS
     {

@@ -1,4 +1,4 @@
-namespace PagarMe.Mpos
+namespace PagarMe.Mpos.Entities
 {
     public enum PaymentMethod
     {

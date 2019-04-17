@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 
-namespace PagarMe.Mpos.Helpers
+namespace PagarMe.Mpos.Natives
 {
     class PtrHelper
     {

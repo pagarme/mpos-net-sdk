@@ -1,15 +1,16 @@
-using PagarMe.Mpos.Helpers;
 using System;
 using System.Threading.Tasks;
-using static PagarMe.Mpos.Mpos;
+using PagarMe.Mpos.Entities;
+using PagarMe.Mpos.Natives;
+using static PagarMe.Mpos.Natives.Native;
 
 namespace PagarMe.Mpos.Callbacks
 {
     class MposTablesLoadedSynchronizeTablesCallback
     {
-        public static Native.MposTablesLoadedCallbackDelegate Callback(Mpos mpos, TaskCompletionSource<Boolean> source)
+        public static MposTablesLoadedCallbackDelegate Callback(Mpos mpos, TaskCompletionSource<Boolean> source)
         {
-            return GCHelper.ManualFree<Native.MposTablesLoadedCallbackDelegate>(releaseGC =>
+            return GCHelper.ManualFree<MposTablesLoadedCallbackDelegate>(releaseGC =>
             {
                 return (mposPtr, tableError, loaded) =>
                 {
@@ -19,12 +20,12 @@ namespace PagarMe.Mpos.Callbacks
             });
         }
 
-        private static Native.Error callback(Mpos mpos, TaskCompletionSource<bool> source, int tableError, bool loaded)
+        private static Error callback(Mpos mpos, TaskCompletionSource<bool> source, int tableError, bool loaded)
         {
             mpos.OnTableUpdated(loaded, tableError);
             source.SetResult(true);
 
-            return Native.Error.Ok;
+            return Error.Ok;
         }
     }
 
