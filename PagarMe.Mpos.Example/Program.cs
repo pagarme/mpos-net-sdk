@@ -7,7 +7,14 @@ namespace PagarMe.Mpos.Example
     {
         public static void Main(string[] args)
         {
-            Process().Wait();
+            try
+            {
+                Process().Wait();
+            }
+            catch (Exception e)
+            {
+                PgDebugLog.Write(e);
+            }
 
             Console.ReadLine();
         }
