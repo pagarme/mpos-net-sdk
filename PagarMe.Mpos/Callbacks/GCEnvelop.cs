@@ -23,5 +23,4 @@ namespace PagarMe.Mpos.Callbacks
             });
         }
     }
-
 }

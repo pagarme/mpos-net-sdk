@@ -37,7 +37,7 @@ namespace PagarMe.Mpos.Callbacks
             });
         }
 
-        private Error insertDataIntoStorage(Mpos mpos, bool forceUpdate, 
+        private Error insertDataIntoStorage(Mpos mpos, bool forceUpdate,
                 TaskCompletionSource<bool> source, string version)
         {
             var callback = MposTablesLoadedSynchronizeTablesCallback.Callback(mpos, source);

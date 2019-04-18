@@ -75,7 +75,7 @@ namespace PagarMe.Mpos.Natives
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate Error MposPaymentCallbackDelegateInterop(IntPtr mpos, int error, IntPtr info);
         public delegate Error MposPaymentCallbackDelegate(IntPtr mpos, int error, PaymentInfo info);
-        
+
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate Error MposTablesLoadedCallbackDelegate(IntPtr mpos, int error, bool loaded);
 
@@ -127,7 +127,7 @@ namespace PagarMe.Mpos.Natives
         public static Error UpdateTables(Mpos mpos, MposTablesLoadedCallbackDelegate tableCallback, Aid[] aidList, Capk[] capkList)
         {
             return Dll.UpdateTables(
-                mpos.nativeMpos, mpos.TMSStorage.GetGlobalVersion(), true, 
+                mpos.nativeMpos, mpos.TMSStorage.GetGlobalVersion(), true,
                 tableCallback, aidList, capkList
             );
         }

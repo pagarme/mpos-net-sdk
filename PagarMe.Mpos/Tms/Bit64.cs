@@ -131,7 +131,7 @@ namespace PagarMe.Mpos.Tms
 
 
 #if NETFX_CORE
-	    [DllImport (LibraryPath, EntryPoint = "sqlite3_prepare_v2", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport (LibraryPath, EntryPoint = "sqlite3_prepare_v2", CallingConvention = CallingConvention.Cdecl)]
         public static extern Result Prepare2InternalInternal(IntPtr db, byte[] queryBytes, int numBytes, out IntPtr stmt, IntPtr pzTail);
         public Result Prepare2Internal(IntPtr db, byte[] queryBytes, int numBytes, out IntPtr stmt, IntPtr pzTail)
         {
@@ -338,5 +338,4 @@ namespace PagarMe.Mpos.Tms
             return LibVersionNumberInternal();
         }
     }
-
 }

@@ -52,7 +52,7 @@ namespace PagarMe.Mpos.Devices
 
         private void update()
         {
-            tryLogOnException(() => 
+            tryLogOnException(() =>
             {
                 var serialPorts = SerialPort.GetPortNames();
 
