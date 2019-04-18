@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 
 namespace PagarMe.Mpos
 {
@@ -10,6 +11,22 @@ namespace PagarMe.Mpos
 
         private static String header =>
             $"{DateTime.Now:HH:mm:ss.fff}";
+
+        public static void Write(Exception exception)
+        {
+            if (exception is AggregateException agg)
+            {
+                agg.InnerExceptions.ToList().ForEach(Write);
+            }
+            else if (exception.InnerException != null)
+            {
+                Write(exception.InnerException);
+            }
+            else
+            {
+                write("EXCEPTION", exception);
+            }
+        }
 
         public static void Write(object text)
         {
