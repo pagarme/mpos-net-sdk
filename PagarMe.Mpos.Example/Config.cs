@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Configuration;
 
-namespace PagarMe.Generic
+namespace PagarMe.Mpos.Example
 {
     public static class Config
     {
