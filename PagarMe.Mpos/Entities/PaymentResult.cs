@@ -70,7 +70,7 @@ namespace PagarMe.Mpos.Entities
         internal void BuildErrored(Int32 error)
         {
             Status = error == Native.ST_CANCEL
-                ? PaymentStatus.Canceled 
+                ? PaymentStatus.Canceled
                 : PaymentStatus.Errored;
 
             ErrorCode = error;

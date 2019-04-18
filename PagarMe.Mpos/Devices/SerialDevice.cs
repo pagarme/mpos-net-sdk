@@ -31,7 +31,7 @@ namespace PagarMe.Mpos.Devices
             Name = "Serial Device (" + port + ")";
             Manufacturer = "";
         }
-        
+
         public Stream Open(Int32 baudRate)
         {
             if (port == null)

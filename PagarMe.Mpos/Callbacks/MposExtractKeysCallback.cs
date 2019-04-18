@@ -56,7 +56,7 @@ namespace PagarMe.Mpos.Callbacks
 
                     else
                     {
-                        // We don't need to do anything; complete operation.	
+                        // We don't need to do anything; complete operation.
                         mpos.OnTableUpdated(false, 0);
                         source.SetResult(true);
                     }

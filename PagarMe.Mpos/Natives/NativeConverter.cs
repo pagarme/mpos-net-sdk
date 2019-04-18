@@ -28,7 +28,7 @@ namespace PagarMe.Mpos.Natives
         {
             return new MposGetTableVersionToInterop(callback).Convert();
         }
-        
+
         protected Error Convert(IList[] dataList, Func<IntPtr, Int32, Error> externCall)
         {
             var data = PtrHelper.RefLists(dataList);
@@ -40,7 +40,7 @@ namespace PagarMe.Mpos.Natives
 
             return result;
         }
-        
+
         protected unsafe IntPtr Convert(AbecsStream stream)
         {
             return (IntPtr)stream.NativeStream;

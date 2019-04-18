@@ -38,7 +38,7 @@ namespace PagarMe.Mpos
 
         public Stream BaseStream => stream.BaseStream;
 
-	    public string EncryptionKey { get; }
+        public string EncryptionKey { get; }
         public string StoragePath { get; }
         public TMSStorage TMSStorage { get; }
 
@@ -162,7 +162,7 @@ namespace PagarMe.Mpos
 
         public void Cancel()
         {
-	        Native.Cancel(nativeMpos);
+            Native.Cancel(nativeMpos);
         }
 
         public Task Close()
