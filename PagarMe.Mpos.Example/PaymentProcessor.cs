@@ -1,7 +1,6 @@
 using System;
 using System.IO.Ports;
 using System.Threading.Tasks;
-using PagarMe.Generic;
 using PagarMe.Mpos.Entities;
 
 namespace PagarMe.Mpos.Example
