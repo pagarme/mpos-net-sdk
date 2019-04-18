@@ -81,7 +81,9 @@ namespace PagarMe.Mpos
 
             var callback = MposInitializedCallback.Callback(this, source);
 
+            PgDebugLog.WriteLocal("Start Initialize");
             var error = Native.Initialize(nativeMpos, callback);
+            PgDebugLog.WriteLocal($"Called Initialize: result code [{error}]");
 
             if (error != Error.Ok)
                 throw new MposException(error);
@@ -143,7 +145,9 @@ namespace PagarMe.Mpos
 
             var callback = MposFinishTransactionCallback.Callback(this, source);
 
+            PgDebugLog.WriteLocal("Start FinishTransaction");
             var error = Native.FinishTransaction(nativeMpos, status, responseCode, emvData, length, callback);
+            PgDebugLog.WriteLocal($"Called FinishTransaction: result code [{error}]");
 
             if (error != Error.Ok)
                 throw new MposException(error);
@@ -154,7 +158,9 @@ namespace PagarMe.Mpos
 
         public void Display(string text)
         {
+            PgDebugLog.WriteLocal("Start Display");
             var error = Native.Display(nativeMpos, text);
+            PgDebugLog.WriteLocal($"Called Display: result code [{error}]");
 
             if (error != Error.Ok)
                 throw new MposException(error);
@@ -162,7 +168,9 @@ namespace PagarMe.Mpos
 
         public void Cancel()
         {
-            Native.Cancel(nativeMpos);
+            PgDebugLog.WriteLocal("Start Cancel");
+            var error = Native.Cancel(nativeMpos);
+            PgDebugLog.WriteLocal($"Called Cancel: result code [{error}]");
         }
 
         public Task Close()
@@ -170,7 +178,9 @@ namespace PagarMe.Mpos
             var source = new TaskCompletionSource<bool>();
             var callback = MposClosedCallback.Callback(this, source);
 
+            PgDebugLog.WriteLocal("Start Close");
             var error = Native.Close(nativeMpos, "", callback);
+            PgDebugLog.WriteLocal($"Called Close: result code [{error}]");
 
             if (error != Error.Ok)
                 throw new MposException(error);
