@@ -62,6 +62,7 @@
     <Compile Include="Callbacks\MposTablesLoadedSynchronizeTablesCallback.cs" />
     <Compile Include="Callbacks\TmsStoreCallback.cs" />
     <Compile Include="Callbacks\TmsStoreToInterop.cs" />
+    <Compile Include="PgDebugLog.cs" />
     <Compile Include="Natives\GCHelper.cs" />
     <Compile Include="Natives\PtrHelper.cs" />
     <Compile Include="Natives\INativeImport.cs" />
