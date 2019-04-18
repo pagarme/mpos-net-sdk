@@ -18,3 +18,5 @@ PagarMe.AutomatedTests/App.config
 # OSX
 .DS_Store
 *.orig
+
+*.DotSettings
