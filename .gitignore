@@ -20,3 +20,5 @@ PagarMe.AutomatedTests/App.config
 *.orig
 
 *.DotSettings
+
+*.user
