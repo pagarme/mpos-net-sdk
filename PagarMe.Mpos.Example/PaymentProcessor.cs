@@ -40,9 +40,6 @@ namespace PagarMe.Mpos.Example
             var result = await mpos.ProcessPayment(amount, null, PaymentMethod.Debit);
             Console.WriteLine("CARD HASH = " + result.CardHash);
 
-            await mpos.Close();
-            Console.WriteLine("CLOSED!");
-
             if (result.Status == PaymentStatus.Accepted)
             {
                 var transaction = new Transaction
@@ -70,6 +67,7 @@ namespace PagarMe.Mpos.Example
             }
 
             await mpos.Close();
+            Console.WriteLine("CLOSED!");
         }
     }
 }
