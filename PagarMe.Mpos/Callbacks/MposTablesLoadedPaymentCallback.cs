@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using PagarMe.Mpos.Entities;
 using PagarMe.Mpos.Natives;
@@ -32,8 +33,13 @@ namespace PagarMe.Mpos.Callbacks
             if (applications != null)
                 foreach (var application in applications)
                 {
-                    var entry = mpos.TMSStorage.SelectApplication(application.Brand, (int)application.PaymentMethod);
-                    if (entry != null) rawApplications.Add(new Application(entry));
+                    var entries = mpos.TMSStorage.SelectApplication(application.Brand, (int)application.PaymentMethod);
+
+                    entries.ToList().ForEach(a =>
+	                    {
+		                    rawApplications.Add(new Application(a));
+	                    }
+                    );
                 }
             else
                 foreach (var entry in mpos.TMSStorage.GetApplicationRows())

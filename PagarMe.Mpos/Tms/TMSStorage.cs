@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Text;
+using PagarMe.Mpos.Entities;
 
 namespace PagarMe.Mpos.Tms
 {
@@ -229,9 +230,17 @@ namespace PagarMe.Mpos.Tms
             return db.Table<CapkEntry>().ToArray();
         }
 
-        public ApplicationEntry SelectApplication(string brand, int paymentMethod) {
-            var query = db.Table<ApplicationEntry>().Where(e => (e.PaymentMethod == paymentMethod && e.CardBrand == brand));
-            return query.FirstOrDefault();
+        public ApplicationEntry[] SelectApplication(string brand, int paymentMethod)
+        {
+	        var query = db.Table<ApplicationEntry>()
+		        .Where(e => e.PaymentMethod == paymentMethod && e.CardBrand == brand);
+
+	        if (brand != "elo" || paymentMethod != (int)PaymentMethod.Debit)
+	        {
+		        query = query.Take(1);
+	        }
+
+	        return query.ToArray();
         }
 
         public ApplicationEntry[] GetApplicationRows() {
