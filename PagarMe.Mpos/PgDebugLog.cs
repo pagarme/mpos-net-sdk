@@ -44,7 +44,7 @@ namespace PagarMe.Mpos
 
 #if DEBUG
             Console.WriteLine(text);
-            File.AppendAllText(path, $"{text}\\n");
+            File.AppendAllText(path, $"{text}\n");
 #endif
         }
     }
