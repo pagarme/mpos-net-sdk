@@ -1,6 +1,8 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
 
 namespace PagarMe.Mpos.Abecs
@@ -76,6 +78,17 @@ namespace PagarMe.Mpos.Abecs
             var buffer = new byte[len];
 
             Marshal.Copy(data, buffer, 0, len);
+
+            if (len >= 4)
+            {
+                var commandName = Encoding.ASCII.GetString(buffer).Substring(0, 4);
+
+                if (commandName.Contains("GTS"))
+                {
+                    var command = String.Join(",", buffer);
+                    PgDebugLog.WriteLocal(command);
+                }
+            }
 
             BaseStream.Write(buffer, 0, buffer.Length);
 
