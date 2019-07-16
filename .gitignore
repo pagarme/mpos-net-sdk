@@ -12,7 +12,7 @@ packages
 *.a
 
 PagarMe.Mpos.Example/App.config
-*.csproj.user
+*.user
 PagarMe.AutomatedTests/App.config
 
 # OSX
