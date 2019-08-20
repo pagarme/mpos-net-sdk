@@ -119,7 +119,7 @@ namespace PagarMe.Mpos
             return source.Task;
         }
 
-        public Task FinishTransaction(bool success, int responseCode, string emvData)
+        public Task<Boolean> FinishTransaction(bool success, int responseCode, string emvData)
         {
             var source = new TaskCompletionSource<bool>();
 
@@ -234,9 +234,9 @@ namespace PagarMe.Mpos
                 TableUpdated(this, loaded);
         }
 
-        protected internal virtual void OnFinishedTransaction(int error)
+        protected internal virtual void OnFinishedTransaction(int error, bool shouldReverse)
         {
-            if (error != 0)
+            if (error != 0 || shouldReverse)
                 Errored(this, error);
             else if (FinishedTransaction != null)
                 FinishedTransaction(this, new EventArgs());

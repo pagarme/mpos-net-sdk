@@ -72,21 +72,45 @@ namespace PagarMe.Mpos.Example
 
                 if (result.IsOnlinePin)
                 {
-                    PgDebugLog.Write("Calling success finish");
-                    await mpos.FinishTransaction(true, responseCode, response);
-                    PgDebugLog.Write("Success finish called");
+                    if (responseCode == 0)
+                    {
+                        PgDebugLog.Write("Calling success finish");
+                        var finishedOk = await mpos.FinishTransaction(true, responseCode, response);
+
+                        if (finishedOk)
+                        {
+                            PgDebugLog.Write("Success finish called");
+                        }
+                        else
+                        {
+                            PgDebugLog.Write("Card rejected finish");
+                            transaction.Refund();
+                        }
+                    }
+                    else
+                    {
+                        await finishCancelling(responseCode, response);
+                    }
                 }
             }
             else if (result.Status != PaymentStatus.Canceled && result.IsOnlinePin)
             {
-                PgDebugLog.Write("Calling error finish");
-                await mpos.FinishTransaction(false, 0, null);
-                PgDebugLog.Write("Error finish called");
+                await finishCancelling();
             }
 
             PgDebugLog.Write("Will close");
             await mpos.Close();
             PgDebugLog.Write("Closed");
+        }
+
+        private async Task finishCancelling(Int32 responseCode = 0, String response = null)
+        {
+            PgDebugLog.Write("Calling error finish");
+            // if finish rejects the transaction
+            // there is no problem,
+            // because API already rejected it
+            await mpos.FinishTransaction(false, responseCode, response);
+            PgDebugLog.Write("Error finish called");
         }
 
         public void Dispose()

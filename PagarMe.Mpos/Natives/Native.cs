@@ -80,7 +80,7 @@ namespace PagarMe.Mpos.Natives
         public delegate Error MposTablesLoadedCallbackDelegate(IntPtr mpos, int error, bool loaded);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        public delegate Error MposFinishTransactionCallbackDelegate(IntPtr mpos, int error);
+        public delegate Error MposFinishTransactionCallbackDelegate(IntPtr mpos, int error, bool shouldReverse);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate Error MposExtractKeysCallbackDelegateInterop(IntPtr mpos, int error, IntPtr keys, int keysLength);
