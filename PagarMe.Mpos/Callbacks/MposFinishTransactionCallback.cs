@@ -11,18 +11,18 @@ namespace PagarMe.Mpos.Callbacks
         {
             return GCHelper.ManualFree<MposFinishTransactionCallbackDelegate>(releaseGC =>
             {
-                return (mposPtr, err) =>
+                return (mposPtr, err, shouldReverse) =>
                 {
                     releaseGC();
-                    return callback(mpos, source, err);
+                    return callback(mpos, source, err, shouldReverse);
                 };
             });
         }
 
-        private static Error callback(Mpos mpos, TaskCompletionSource<bool> source, int err)
+        private static Error callback(Mpos mpos, TaskCompletionSource<bool> source, int err, bool shouldReverse)
         {
-            mpos.OnFinishedTransaction(err);
-            source.SetResult(true);
+            mpos.OnFinishedTransaction(err, shouldReverse);
+            source.SetResult(!shouldReverse);
 
             return Error.Ok;
         }
