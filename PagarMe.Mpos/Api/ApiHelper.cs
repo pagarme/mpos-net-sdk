@@ -116,10 +116,15 @@ namespace PagarMe.Mpos.Api
             checksum = WebUtility.UrlEncode(checksum);
 
             var path = $"/terminal/updates?checksum={checksum}&dukpt_keys=[{dukptKeysString}]";
+            Console.WriteLine("#### emvTableFilePath...");
 
             try
             {
-                return await createRequest("GET", path, encryptionKey);
+                Console.WriteLine("#### emvTableFilePath...");
+                string emvTableFilePath = "./emv_tables_ctls.json";
+                string emvTables = File.ReadAllText(emvTableFilePath, Encoding.UTF8);
+                Console.WriteLine(emvTables);
+                return emvTables;
             }
             catch (WebException ex)
             {
