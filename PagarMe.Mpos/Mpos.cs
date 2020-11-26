@@ -106,10 +106,10 @@ namespace PagarMe.Mpos
 
 
         public Task<PaymentResult> ProcessPayment(int amount, IEnumerable<EmvApplication> applications = null,
-            PaymentMethod magstripePaymentMethod = PaymentMethod.Credit)
+            PaymentMethod magstripePaymentMethod = PaymentMethod.Credit, bool contactlessDisabled = false)
         {
             var source = new TaskCompletionSource<PaymentResult>();
-            var tableCallback = MposTablesLoadedPaymentCallback.Callback(this, amount, applications, magstripePaymentMethod, source);
+            var tableCallback = MposTablesLoadedPaymentCallback.Callback(this, amount, applications, magstripePaymentMethod, contactlessDisabled, source);
             var versionCallback = MposGetTableVersionCallback.Callback(this, tableCallback, amount, magstripePaymentMethod, source);
 
             var tableVersionError = GetTableVersion(nativeMpos, versionCallback);

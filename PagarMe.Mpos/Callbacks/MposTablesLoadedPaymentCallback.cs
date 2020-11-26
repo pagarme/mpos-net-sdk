@@ -9,20 +9,20 @@ namespace PagarMe.Mpos.Callbacks
 {
     class MposTablesLoadedPaymentCallback
     {
-        public static MposTablesLoadedCallbackDelegate Callback(Mpos mpos, int amount, IEnumerable<EmvApplication> applications, PaymentMethod magstripePaymentMethod, TaskCompletionSource<PaymentResult> source)
+        public static MposTablesLoadedCallbackDelegate Callback(Mpos mpos, int amount, IEnumerable<EmvApplication> applications, PaymentMethod magstripePaymentMethod, bool contactlessDisabled, TaskCompletionSource<PaymentResult> source)
         {
             return GCHelper.ManualFree<MposTablesLoadedCallbackDelegate>(releaseGC =>
             {
                 return (mposPtr, tableError, loaded) =>
                 {
                     releaseGC();
-                    return callback(mpos, amount, applications, magstripePaymentMethod, source);
+                    return callback(mpos, amount, applications, magstripePaymentMethod, contactlessDisabled, source);
                 };
 
             });
         }
 
-        private static Error callback(Mpos mpos, int amount, IEnumerable<EmvApplication> applications, PaymentMethod magstripePaymentMethod, TaskCompletionSource<PaymentResult> source)
+        private static Error callback(Mpos mpos, int amount, IEnumerable<EmvApplication> applications, PaymentMethod magstripePaymentMethod, bool contactlessDisabled, TaskCompletionSource<PaymentResult> source)
         {
             var callback = MposPaymentCallback.Callback(mpos, source);
 
@@ -52,7 +52,7 @@ namespace PagarMe.Mpos.Callbacks
 
             var error = ProcessPayment(mpos.nativeMpos, amount, rawApplications.ToArray(), rawApplications.Count,
                 acquirers.ToArray(), acquirers.Count, riskProfiles.ToArray(), riskProfiles.Count,
-                (int)magstripePaymentMethod, callback);
+                (int)magstripePaymentMethod, callback, contactlessDisabled);
 
             if (error != Error.Ok)
                 throw new MposException(error);

@@ -13,6 +13,16 @@ namespace PagarMe.Mpos.Tms
         public int RecordNumber { get; set; }
 
         public string EmvTags { get; set; }
+
+        public bool CtlsZeroAm { get; set; }
+        public int CtlsMode { get; set; }
+        public string CtlsTransactionLimit { get; set; }
+        public string CtlsFloorLimit { get; set; }
+        public string CtlsCvmLimit { get; set; }
+        public string CtlsApplicationVersion { get; set; }
+        public string CtlsDefaultTac { get; set; }
+        public string CtlsDenialTac { get; set; }
+        public string CtlsOnlineTac { get; set; }
     }
 
     public class AcquirerEntry {
@@ -60,13 +70,6 @@ namespace PagarMe.Mpos.Tms
         public string OnlineTac { get; set; }
         public int FloorLimit { get; set; }
         public string Tcc { get; set; }
-
-        public bool CtlsZeroAm { get; set; }
-        public int CtlsMode { get; set; }
-        public int CtlsTransactionLimit { get; set; }
-        public int CtlsFloorLimit { get; set; }
-        public int CtlsCvmLimit { get; set; }
-        public string CtlsApplicationVersion { get; set; }
 
         public string Tdol { get; set; }
         public string Ddol { get; set; }
@@ -137,7 +140,7 @@ namespace PagarMe.Mpos.Tms
             db.Insert(entry);
         }
 
-        public void StoreApplicationRow(int paymentMethod, string cardBrand, int acquirerNumber, int recordNumber, int emvTagsLength, int[] emvTags) {
+        public void StoreApplicationRow(int paymentMethod, string cardBrand, int acquirerNumber, int recordNumber, int emvTagsLength, int[] emvTags, bool ctlsZeroAm, int ctlsMode, byte[] ctlsTransactionLimit, byte[] ctlsFloorLimit, byte[] ctlsCvmLimit, byte[] ctlsApplicationVersion, byte[] ctlsDefaultTac, byte[] ctlsDenialTac, byte[] ctlsOnlineTac) {
             int[] cleanEmvTags = new int[emvTagsLength];
             for (int i = 0; i < emvTagsLength; i++) {
                 cleanEmvTags[i] = emvTags[i];
@@ -148,12 +151,22 @@ namespace PagarMe.Mpos.Tms
                 CardBrand = cardBrand,
                 AcquirerNumber = acquirerNumber,
                 RecordNumber = recordNumber,
-                EmvTags = String.Join(",", cleanEmvTags)
+                EmvTags = String.Join(",", cleanEmvTags),
+                CtlsZeroAm = ctlsZeroAm,
+                CtlsMode = ctlsMode,
+                CtlsTransactionLimit = Encoding.ASCII.GetString(ctlsTransactionLimit, 0, 8),
+                CtlsFloorLimit = Encoding.ASCII.GetString(ctlsFloorLimit, 0, 8),
+                CtlsCvmLimit = Encoding.ASCII.GetString(ctlsCvmLimit, 0, 8),
+                CtlsApplicationVersion = Encoding.ASCII.GetString(ctlsApplicationVersion, 0, 4),
+                
+                CtlsDefaultTac = Encoding.ASCII.GetString(ctlsDefaultTac, 0, 10),
+                CtlsDenialTac = Encoding.ASCII.GetString(ctlsDenialTac, 0, 10),
+                CtlsOnlineTac = Encoding.ASCII.GetString(ctlsOnlineTac, 0, 10),
             };
             db.Insert(entry);
         }
 
-        public void StoreAidRow(int acqNumber, int recNumber, int aidLen, byte[] aid, int appType, int appNameLength, byte[] appName, byte[] appVer1, byte[] appVer2, byte[] appVer3, int country, int currency, int exponent, byte[] merchantId, int mcc, byte[] terminalId, byte[] capabilities, byte[] additionalCapabilities, int type, byte[] tacDefault, byte[] tacDenial, byte[] tacOnline, int floorLimit, byte tcc, bool ctlsZeroAm, int ctlsMode, int crlsTrxLimit, int ctlsFloorLimit, int ctlsCvmLimit, byte[] ctlsAppVer, int tdolLen, byte[] tdol, int ddolLen, byte[] ddol) {
+        public void StoreAidRow(int acqNumber, int recNumber, int aidLen, byte[] aid, int appType, int appNameLength, byte[] appName, byte[] appVer1, byte[] appVer2, byte[] appVer3, int country, int currency, int exponent, byte[] merchantId, int mcc, byte[] terminalId, byte[] capabilities, byte[] additionalCapabilities, int type, byte[] tacDefault, byte[] tacDenial, byte[] tacOnline, int floorLimit, byte tcc, int tdolLen, byte[] tdol, int ddolLen, byte[] ddol) {
             AidEntry entry = new AidEntry {
                 AcquirerNumber = acqNumber,
                 RecordIndex = recNumber,
@@ -181,15 +194,8 @@ namespace PagarMe.Mpos.Tms
                 FloorLimit = floorLimit,
                 Tcc = Convert.ToString(tcc),
 
-                CtlsZeroAm = ctlsZeroAm,
-                CtlsMode = ctlsMode,
-                CtlsTransactionLimit = crlsTrxLimit,
-                CtlsFloorLimit = ctlsFloorLimit,
-                CtlsCvmLimit = ctlsCvmLimit,
-                CtlsApplicationVersion = Encoding.ASCII.GetString(ctlsAppVer, 0, 4),
-
-                Tdol = Encoding.ASCII.GetString(tdol, 0, tdolLen),
-                Ddol = Encoding.ASCII.GetString(ddol, 0, ddolLen)
+                Tdol = Encoding.ASCII.GetString(tdol, 0, tdol.Length),
+                Ddol = Encoding.ASCII.GetString(ddol, 0, tdol.Length)
             };
             db.Insert(entry);
         }

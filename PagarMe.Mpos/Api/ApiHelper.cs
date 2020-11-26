@@ -119,7 +119,9 @@ namespace PagarMe.Mpos.Api
 
             try
             {
-                return await createRequest("GET", path, encryptionKey);
+                string res = await createRequest("GET", path, encryptionKey);
+                Console.WriteLine(res);
+                return res;
             }
             catch (WebException ex)
             {

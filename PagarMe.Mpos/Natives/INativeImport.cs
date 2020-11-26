@@ -15,7 +15,7 @@ namespace PagarMe.Mpos.Natives
         Error ProcessPayment(IntPtr mpos, int amount, Application[] applicationList,
             int applicationListLength, Acquirer[] acquirers, int acquirerListLength,
             RiskManagement[] riskManagementList, int riskManagementListLength, int magstripePaymentMethod,
-            Native.MposPaymentCallbackDelegate paymentCallback);
+            Native.MposPaymentCallbackDelegate paymentCallback, bool contactlessDisabled);
 
         Error UpdateTables(IntPtr mpos, string version, bool forceUpdate,
             Native.MposTablesLoadedCallbackDelegate callback, params IList[] data);

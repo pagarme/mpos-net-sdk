@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using PagarMe.Mpos.Entities;
 using PagarMe.Mpos.Natives;
 using static PagarMe.Mpos.Natives.Native;
-
+using System;
 namespace PagarMe.Mpos.Callbacks
 {
     class TmsStoreCallback
@@ -22,6 +22,7 @@ namespace PagarMe.Mpos.Callbacks
                 return (version, capkList, aidList, appList, riskProfileList, acquirerList, userData) =>
                 {
                     releaseGC();
+
 
                     var instance = new TmsStoreCallback()
                     {
@@ -60,15 +61,15 @@ namespace PagarMe.Mpos.Callbacks
                         aid.CurrencyExponent, aid.MerchantId, aid.Mcc, aid.TerminalId,
                         aid.TerminalCapabilities, aid.AdditionalTerminalCapabilities, aid.TerminalType,
                         aid.DefaultTac, aid.DenialTac, aid.OnlineTac, aid.FloorLimit, aid.Tcc,
-                        aid.CtlsZeroAm, aid.CtlsMode, aid.CtlsTransactionLimit, aid.CtlsFloorLimit,
-                        aid.CtlsCvmLimit, aid.CtlsApplicationVersion, aid.TdolLength, aid.Tdol,
-                        aid.DdolLength, aid.Ddol);
+                        aid.TdolLength, aid.Tdol, aid.DdolLength, aid.Ddol);
             }
 
             foreach (var app in appList)
             {
                 mpos.TMSStorage.StoreApplicationRow(app.PaymentMethod, app.CardBrand, app.AcquirerNumber,
-                    app.RecordNumber, app.EmvTagsLength, app.EmvTags);
+                    app.RecordNumber, app.EmvTagsLength, app.EmvTags, app.CtlsZeroAm, app.CtlsMode, 
+                    app.CtlsTransactionLimit, app.CtlsFloorLimit, app.CtlsCvmLimit, app.CtlsApplicationVersion,
+                    app.CtlsDefaultTac, app.CtlsDenialTac, app.CtlsOnlineTac);
             }
 
             foreach (var profile in riskProfileList)

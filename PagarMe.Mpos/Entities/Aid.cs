@@ -35,13 +35,6 @@ namespace PagarMe.Mpos.Entities
         public int FloorLimit;
         [MarshalAs(UnmanagedType.I1)] public byte Tcc;
 
-        [MarshalAs(UnmanagedType.I1)] public bool CtlsZeroAm;
-        public int CtlsMode;
-        public int CtlsTransactionLimit;
-        public int CtlsFloorLimit;
-        public int CtlsCvmLimit;
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)] public byte[] CtlsApplicationVersion;
-
         public int TdolLength;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 40)] public byte[] Tdol;
         public int DdolLength;
@@ -75,13 +68,6 @@ namespace PagarMe.Mpos.Entities
             OnlineTac = GetBytes(e.OnlineTac, 10);
             FloorLimit = e.FloorLimit;
             Tcc = Convert.ToByte(e.Tcc[0]);
-
-            CtlsZeroAm = e.CtlsZeroAm;
-            CtlsMode = e.CtlsMode;
-            CtlsTransactionLimit = e.CtlsTransactionLimit;
-            CtlsFloorLimit = e.CtlsFloorLimit;
-            CtlsCvmLimit = e.CtlsCvmLimit;
-            CtlsApplicationVersion = GetBytes(e.CtlsApplicationVersion, 4);
 
             Tdol = GetBytes(e.Tdol, 40, out TdolLength);
             Ddol = GetBytes(e.Ddol, 40, out DdolLength);

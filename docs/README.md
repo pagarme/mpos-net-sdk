@@ -50,13 +50,14 @@ Requisita ao pinpad que uma mensagem seja mostrada em seu display. Recebe os seg
 
 Não retorna.
 
-##### `ProcessPayment(int amount, IEnumerable<EmvApplication> applications, PaymentMethod magstripePaymentMethod)`
+##### `ProcessPayment(int amount, IEnumerable<EmvApplication> applications, PaymentMethod magstripePaymentMethod, contactlessDisabled)`
 
 Requisita ao pinpad que seja processado um pagamento. Recebe os seguintes parâmetros:
 
 * `amount`: Número, em centavos, que indica a quantia cobrada.
 * `applications`: Indica as aplicações suportadas pelo pagamento. Se não passado, usará as registradas.
 * `magstripePaymentMethod`: Caso esteja passando tarja, indica o tipo de cartão: Crédito ou Débito. Se não passado, usará como Crédito.
+* `contactlessDisabled`: Se for verdadeiro desabilita contactless.
 
 Se usado com `await`, retorna um objeto `PaymentResult`. Tem associado o evento `PaymentProcessed`.
 

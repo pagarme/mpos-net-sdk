@@ -29,10 +29,10 @@ namespace PagarMe.Mpos.Natives
         }
 
         [DllImport(mpos, EntryPoint = "mpos_process_payment", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
-        public static extern Error ProcessPaymentExtern(IntPtr mpos, int amount, Application[] applicationList, int applicationListLength, Acquirer[] acquirers, int acquirerListLength, RiskManagement[] riskManagementList, int riskManagementListLength, int magstripePaymentMethod, Native.MposPaymentCallbackDelegateInterop paymentCallback);
-        public Error ProcessPayment(IntPtr mpos, int amount, Application[] applicationList, int applicationListLength, Acquirer[] acquirers, int acquirerListLength, RiskManagement[] riskManagementList, int riskManagementListLength, int magstripePaymentMethod, Native.MposPaymentCallbackDelegate paymentCallback)
+        public static extern Error ProcessPaymentExtern(IntPtr mpos, int amount, Application[] applicationList, int applicationListLength, Acquirer[] acquirers, int acquirerListLength, RiskManagement[] riskManagementList, int riskManagementListLength, int magstripePaymentMethod, Native.MposPaymentCallbackDelegateInterop paymentCallback, bool contactlessDisabled);
+        public Error ProcessPayment(IntPtr mpos, int amount, Application[] applicationList, int applicationListLength, Acquirer[] acquirers, int acquirerListLength, RiskManagement[] riskManagementList, int riskManagementListLength, int magstripePaymentMethod, Native.MposPaymentCallbackDelegate paymentCallback, bool contactlessDisabled)
         {
-            return ProcessPaymentExtern(mpos, amount, applicationList, applicationListLength, acquirers, acquirerListLength, riskManagementList, riskManagementListLength, magstripePaymentMethod, Convert(paymentCallback));
+            return ProcessPaymentExtern(mpos, amount, applicationList, applicationListLength, acquirers, acquirerListLength, riskManagementList, riskManagementListLength, magstripePaymentMethod, Convert(paymentCallback), contactlessDisabled);
         }
 
         [DllImport(mpos, EntryPoint = "mpos_update_tables", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
